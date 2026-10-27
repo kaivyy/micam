@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>CCTV Xiaomi CW100 Dual • Surveillance Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,12 +27,25 @@
       --radius-lg: 14px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text);
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       line-height: 1.5;
@@ -42,90 +55,140 @@
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 0.85rem 2rem;
+      padding: 0.85rem 1.75rem;
+      padding-top: max(0.85rem, env(safe-area-inset-top));
+      padding-left: max(1.75rem, env(safe-area-inset-left));
+      padding-right: max(1.75rem, env(safe-area-inset-right));
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 40;
+      gap: 0.75rem;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
+      min-width: 0;
     }
     .brand-mark {
       width: 38px;
       height: 38px;
+      min-width: 38px;
       border-radius: var(--radius-sm);
-      background: #0284c7;
+      background: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
+      flex-shrink: 0;
     }
     .brand-mark svg { width: 22px; height: 22px; fill: currentColor; }
+    .brand-text {
+      min-width: 0;
+    }
     .brand-text h1 {
-      font-size: 1.05rem;
+      font-size: clamp(0.88rem, 2.5vw, 1.05rem);
       font-weight: 700;
       letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .brand-text p {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
+      flex-shrink: 0;
     }
 
     .pill-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
       background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.25);
       color: var(--accent);
-      padding: 0.35rem 0.75rem;
+      padding: 0.35rem 0.65rem;
       border-radius: var(--radius-sm);
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
+      white-space: nowrap;
+      min-height: 36px;
     }
     .pulse-indicator {
       width: 7px;
       height: 7px;
       background: var(--accent);
       border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
     }
 
     .btn-nav {
       background: var(--surface-elevated);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 0.45rem 0.85rem;
+      min-height: 44px;
+      padding: 0.5rem 0.85rem;
       border-radius: var(--radius-sm);
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.45rem;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      white-space: nowrap;
+      touch-action: manipulation;
     }
     .btn-nav:hover {
       background: var(--surface-hover);
       border-color: rgba(255, 255, 255, 0.15);
     }
+    .btn-nav:active {
+      transform: scale(0.97);
+    }
+
+    @media (max-width: 540px) {
+      header {
+        padding: 0.65rem 0.85rem;
+        padding-top: max(0.65rem, env(safe-area-inset-top));
+        padding-left: max(0.85rem, env(safe-area-inset-left));
+        padding-right: max(0.85rem, env(safe-area-inset-right));
+      }
+      .brand-mark { width: 34px; height: 34px; min-width: 34px; }
+      .brand-mark svg { width: 20px; height: 20px; }
+      .pill-badge span.pill-long-text { display: none; }
+      .pill-badge span.pill-short-text { display: inline; }
+      .btn-nav span.btn-label-long { display: none; }
+      .btn-nav span.btn-label-short { display: inline; }
+    }
+    @media (min-width: 541px) {
+      .pill-badge span.pill-long-text { display: inline; }
+      .pill-badge span.pill-short-text { display: none; }
+      .btn-nav span.btn-label-long { display: inline; }
+      .btn-nav span.btn-label-short { display: none; }
+    }
 
     /* Main Container */
     main {
       flex: 1;
-      padding: 1.5rem 2rem;
+      padding: 1.5rem 1.75rem;
+      padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
       max-width: 1560px;
       width: 100%;
       margin: 0 auto;
@@ -134,7 +197,17 @@
       gap: 1.5rem;
     }
     @media (max-width: 1100px) {
-      main { grid-template-columns: 1fr; padding: 1rem; }
+      main {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 1.25rem;
+      }
+    }
+    @media (max-width: 480px) {
+      main {
+        padding: 0.75rem;
+        gap: 0.85rem;
+      }
     }
 
     /* Cards */
@@ -144,6 +217,12 @@
       border-radius: var(--radius-lg);
       padding: 1.25rem;
     }
+    @media (max-width: 480px) {
+      .card {
+        padding: 0.95rem;
+        border-radius: var(--radius-md);
+      }
+    }
 
     /* Dual Camera Viewports */
     .viewports-grid {
@@ -152,7 +231,7 @@
       gap: 1rem;
     }
     @media (max-width: 768px) {
-      .viewports-grid { grid-template-columns: 1fr; }
+      .viewports-grid { grid-template-columns: 1fr; gap: 0.85rem; }
     }
 
     .monitor-box {
@@ -165,12 +244,14 @@
     }
 
     .monitor-header {
-      background: rgba(17, 24, 39, 0.8);
+      background: rgba(17, 24, 39, 0.85);
       padding: 0.5rem 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border);
+      min-height: 48px;
+      gap: 0.5rem;
     }
     .monitor-title {
       display: flex;
@@ -178,6 +259,12 @@
       gap: 0.5rem;
       font-size: 0.78rem;
       font-weight: 700;
+      min-width: 0;
+    }
+    .monitor-title span:last-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .badge-live {
       background: var(--danger);
@@ -187,31 +274,39 @@
       padding: 0.15rem 0.45rem;
       border-radius: 3px;
       letter-spacing: 0.05em;
+      flex-shrink: 0;
     }
     .monitor-actions {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.25rem;
+      flex-shrink: 0;
     }
     .btn-icon {
       background: transparent;
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-      display: flex;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      transition: color 0.15s, background 0.15s, transform 0.1s;
+      touch-action: manipulation;
     }
     .btn-icon:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
-    .btn-icon svg { width: 15px; height: 15px; fill: currentColor; }
+    .btn-icon:active { transform: scale(0.92); color: #fff; background: rgba(255, 255, 255, 0.18); }
+    .btn-icon svg { width: 18px; height: 18px; fill: currentColor; }
 
     .video-frame-container {
       position: relative;
       width: 100%;
       aspect-ratio: 16/9;
       background: #000;
+      overflow: hidden;
     }
     .video-frame-container iframe {
       width: 100%;
@@ -222,10 +317,12 @@
 
     .monitor-footer {
       background: rgba(17, 24, 39, 0.6);
-      padding: 0.4rem 0.85rem;
+      padding: 0.5rem 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
       color: var(--text-sub);
@@ -236,30 +333,44 @@
     .telemetry-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.85rem;
+      gap: 0.75rem;
       margin-top: 1.25rem;
     }
-    @media (max-width: 640px) {
+    @media (max-width: 1024px) {
       .telemetry-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 420px) {
+      .telemetry-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
     }
     .metric-cell {
       background: var(--surface-elevated);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 0.85rem;
+      min-width: 0;
+    }
+    @media (max-width: 480px) {
+      .metric-cell { padding: 0.65rem 0.75rem; }
     }
     .metric-name {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-muted);
       text-transform: uppercase;
       font-weight: 600;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .metric-val {
-      font-size: 1.15rem;
+      font-size: clamp(0.92rem, 3.2vw, 1.15rem);
       font-weight: 700;
       color: #fff;
       font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Controls Deck */
@@ -267,6 +378,9 @@
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+    }
+    @media (max-width: 480px) {
+      .deck-group { gap: 0.85rem; }
     }
     .group-header {
       font-size: 0.85rem;
@@ -279,75 +393,100 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      min-height: 32px;
     }
     .control-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.6rem 0;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      gap: 0.75rem;
+      min-height: 48px;
+    }
+    .control-row:last-of-type {
+      border-bottom: none;
+    }
+    .control-label {
+      min-width: 0;
     }
     .control-label h4 { font-size: 0.85rem; font-weight: 600; }
     .control-label p { font-size: 0.72rem; color: var(--text-muted); }
 
-    /* Switch */
+    /* Switch - with minimum 44px touch height */
     .toggle-switch {
       position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 44px;
+      cursor: pointer;
+      touch-action: manipulation;
+      flex-shrink: 0;
     }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
     .slider {
       position: absolute;
       cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
+      width: 48px;
+      height: 26px;
       background-color: #334155;
       transition: .2s;
-      border-radius: 24px;
+      border-radius: 26px;
     }
     .slider:before {
       position: absolute;
       content: "";
-      height: 18px;
-      width: 18px;
+      height: 20px;
+      width: 20px;
       left: 3px;
       bottom: 3px;
       background-color: white;
       transition: .2s;
       border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
     input:checked + .slider { background-color: var(--accent); }
-    input:checked + .slider:before { transform: translateX(20px); }
+    input:checked + .slider:before { transform: translateX(22px); }
 
     /* Buttons */
     .btn {
       width: 100%;
-      padding: 0.65rem 1rem;
+      min-height: 44px;
+      padding: 0.65rem 1.15rem;
       border-radius: var(--radius-sm);
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       border: 1px solid transparent;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.45rem;
-      transition: background 0.15s;
+      gap: 0.5rem;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      touch-action: manipulation;
+    }
+    .btn:active {
+      transform: scale(0.98);
     }
     .btn-solid { background: var(--primary); color: #fff; }
     .btn-solid:hover { background: #0369a1; }
+    .btn-solid:active { background: #025380; }
     .btn-outline {
       background: transparent;
       border-color: var(--border);
       color: var(--text);
     }
-    .btn-outline:hover { background: var(--surface-hover); }
+    .btn-outline:hover { background: var(--surface-hover); border-color: rgba(255, 255, 255, 0.2); }
+    .btn-outline:active { background: var(--surface-elevated); }
     .btn-danger {
       background: rgba(239, 68, 68, 0.12);
       border-color: rgba(239, 68, 68, 0.3);
       color: var(--danger);
     }
     .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
+    .btn-danger:active { background: rgba(239, 68, 68, 0.32); }
 
     /* Terminal Console */
     .console-box {
@@ -359,7 +498,9 @@
       font-size: 0.72rem;
       height: 120px;
       overflow-y: auto;
+      overflow-x: auto;
       color: #cbd5e1;
+      word-break: break-word;
     }
     .console-line { margin-bottom: 2px; }
     .console-time { color: #38bdf8; }
@@ -368,12 +509,13 @@
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 100;
+      padding: 1rem;
     }
     .modal-backdrop.open { display: flex; }
 
@@ -383,16 +525,27 @@
       border-radius: var(--radius-lg);
       width: 100%;
       max-width: 480px;
+      max-height: calc(100vh - 2rem);
+      max-height: calc(100dvh - 2rem);
+      overflow-y: auto;
       padding: 1.5rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+      -webkit-overflow-scrolling: touch;
+    }
+    @media (max-width: 480px) {
+      .modal-card {
+        padding: 1.15rem;
+        border-radius: var(--radius-md);
+      }
     }
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.15rem;
       padding-bottom: 0.75rem;
       border-bottom: 1px solid var(--border);
+      gap: 0.5rem;
     }
     .modal-header h3 { font-size: 1rem; font-weight: 700; }
     .modal-close {
@@ -400,8 +553,19 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1.4rem;
+      line-height: 1;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+      touch-action: manipulation;
     }
+    .modal-close:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+    .modal-close:active { background: rgba(255, 255, 255, 0.16); }
 
     .form-group {
       margin-bottom: 1rem;
@@ -418,13 +582,25 @@
       background: #04070d;
       border: 1px solid var(--border);
       color: #fff;
-      padding: 0.55rem 0.75rem;
+      padding: 0.65rem 0.85rem;
       border-radius: var(--radius-sm);
-      font-size: 0.82rem;
+      font-size: 16px; /* Prevents auto-zoom in iOS Safari */
       font-family: inherit;
       outline: none;
+      min-height: 44px;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
     }
     .form-input:focus { border-color: var(--border-focus); }
+
+    .otp-input-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+    @media (max-width: 360px) {
+      .otp-input-group { flex-direction: column; }
+      .otp-input-group .btn { width: 100%; }
+    }
 
     .info-kv {
       display: flex;
@@ -432,9 +608,16 @@
       padding: 0.45rem 0;
       font-size: 0.78rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      gap: 0.5rem;
     }
-    .info-kv span:first-child { color: var(--text-muted); }
-    .info-kv span:last-child { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fff; }
+    .info-kv span:first-child { color: var(--text-muted); flex-shrink: 0; }
+    .info-kv span:last-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #fff;
+      text-align: right;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
@@ -442,7 +625,7 @@
   <!-- Top Navigation -->
   <header>
     <div class="brand">
-      <div class="brand-mark">
+      <div class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
       </div>
       <div class="brand-text">
@@ -453,11 +636,13 @@
     <div class="header-actions">
       <div class="pill-badge" id="netStatusPill">
         <div class="pulse-indicator"></div>
-        <span id="netStatusText">TERHUBUNG (2 LENSA)</span>
+        <span class="pill-long-text" id="netStatusText">TERHUBUNG (2 LENSA)</span>
+        <span class="pill-short-text">LIVE</span>
       </div>
-      <button class="btn-nav" id="btnOpenAuthModal">
+      <button class="btn-nav" id="btnOpenAuthModal" aria-label="Kelola Sesi Akun Xiaomi">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-        Akun & Sesi Xiaomi
+        <span class="btn-label-long">Akun & Sesi Xiaomi</span>
+        <span class="btn-label-short">Akun</span>
       </button>
     </div>
   </header>
@@ -477,10 +662,10 @@
                 <span>Lensa 1: Wide Angle (Kiri)</span>
               </div>
               <div class="monitor-actions">
-                <button class="btn-icon" onclick="reloadFrame('camLeft')" title="Muat Ulang Stream">
+                <button class="btn-icon" onclick="reloadFrame('camLeft')" title="Muat Ulang Stream" aria-label="Muat Ulang Stream Lensa Kiri">
                   <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                 </button>
-                <button class="btn-icon" onclick="takeSnapshot('kiri')" title="Ambil Foto Snapshot">
+                <button class="btn-icon" onclick="takeSnapshot('kiri')" title="Ambil Foto Snapshot" aria-label="Ambil Snapshot Lensa Kiri">
                   <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
                 </button>
               </div>
@@ -502,10 +687,10 @@
                 <span>Lensa 2: PTZ Tele (Kanan)</span>
               </div>
               <div class="monitor-actions">
-                <button class="btn-icon" onclick="reloadFrame('camRight')" title="Muat Ulang Stream">
+                <button class="btn-icon" onclick="reloadFrame('camRight')" title="Muat Ulang Stream" aria-label="Muat Ulang Stream Lensa Kanan">
                   <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                 </button>
-                <button class="btn-icon" onclick="takeSnapshot('kanan')" title="Ambil Foto Snapshot">
+                <button class="btn-icon" onclick="takeSnapshot('kanan')" title="Ambil Foto Snapshot" aria-label="Ambil Snapshot Lensa Kanan">
                   <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
                 </button>
               </div>
@@ -532,11 +717,11 @@
           </div>
           <div class="metric-cell">
             <div class="metric-name">SSID Pemancar</div>
-            <div class="metric-val" style="font-size: 1rem;" id="wifiSsidVal">ARVY KAIRI</div>
+            <div class="metric-val" id="wifiSsidVal">ARVY KAIRI</div>
           </div>
           <div class="metric-cell">
             <div class="metric-name">Frekuensi Channel</div>
-            <div class="metric-val" style="font-size: 1rem;">2427 MHz (Ch 4)</div>
+            <div class="metric-val">2427 MHz (Ch 4)</div>
           </div>
         </div>
       </div>
@@ -545,7 +730,7 @@
       <div class="card">
         <div class="group-header">
           <span>Log Komunikasi Realtime</span>
-          <span style="font-size: 0.72rem; font-family: monospace;">Port UDP 54321</span>
+          <span style="font-size: 0.72rem; font-family: 'JetBrains Mono', monospace;">Port UDP 54321</span>
         </div>
         <div class="console-box" id="consoleBox">
           <div class="console-line"><span class="console-time">[INIT]</span> Dashboard terinisialisasi. Dual camera stream aktif.</div>
@@ -563,7 +748,7 @@
             <h4>Lampu Sorot Putih</h4>
             <p>Dual LED spotlight penerangan</p>
           </div>
-          <label class="toggle-switch">
+          <label class="toggle-switch" aria-label="Toggle Lampu Sorot Putih">
             <input type="checkbox" id="lightToggle">
             <span class="slider"></span>
           </label>
@@ -574,7 +759,7 @@
             <h4>Night Vision (IR)</h4>
             <p>Inframerah malam otomatis</p>
           </div>
-          <label class="toggle-switch">
+          <label class="toggle-switch" aria-label="Toggle Night Vision Inframerah">
             <input type="checkbox" id="nightshotToggle" checked>
             <span class="slider"></span>
           </label>
@@ -585,13 +770,13 @@
             <h4>Sensor Kedua Lensa</h4>
             <p>Mode siaga / aktif kamera</p>
           </div>
-          <label class="toggle-switch">
+          <label class="toggle-switch" aria-label="Toggle Sensor Kedua Lensa">
             <input type="checkbox" id="powerToggle" checked>
             <span class="slider"></span>
           </label>
         </div>
 
-        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.65rem;">
+        <div style="margin-top: 1.15rem; display: flex; flex-direction: column; gap: 0.75rem;">
           <button class="btn btn-outline" id="btnTriggerP2p">Inisialisasi P2P Stream</button>
           <button class="btn btn-danger" id="btnRebootCam">Restart Kamera CCTV</button>
         </div>
@@ -611,11 +796,11 @@
   </main>
 
   <!-- Modal: Satset Akun & Otentikasi Xiaomi -->
-  <div class="modal-backdrop" id="authModal">
+  <div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Manajemen Sesi & Akun Xiaomi</h3>
-        <button class="modal-close" id="btnCloseModal">&times;</button>
+        <h3 id="modalHeading">Manajemen Sesi & Akun Xiaomi</h3>
+        <button class="modal-close" id="btnCloseModal" aria-label="Tutup Dialog Modal">&times;</button>
       </div>
 
       <div style="margin-bottom: 1.25rem;">
@@ -626,16 +811,16 @@
       </div>
 
       <!-- Quick Actions -->
-      <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.85rem;">
         <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Tindakan Cepat (Satset):</div>
         <button class="btn btn-solid" id="btnSyncGateway">Sinkronkan Ulang Gateway Stream</button>
 
         <!-- Form Input OTP Jika Diperlukan di Masa Depan -->
-        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.5rem;">
-          <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.35rem;">Verifikasi Kode OTP Xiaomi (Jika Re-auth):</div>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" class="form-input" id="otpInput" placeholder="Masukkan 6 digit kode OTP" maxlength="6">
-            <button class="btn btn-solid" style="width: auto; padding: 0 1rem;" id="btnSubmitOtp">Kirim</button>
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem; margin-top: 0.25rem;">
+          <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.45rem;">Verifikasi Kode OTP Xiaomi (Jika Re-auth):</div>
+          <div class="otp-input-group">
+            <input type="text" class="form-input" id="otpInput" placeholder="Masukkan 6 digit kode OTP" maxlength="6" inputmode="numeric">
+            <button class="btn btn-solid" style="width: auto; min-width: 80px;" id="btnSubmitOtp">Kirim</button>
           </div>
         </div>
       </div>
