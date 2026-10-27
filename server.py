@@ -6,9 +6,14 @@ import socket
 import hashlib
 import time
 import os
+import sys
+import shutil
 import urllib.request
 from urllib.parse import urlparse, parse_qs
 from Crypto.Cipher import AES
+
+# Import recorder module
+from recorder import recorder
 
 CAMERA_IP = "192.168.1.11"
 CAMERA_PORT = 54321
@@ -62,8 +67,40 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_auth_status()
         elif parsed.path.startswith("/api/snapshot/"):
             self.handle_snapshot(parsed.path)
+        elif parsed.path == "/api/record/status":
+            self.send_json(recorder.get_status())
+        elif parsed.path == "/api/recordings":
+            self.send_json({
+                "recordings": recorder.list_recordings(),
+                "status": recorder.get_status()
+            })
+        elif parsed.path.startswith("/api/recordings/") and parsed.path.endswith("/stream"):
+            # Format: /api/recordings/<filename>/stream
+            parts = parsed.path.strip("/").split("/")
+            if len(parts) >= 4:
+                filename = parts[2]
+                self.handle_video_stream(filename, as_attachment=False)
+            else:
+                self.send_error(400, "Invalid stream URL")
+        elif parsed.path.startswith("/api/recordings/") and parsed.path.endswith("/download"):
+            # Format: /api/recordings/<filename>/download
+            parts = parsed.path.strip("/").split("/")
+            if len(parts) >= 4:
+                filename = parts[2]
+                self.handle_video_stream(filename, as_attachment=True)
+            else:
+                self.send_error(400, "Invalid download URL")
         else:
             super().do_GET()
+
+    def do_DELETE(self):
+        parsed = urlparse(self.path)
+        if parsed.path.startswith("/api/recordings/"):
+            filename = parsed.path.replace("/api/recordings/", "").strip("/")
+            success, msg = recorder.delete_recording(filename)
+            self.send_json({"success": success, "message": msg}, status=200 if success else 400)
+        else:
+            self.send_error(404, "Endpoint not found")
 
     def do_POST(self):
         parsed = urlparse(self.path)
@@ -75,35 +112,50 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             data = {}
 
         if parsed.path == "/api/control/light":
-            # White light floodlight: siid 16, piid 1
             state = bool(data.get("state", False))
             res = send_miio_rpc("set_properties", [{"did": "1178517372", "siid": 16, "piid": 1, "value": state}])
             self.send_json({"success": True, "result": res, "state": state})
 
         elif parsed.path == "/api/control/power":
-            # Camera lens power: siid 2, piid 1
             state = bool(data.get("state", True))
             res = send_miio_rpc("set_properties", [{"did": "1178517372", "siid": 2, "piid": 1, "value": state}])
             self.send_json({"success": True, "result": res, "state": state})
 
         elif parsed.path == "/api/control/nightshot":
-            # Night vision mode: siid 2, piid 3 (0: Off, 1: On, 2: Auto)
             val = int(data.get("value", 2))
             res = send_miio_rpc("set_properties", [{"did": "1178517372", "siid": 2, "piid": 3, "value": val}])
             self.send_json({"success": True, "result": res, "value": val})
 
         elif parsed.path == "/api/action/p2p":
-            # Start P2P stream: siid 9, aiid 1
             res = send_miio_rpc("action", {"did": "1178517372", "siid": 9, "aiid": 1, "in": []})
             self.send_json({"success": True, "result": res})
 
         elif parsed.path == "/api/action/reboot":
-            # Reboot camera: siid 2, aiid 2
             res = send_miio_rpc("action", {"did": "1178517372", "siid": 2, "aiid": 2, "in": []})
             self.send_json({"success": True, "result": res})
 
+        # DVR / Recording Endpoints
+        elif parsed.path == "/api/record/start":
+            lens = data.get("lens", "both")
+            res = recorder.start_manual(lens)
+            self.send_json({"success": True, "result": res, "status": recorder.get_status()})
+
+        elif parsed.path == "/api/record/stop":
+            lens = data.get("lens", "both")
+            res = recorder.stop_manual(lens)
+            self.send_json({"success": True, "result": res, "status": recorder.get_status()})
+
+        elif parsed.path == "/api/record/settings":
+            new_status = recorder.update_config(data)
+            self.send_json({"success": True, "status": new_status})
+
+        elif parsed.path == "/api/recordings/delete":
+            filename = data.get("filename", "")
+            success, msg = recorder.delete_recording(filename)
+            self.send_json({"success": success, "message": msg, "status": recorder.get_status()})
+
+        # Xiaomi Auth Endpoints
         elif parsed.path == "/api/auth/login":
-            # Initiate Xiaomi login via go2rtc
             username = data.get("username", "")
             password = data.get("password", "")
             payload = f"username={urllib.parse.quote(username)}&password={urllib.parse.quote(password)}".encode()
@@ -123,7 +175,6 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json({"status": 500, "error": str(e)})
 
         elif parsed.path == "/api/auth/verify_otp":
-            # Verify Xiaomi OTP via go2rtc
             code = data.get("code", "").strip()
             payload = f"verify={urllib.parse.quote(code)}".encode()
             req = urllib.request.Request(f"{GO2RTC_API}/api/xiaomi", data=payload, method="POST")
@@ -136,7 +187,6 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json({"success": False, "error": str(e)})
 
         elif parsed.path == "/api/auth/reload_streams":
-            # Reload streams in go2rtc
             try:
                 with urllib.request.urlopen(f"{GO2RTC_API}/api/streams", timeout=5) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
@@ -146,6 +196,85 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
 
         else:
             self.send_error(404, "Endpoint not found")
+
+    def handle_video_stream(self, filename, as_attachment=False):
+        clean_name = os.path.basename(filename)
+        if clean_name != filename or not filename.endswith(".mp4"):
+            self.send_error(400, "Invalid filename")
+            return
+
+        storage_dir = recorder.config["storage_dir"]
+        filepath = os.path.join(storage_dir, clean_name)
+        if not os.path.exists(filepath):
+            self.send_error(404, "Recording not found")
+            return
+
+        try:
+            file_size = os.path.getsize(filepath)
+        except Exception as e:
+            self.send_error(500, f"Cannot stat file: {e}")
+            return
+
+        if as_attachment:
+            self.send_response(200)
+            self.send_header("Content-Type", "video/mp4")
+            self.send_header("Content-Disposition", f'attachment; filename="{clean_name}"')
+            self.send_header("Content-Length", str(file_size))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            with open(filepath, "rb") as f:
+                shutil.copyfileobj(f, self.wfile)
+            return
+
+        range_header = self.headers.get("Range")
+        if range_header:
+            try:
+                byte_range = range_header.strip().split("=")[1]
+                parts = byte_range.split("-")
+                start = int(parts[0]) if parts[0] else 0
+                end = int(parts[1]) if parts[1] else file_size - 1
+            except Exception:
+                start = 0
+                end = file_size - 1
+
+            if start >= file_size or end >= file_size or start > end:
+                self.send_response(416)
+                self.send_header("Content-Range", f"bytes */{file_size}")
+                self.end_headers()
+                return
+
+            chunk_length = end - start + 1
+            self.send_response(206)
+            self.send_header("Content-Type", "video/mp4")
+            self.send_header("Content-Range", f"bytes {start}-{end}/{file_size}")
+            self.send_header("Content-Length", str(chunk_length))
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+
+            with open(filepath, "rb") as f:
+                f.seek(start)
+                remaining = chunk_length
+                chunk_size = 64 * 1024
+                while remaining > 0:
+                    read_bytes = min(remaining, chunk_size)
+                    buf = f.read(read_bytes)
+                    if not buf:
+                        break
+                    try:
+                        self.wfile.write(buf)
+                    except BrokenPipeError:
+                        break
+                    remaining -= len(buf)
+        else:
+            self.send_response(200)
+            self.send_header("Content-Type", "video/mp4")
+            self.send_header("Content-Length", str(file_size))
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            with open(filepath, "rb") as f:
+                shutil.copyfileobj(f, self.wfile)
 
     def handle_api_status(self):
         try:
@@ -219,6 +348,8 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Range")
         self.end_headers()
         self.wfile.write(data)
 
