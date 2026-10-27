@@ -1,0 +1,24 @@
+api:
+  listen: ":1984"
+
+rtsp:
+  listen: ":8554"
+
+webrtc:
+  listen: ":8555"
+
+xiaomi:
+  "1778813257": V1:9d2wTZnSKA8D7PcQtwbCZCQvwZlA7N3okQUFtyWWp6s341Q3dLObG+ucV9Hee0tHJYck7zwV71TUkJlQUAnSLFPd2zYgZf2ahMzmplXPQUxIsUnDhqSdfr5wtf3j4YjqvrUIw2aoc2tVWyulYbrFhDbX6e3mQO96RmoCljsqSf1gruqslVYYRZ98kS+zyWuA5RwtbnN/uCsfUQ30xX9iZfUZBYdHUHHWHLVoSCsncgZdFQmq97eOYH/g/btdSbCQxTDGkYgVp0Kq2A0RZh3Gf+PD7ubG4k0HQB/r0Jkw13c=
+
+streams:
+  # Lensa Kiri (Primary / Wide Angle)
+  cctv_garasi_kiri:
+    - xiaomi://1778813257:sg@192.168.1.11?did=1178517372&model=chuangmi.camera.075ae1
+  cctv_garasi_left:
+    - cctv_garasi_kiri
+
+  # Lensa Kanan (Secondary / PTZ Lens)
+  cctv_garasi_kanan:
+    - xiaomi://1778813257:sg@192.168.1.11?did=1178517372&model=chuangmi.camera.075ae1&channel=2
+  cctv_garasi_right:
+    - cctv_garasi_kanan

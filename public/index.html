@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCTV Xiaomi CW100 Dual • Surveillance Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #111827;
+      --surface-elevated: #162032;
+      --surface-hover: #1f2d44;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+      --accent: #10b981;
+      --primary: #0284c7;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Header Nav */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .brand-mark svg { width: 22px; height: 22px; fill: currentColor; }
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: var(--accent);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .pulse-indicator {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .btn-nav {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-nav:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      max-width: 1560px;
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; padding: 1rem; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+
+    /* Dual Camera Viewports */
+    .viewports-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 768px) {
+      .viewports-grid { grid-template-columns: 1fr; }
+    }
+
+    .monitor-box {
+      background: #04070d;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .monitor-header {
+      background: rgba(17, 24, 39, 0.8);
+      padding: 0.5rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .monitor-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .badge-live {
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+    .monitor-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+    .btn-icon svg { width: 15px; height: 15px; fill: currentColor; }
+
+    .video-frame-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
+    .video-frame-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .monitor-footer {
+      background: rgba(17, 24, 39, 0.6);
+      padding: 0.4rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-sub);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Telemetry strip */
+    .telemetry-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.85rem;
+      margin-top: 1.25rem;
+    }
+    @media (max-width: 640px) {
+      .telemetry-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .metric-cell {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+    }
+    .metric-name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .metric-val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Controls Deck */
+    .deck-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .group-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+    }
+    .control-label h4 { font-size: 0.85rem; font-weight: 600; }
+    .control-label p { font-size: 0.72rem; color: var(--text-muted); }
+
+    /* Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .2s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.8rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      transition: background 0.15s;
+    }
+    .btn-solid { background: var(--primary); color: #fff; }
+    .btn-solid:hover { background: #0369a1; }
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { background: var(--surface-hover); }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
+
+    /* Terminal Console */
+    .console-box {
+      background: #04070d;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      height: 120px;
+      overflow-y: auto;
+      color: #cbd5e1;
+    }
+    .console-line { margin-bottom: 2px; }
+    .console-time { color: #38bdf8; }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .form-input {
+      width: 100%;
+      background: #04070d;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.55rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--border-focus); }
+
+    .info-kv {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.45rem 0;
+      font-size: 0.78rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .info-kv span:first-child { color: var(--text-muted); }
+    .info-kv span:last-child { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>Xiaomi CW100 • CCTV Garasi</h1>
+        <p id="subNetInfo">192.168.1.11 • DUAL SENSOR H.265</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="pill-badge" id="netStatusPill">
+        <div class="pulse-indicator"></div>
+        <span id="netStatusText">TERHUBUNG (2 LENSA)</span>
+      </div>
+      <button class="btn-nav" id="btnOpenAuthModal">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        Akun & Sesi Xiaomi
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main>
+    <!-- Left Column: Video Viewports & Telemetry -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <div class="card">
+        <!-- Dual Lens Grid -->
+        <div class="viewports-grid">
+          <!-- Monitor 1: Kamera Kiri -->
+          <div class="monitor-box">
+            <div class="monitor-header">
+              <div class="monitor-title">
+                <span class="badge-live">LIVE</span>
+                <span>Lensa 1: Wide Angle (Kiri)</span>
+              </div>
+              <div class="monitor-actions">
+                <button class="btn-icon" onclick="reloadFrame('camLeft')" title="Muat Ulang Stream">
+                  <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+                <button class="btn-icon" onclick="takeSnapshot('kiri')" title="Ambil Foto Snapshot">
+                  <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="video-frame-container">
+              <iframe id="camLeft" src="http://192.168.1.44:1984/stream.html?src=cctv_garasi_kiri" allow="autoplay; fullscreen"></iframe>
+            </div>
+            <div class="monitor-footer">
+              <span>Resolusi: 2304x1296 (2.5K)</span>
+              <span>Codec: H.265 / HEVC</span>
+            </div>
+          </div>
+
+          <!-- Monitor 2: Kamera Kanan -->
+          <div class="monitor-box">
+            <div class="monitor-header">
+              <div class="monitor-title">
+                <span class="badge-live">LIVE</span>
+                <span>Lensa 2: PTZ Tele (Kanan)</span>
+              </div>
+              <div class="monitor-actions">
+                <button class="btn-icon" onclick="reloadFrame('camRight')" title="Muat Ulang Stream">
+                  <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+                <button class="btn-icon" onclick="takeSnapshot('kanan')" title="Ambil Foto Snapshot">
+                  <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="video-frame-container">
+              <iframe id="camRight" src="http://192.168.1.44:1984/stream.html?src=cctv_garasi_kanan" allow="autoplay; fullscreen"></iframe>
+            </div>
+            <div class="monitor-footer">
+              <span>Channel: Secondary Lens</span>
+              <span>Codec: H.265 / HEVC</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry Metrics Bar -->
+        <div class="telemetry-row">
+          <div class="metric-cell">
+            <div class="metric-name">Sinyal Wi-Fi (RSSI)</div>
+            <div class="metric-val" id="wifiRssiVal">-38 dBm</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-name">Latensi Ping (RTT)</div>
+            <div class="metric-val" id="pingRttVal">1.4 ms</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-name">SSID Pemancar</div>
+            <div class="metric-val" style="font-size: 1rem;" id="wifiSsidVal">ARVY KAIRI</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-name">Frekuensi Channel</div>
+            <div class="metric-val" style="font-size: 1rem;">2427 MHz (Ch 4)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Diagnostics Terminal Log -->
+      <div class="card">
+        <div class="group-header">
+          <span>Log Komunikasi Realtime</span>
+          <span style="font-size: 0.72rem; font-family: monospace;">Port UDP 54321</span>
+        </div>
+        <div class="console-box" id="consoleBox">
+          <div class="console-line"><span class="console-time">[INIT]</span> Dashboard terinisialisasi. Dual camera stream aktif.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Hardware Control Deck -->
+    <div class="deck-group">
+      <div class="card">
+        <div class="group-header">Kontrol Perangkat Keras</div>
+        
+        <div class="control-row">
+          <div class="control-label">
+            <h4>Lampu Sorot Putih</h4>
+            <p>Dual LED spotlight penerangan</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="lightToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <h4>Night Vision (IR)</h4>
+            <p>Inframerah malam otomatis</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="nightshotToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <h4>Sensor Kedua Lensa</h4>
+            <p>Mode siaga / aktif kamera</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="powerToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.65rem;">
+          <button class="btn btn-outline" id="btnTriggerP2p">Inisialisasi P2P Stream</button>
+          <button class="btn btn-danger" id="btnRebootCam">Restart Kamera CCTV</button>
+        </div>
+      </div>
+
+      <!-- Quick Session Info Card -->
+      <div class="card">
+        <div class="group-header">Identitas Hardware</div>
+        <div style="margin-top: 0.5rem;">
+          <div class="info-kv"><span>Model</span><span>chuangmi.075ae1</span></div>
+          <div class="info-kv"><span>Device ID</span><span>1178517372</span></div>
+          <div class="info-kv"><span>MAC</span><span>B8:88:80:5D:DD:B5</span></div>
+          <div class="info-kv"><span>Enkripsi</span><span>AES-128-CBC</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Satset Akun & Otentikasi Xiaomi -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Manajemen Sesi & Akun Xiaomi</h3>
+        <button class="modal-close" id="btnCloseModal">&times;</button>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <div class="info-kv"><span>Akun Terhubung</span><span id="authEmailVal">tadincahrancamaya@gmail.com</span></div>
+        <div class="info-kv"><span>User ID</span><span id="authUidVal">1778813257</span></div>
+        <div class="info-kv"><span>Status Sesi</span><span style="color: var(--accent);">AKTIF (PassToken V1)</span></div>
+        <div class="info-kv"><span>Region Server</span><span>Singapore (sg)</span></div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Tindakan Cepat (Satset):</div>
+        <button class="btn btn-solid" id="btnSyncGateway">Sinkronkan Ulang Gateway Stream</button>
+
+        <!-- Form Input OTP Jika Diperlukan di Masa Depan -->
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.5rem;">
+          <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.35rem;">Verifikasi Kode OTP Xiaomi (Jika Re-auth):</div>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" class="form-input" id="otpInput" placeholder="Masukkan 6 digit kode OTP" maxlength="6">
+            <button class="btn btn-solid" style="width: auto; padding: 0 1rem;" id="btnSubmitOtp">Kirim</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const consoleBox = document.getElementById('consoleBox');
+    function log(msg) {
+      const now = new Date().toTimeString().split(' ')[0];
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      line.innerHTML = `<span class="console-time">[${now}]</span> ${msg}`;
+      consoleBox.appendChild(line);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    // Modal controls
+    const modal = document.getElementById('authModal');
+    document.getElementById('btnOpenAuthModal').addEventListener('click', () => modal.classList.add('open'));
+    document.getElementById('btnCloseModal').addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+    function reloadFrame(frameId) {
+      const frame = document.getElementById(frameId);
+      const curSrc = frame.src;
+      frame.src = 'about:blank';
+      setTimeout(() => { frame.src = curSrc; }, 150);
+      log(`Stream ${frameId} dimuat ulang.`);
+    }
+
+    function takeSnapshot(side) {
+      window.open(`/api/snapshot/${side}`, '_blank');
+      log(`Mengambil snapshot lensa ${side}.`);
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if (data.online) {
+          document.getElementById('wifiRssiVal').textContent = (data.info.ap.rssi || '-38') + ' dBm';
+          document.getElementById('wifiSsidVal').textContent = data.info.ap.ssid || 'ARVY KAIRI';
+          if (data.properties && data.properties.length >= 2) {
+            document.getElementById('powerToggle').checked = data.properties[0].value;
+            document.getElementById('lightToggle').checked = data.properties[1].value;
+          }
+        }
+      } catch (e) {
+        log('Gagal polling status: ' + e);
+      }
+    }
+
+    async function pingLoop() {
+      try {
+        const res = await fetch('/api/ping');
+        const data = await res.json();
+        if (data.alive) {
+          document.getElementById('pingRttVal').textContent = data.rtt_ms + ' ms';
+        }
+      } catch (e) {}
+    }
+
+    // Hardware Controls
+    document.getElementById('lightToggle').addEventListener('change', async (e) => {
+      const state = e.target.checked;
+      log(`Lampu Sorot -> ${state ? 'ON' : 'OFF'}...`);
+      await fetch('/api/control/light', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({state: state})
+      });
+      log('Perintah lampu sorot dieksekusi.');
+    });
+
+    document.getElementById('powerToggle').addEventListener('change', async (e) => {
+      const state = e.target.checked;
+      log(`Kamera Sensor -> ${state ? 'ON' : 'OFF'}...`);
+      await fetch('/api/control/power', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({state: state})
+      });
+    });
+
+    document.getElementById('nightshotToggle').addEventListener('change', async (e) => {
+      const val = e.target.checked ? 2 : 0;
+      log(`Night Vision -> ${val === 2 ? 'AUTO' : 'OFF'}...`);
+      await fetch('/api/control/nightshot', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({value: val})
+      });
+    });
+
+    document.getElementById('btnTriggerP2p').addEventListener('click', async () => {
+      log('Memicu inisialisasi P2P stream...');
+      await fetch('/api/action/p2p', {method: 'POST'});
+      log('Sinyal P2P diterima kamera.');
+    });
+
+    document.getElementById('btnRebootCam').addEventListener('click', async () => {
+      if (confirm('Reboot kamera CCTV?')) {
+        log('Mengirim sinyal reboot perangkat...');
+        await fetch('/api/action/reboot', {method: 'POST'});
+      }
+    });
+
+    // Satset In-Web Xiaomi OTP / Gateway Sync
+    document.getElementById('btnSyncGateway').addEventListener('click', async () => {
+      log('Menyinkronkan ulang gateway streaming...');
+      const res = await fetch('/api/auth/reload_streams', {method: 'POST'});
+      const data = await res.json();
+      if (data.success) {
+        log('Gateway berhasil disinkronkan.');
+        reloadFrame('camLeft');
+        reloadFrame('camRight');
+        alert('Gateway stream berhasil disinkronkan!');
+      } else {
+        log('Gagal menyinkronkan gateway: ' + JSON.stringify(data.error));
+      }
+    });
+
+    document.getElementById('btnSubmitOtp').addEventListener('click', async () => {
+      const code = document.getElementById('otpInput').value.trim();
+      if (!code) return alert('Masukkan kode OTP!');
+      log(`Mengirim kode OTP ${code} ke server...`);
+      const res = await fetch('/api/auth/verify_otp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({code: code})
+      });
+      const data = await res.json();
+      if (data.success) {
+        log('Verifikasi OTP sukses.');
+        alert('Verifikasi OTP Berhasil! Stream kini aktif.');
+        reloadFrame('camLeft');
+        reloadFrame('camRight');
+        modal.classList.remove('open');
+      } else {
+        log('Verifikasi OTP gagal.');
+        alert('Verifikasi OTP gagal: ' + (data.error || 'Kode salah'));
+      }
+    });
+
+    fetchStatus();
+    setInterval(fetchStatus, 4000);
+    setInterval(pingLoop, 2000);
+  </script>
+</body>
+</html>
