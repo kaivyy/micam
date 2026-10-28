@@ -83,7 +83,7 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      gap: 0.75rem;
+      gap: 1rem;
     }
 
     .brand {
@@ -91,6 +91,7 @@
       align-items: center;
       gap: 0.75rem;
       min-width: 0;
+      flex-shrink: 1;
     }
     .brand-mark {
       width: 38px;
@@ -108,14 +109,27 @@
     .brand-text {
       min-width: 0;
     }
-    .brand-text h1 {
-      font-size: clamp(0.88rem, 2.5vw, 1.05rem);
+    .brand-title-full {
+      font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: -0.01em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       color: #ffffff;
+      line-height: 1.25;
+      display: block;
+    }
+    .brand-title-short {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #ffffff;
+      line-height: 1.25;
+      display: none;
     }
     .brand-text p {
       font-size: 0.72rem;
@@ -124,12 +138,13 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.25;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
       flex-shrink: 0;
     }
 
@@ -145,7 +160,7 @@
       font-size: 0.75rem;
       font-weight: 600;
       white-space: nowrap;
-      min-height: 36px;
+      min-height: 38px;
     }
     .pulse-indicator {
       width: 7px;
@@ -169,8 +184,8 @@
       background: #050505;
       border: 1px solid var(--border);
       color: var(--text);
-      min-height: 44px;
-      padding: 0.5rem 0.85rem;
+      min-height: 40px;
+      padding: 0.45rem 0.8rem;
       border-radius: var(--radius-sm);
       font-size: 0.8rem;
       font-weight: 600;
@@ -190,25 +205,277 @@
     .btn-nav:active {
       transform: scale(0.97);
     }
+    .btn-nav-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      padding: 0;
+    }
+    .btn-nav-icon svg {
+      width: 18px;
+      height: 18px;
+    }
 
-    @media (max-width: 680px) {
+    .nav-item-mobile {
+      display: none !important;
+    }
+    .bottom-nav {
+      display: none;
+    }
+
+    /* Tablet breakpoint (641px - 940px) */
+    @media (max-width: 940px) and (min-width: 641px) {
       header {
-        padding: 0.65rem 0.85rem;
-        padding-top: max(0.65rem, env(safe-area-inset-top));
-        padding-left: max(0.85rem, env(safe-area-inset-left));
-        padding-right: max(0.85rem, env(safe-area-inset-right));
+        padding: 0.65rem 1rem;
       }
-      .brand-mark { width: 34px; height: 34px; min-width: 34px; }
+      .brand-title-full { display: none; }
+      .brand-title-short { display: block; }
+      .brand-text p { display: none; }
       .pill-badge span.pill-long-text { display: none; }
       .pill-badge span.pill-short-text { display: inline; }
-      .btn-nav span.btn-label-long { display: none; }
-      .btn-nav span.btn-label-short { display: inline; }
+      .nav-item-desktop span.btn-label-long { display: none; }
+      .nav-item-desktop span.btn-label-short { display: inline; }
+      .btn-nav { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
     }
-    @media (min-width: 681px) {
-      .pill-badge span.pill-long-text { display: inline; }
-      .pill-badge span.pill-short-text { display: none; }
-      .btn-nav span.btn-label-long { display: inline; }
-      .btn-nav span.btn-label-short { display: none; }
+
+    /* Mobile breakpoint (<= 640px) */
+    @media (max-width: 640px) {
+      header {
+        padding: 0.55rem 0.85rem;
+        padding-top: max(0.55rem, env(safe-area-inset-top));
+        padding-left: max(0.85rem, env(safe-area-inset-left));
+        padding-right: max(0.85rem, env(safe-area-inset-right));
+        min-height: 52px;
+      }
+      .brand-mark { width: 32px; height: 32px; min-width: 32px; }
+      .brand-mark svg { width: 18px; height: 18px; }
+      .brand-title-full { display: none; }
+      .brand-title-short { display: block; font-size: 0.9rem; }
+      .brand-text p { display: none; }
+
+      .header-actions {
+        gap: 0.4rem;
+      }
+      .pill-badge {
+        padding: 0.25rem 0.5rem;
+        min-height: 38px;
+        font-size: 0.7rem;
+      }
+      .pill-badge span.pill-long-text { display: none; }
+      .pill-badge span.pill-short-text { display: inline; }
+
+      /* Hide crowded buttons from top bar on mobile */
+      .nav-item-desktop {
+        display: none !important;
+      }
+
+      /* Show mobile drawer button */
+      .nav-item-mobile {
+        display: inline-flex !important;
+      }
+
+      .btn-nav-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        padding: 0;
+      }
+
+      /* Show bottom navigation bar */
+      .bottom-nav {
+        display: flex;
+      }
+
+      /* Reserve bottom space for fixed thumb navigation */
+      body {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+      }
+      main {
+        padding-bottom: 0.5rem !important;
+      }
+    }
+
+    /* Bottom Navigation Bar for Mobile */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(58px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: #000000;
+      border-top: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-around;
+      z-index: 45;
+      backdrop-filter: blur(10px);
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      min-width: 0;
+      min-height: 48px;
+      touch-action: manipulation;
+      transition: color 0.15s, transform 0.1s;
+    }
+    .bottom-nav-item:active {
+      transform: scale(0.92);
+    }
+    .bottom-nav-item.active {
+      color: var(--accent);
+    }
+    .bottom-nav-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bottom-nav-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Mobile Quick Drawer / Bottom Sheet */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 55;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .drawer-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .mobile-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #000000;
+      border-top: 1px solid var(--border);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      z-index: 60;
+      transform: translateY(105%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 0.75rem 1rem 1.5rem;
+      padding-bottom: max(1.5rem, calc(1rem + env(safe-area-inset-bottom)));
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);
+    }
+    .mobile-drawer.active {
+      transform: translateY(0);
+    }
+    .drawer-handle {
+      width: 36px;
+      height: 4px;
+      background: #262626;
+      border-radius: 2px;
+      margin: 0 auto 0.85rem;
+    }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+    }
+    .drawer-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .drawer-menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .drawer-menu-item {
+      width: 100%;
+      background: #080808;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      min-height: 52px;
+      touch-action: manipulation;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .drawer-menu-item:hover, .drawer-menu-item:active {
+      background: #121212;
+      border-color: #333333;
+    }
+    .drawer-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: #141414;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .drawer-item-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+    .drawer-item-icon.danger-icon {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+    .drawer-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .drawer-item-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.25;
+    }
+    .drawer-item-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.25;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .drawer-item-chevron {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      padding-left: 0.25rem;
     }
 
     /* Main Container */
@@ -1065,33 +1332,44 @@
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
       </div>
       <div class="brand-text">
-        <h1>Xiaomi CW100 Dual • CCTV Garasi</h1>
+        <h1 class="brand-title-full">Xiaomi CW100 Dual • CCTV Garasi</h1>
+        <h1 class="brand-title-short">Xiaomi CW100</h1>
         <p id="subNetInfo">192.168.1.11 • DUAL SENSOR H.265</p>
       </div>
     </div>
     <div class="header-actions">
+      <!-- Live Status Pill -->
       <div class="pill-badge" id="netStatusPill">
         <div class="pulse-indicator" id="recStatusIndicator"></div>
         <span class="pill-long-text" id="netStatusText">TERHUBUNG (2 LENSA)</span>
         <span class="pill-short-text" id="netStatusShort">LIVE</span>
       </div>
-      <button class="btn-nav" onclick="document.getElementById('dvrSection').scrollIntoView({behavior:'smooth'})" title="Lihat Rekaman DVR">
+
+      <!-- Desktop & Tablet Action Buttons -->
+      <button class="btn-nav nav-item-desktop" onclick="document.getElementById('dvrSection').scrollIntoView({behavior:'smooth'})" title="Lihat Rekaman DVR">
         <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></span>
         <span class="btn-label-long">DVR & Rekaman</span>
         <span class="btn-label-short">DVR</span>
       </button>
-      <button class="btn-nav" onclick="openTelegramModal()" title="Konfigurasi Notifikasi Telegram">
+      <button class="btn-nav nav-item-desktop" onclick="openTelegramModal()" title="Konfigurasi Notifikasi Telegram">
         <span class="icon"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></span>
         <span class="btn-label-long">Telegram</span>
         <span class="btn-label-short">TG</span>
       </button>
-      <button class="btn-nav" id="btnOpenAuthModal" aria-label="Kelola Sesi Akun Xiaomi">
+      <button class="btn-nav nav-item-desktop" id="btnOpenAuthModal" aria-label="Kelola Sesi Akun Xiaomi">
         <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
         <span class="btn-label-long">Akun Xiaomi</span>
         <span class="btn-label-short">Akun</span>
       </button>
-      <button class="btn-nav" onclick="openPinModal()" title="Kunci Dashboard (PIN Guard)">
+
+      <!-- PIN Guard Lock Button -->
+      <button class="btn-nav btn-nav-icon" onclick="openPinModal()" title="Kunci Dashboard (PIN Guard)" aria-label="Kunci Dashboard">
         <span class="icon" id="lockIconSvg"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
+      </button>
+
+      <!-- Mobile Menu Button (Visible only on mobile <= 640px) -->
+      <button class="btn-nav btn-nav-icon nav-item-mobile" onclick="toggleMobileDrawer()" title="Buka Menu Pengaturan" aria-label="Buka Menu Pengaturan">
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></span>
       </button>
     </div>
   </header>
@@ -1100,7 +1378,7 @@
   <main>
     <!-- Left Column: Video Viewports, DVR Manager & Telemetry -->
     <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-      <div class="card">
+      <div class="card" id="liveSection">
         <!-- Dual Lens Grid -->
         <div class="viewports-grid">
           <!-- Monitor 1: Kamera Kiri -->
@@ -1357,7 +1635,7 @@
     <!-- Right Column: Interactive Hardware Control Deck & PTZ -->
     <div class="deck-group">
       <!-- PTZ Directional Controller for Lens 2 -->
-      <div class="card">
+      <div class="card" id="ptzSection">
         <div class="group-header">
           <span>Kontrol PTZ (Lensa 2)</span>
           <span style="font-size: 0.7rem; color: var(--text-muted);">Pan & Tilt</span>
@@ -1393,7 +1671,7 @@
       </div>
 
       <!-- Emergency Siren / Sound Alarm -->
-      <div class="card">
+      <div class="card" id="sirenSection">
         <div class="group-header">
           <span>Sirine & Peringatan Darurat</span>
         </div>
@@ -1406,7 +1684,7 @@
       </div>
 
       <!-- AI Detection & Smart Motion Controls -->
-      <div class="card">
+      <div class="card" id="aiSection">
         <div class="group-header">
           <span>Deteksi Gerakan & AI Pintar</span>
         </div>
@@ -1455,7 +1733,7 @@
       </div>
 
       <!-- Hardware Controls Deck -->
-      <div class="card">
+      <div class="card" id="powerSection">
         <div class="group-header">Kontrol Lampu & Daya</div>
         
         <div class="control-row">
@@ -1650,7 +1928,173 @@
     </div>
   </div>
 
+  <!-- Fixed Mobile Bottom Navigation Bar -->
+  <nav class="bottom-nav" aria-label="Navigasi Bawah Mobile">
+    <button class="bottom-nav-item active" onclick="scrollToSection('liveSection', this)" aria-label="Tonton Live Stream">
+      <span class="bottom-nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+      </span>
+      <span class="bottom-nav-label">Live</span>
+    </button>
+    <button class="bottom-nav-item" onclick="scrollToSection('ptzSection', this)" aria-label="Kontrol Arah PTZ">
+      <span class="bottom-nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L8 6h3v4H7V7L3 11l4 4v-3h4v4H8l4 4 4-4h-3v-4h4v3l4-4-4-4v3h-4V6h3l-4-4z"/></svg>
+      </span>
+      <span class="bottom-nav-label">PTZ</span>
+    </button>
+    <button class="bottom-nav-item" onclick="scrollToSection('dvrSection', this)" aria-label="Rekaman DVR & Linimasa">
+      <span class="bottom-nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+      </span>
+      <span class="bottom-nav-label">DVR</span>
+    </button>
+    <button class="bottom-nav-item" onclick="toggleMobileDrawer()" aria-label="Menu Pengaturan Cepat">
+      <span class="bottom-nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </span>
+      <span class="bottom-nav-label">Menu</span>
+    </button>
+  </nav>
+
+  <!-- Mobile Quick Action Sheet / Drawer -->
+  <div class="drawer-backdrop" id="mobileDrawerBackdrop" onclick="closeMobileDrawer()" aria-hidden="true"></div>
+  <div class="mobile-drawer" id="mobileDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerTitle">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:var(--accent);"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        <span>Pengaturan & Kontrol Cepat</span>
+      </div>
+      <button class="modal-close" onclick="closeMobileDrawer()" aria-label="Tutup Menu">&times;</button>
+    </div>
+    <div class="drawer-menu-list">
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); openTelegramModal();">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Notifikasi Telegram</div>
+          <div class="drawer-item-sub">Kirim alert snapshot foto ke bot Telegram</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); document.getElementById('btnOpenAuthModal').click();">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Akun Xiaomi Cloud</div>
+          <div class="drawer-item-sub">Status token, sinkronisasi & login sesi</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); triggerSiren();">
+        <div class="drawer-item-icon danger-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title" style="color:var(--danger);">Bunyikan Sirine Darurat</div>
+          <div class="drawer-item-sub">Trigger suara alarm hardware kamera seketika</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); scrollToSection('aiSection');">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 17.93V18a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h1a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1a2 2 0 0 1-2 2H4.07A8 8 0 0 1 12 4.07v1.86a2 2 0 0 1-1 1.73A4 4 0 0 0 9 11v1a4 4 0 0 0 4 4h1a2 2 0 0 1 2 2v1.93z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Mode Deteksi AI</div>
+          <div class="drawer-item-sub">Deteksi gerakan, manusia, dan mobil</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); scrollToSection('powerSection');">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A5.006 5.006 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Lampu & Mode Malam</div>
+          <div class="drawer-item-sub">Lampu sorot LED ganda & Infrared Nightshot</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); openPinModal();">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Kunci Layar (PIN Guard)</div>
+          <div class="drawer-item-sub">Kunci akses kontrol dengan PIN 4 digit</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); document.getElementById('btnRebootCam').click();">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Mulai Ulang Kamera</div>
+          <div class="drawer-item-sub">Kirim sinyal reboot hardware lokal</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+    </div>
+  </div>
+
   <script>
+    // --- Mobile Responsive Nav & Drawer Helpers ---
+    function scrollToSection(sectionId, btnElement) {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const headerOffset = 64;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+      if (btnElement) {
+        document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+      }
+    }
+
+    function toggleMobileDrawer() {
+      const drawer = document.getElementById('mobileDrawer');
+      const backdrop = document.getElementById('mobileDrawerBackdrop');
+      if (drawer && backdrop) {
+        const isOpen = drawer.classList.contains('active');
+        if (isOpen) {
+          closeMobileDrawer();
+        } else {
+          drawer.classList.add('active');
+          backdrop.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    }
+
+    function closeMobileDrawer() {
+      const drawer = document.getElementById('mobileDrawer');
+      const backdrop = document.getElementById('mobileDrawerBackdrop');
+      if (drawer && backdrop) {
+        drawer.classList.remove('active');
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Close drawer with ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMobileDrawer();
+    });
     const consoleBox = document.getElementById('consoleBox');
     function log(msg) {
       const now = new Date().toTimeString().split(' ')[0];
@@ -2327,6 +2771,30 @@
     setInterval(fetchStatus, 4000);
     setInterval(fetchRecordStatus, 1500); // Poll recording timers smoothly
     setInterval(pingLoop, 2000);
+
+    // Highlight active bottom nav item on scroll
+    if ('IntersectionObserver' in window) {
+      const navObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            const navItems = document.querySelectorAll('.bottom-nav-item');
+            navItems.forEach(item => {
+              const onclickStr = item.getAttribute('onclick') || '';
+              if (onclickStr.includes(id)) {
+                navItems.forEach(b => b.classList.remove('active'));
+                item.classList.add('active');
+              }
+            });
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+
+      ['liveSection', 'ptzSection', 'dvrSection'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) navObserver.observe(el);
+      });
+    }
   </script>
 </body>
 </html>
