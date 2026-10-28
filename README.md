@@ -172,16 +172,12 @@ Perekaman resolusi penuh 2.5K / HD dengan kompresi **H.265 (HEVC)** rata-rata me
 
 ## 🤝 Kredit & Referensi Proyek
 
-Proyek ini dibangun dan terinspirasi dari proyek-proyek open-source hebat berikut:
+Proyek ini dibangun menggunakan fondasi dan terinspirasi dari proyek-proyek open-source hebat berikut:
 
-1. **[AlexxIT/go2rtc](https://github.com/AlexxIT/go2rtc)**  
-   *Ultimate streaming gateway & universal WebRTC/MSE streaming relay.* Digunakan sebagai jembatan protokol P2P Xiaomi MISS / TUTK CS2 ke browser dan NVR RTSP.
-2. **[PiotrMachowski/Xiaomi-cloud-tokens-extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor)**  
-   *Token & Cloud Device Extractor for Xiaomi Smart Home Ecosystem.* Digunakan untuk mengekstraksi device token lokal, Device ID, passToken, dan region server Singapore (`sg`).
-3. **[rytilahti/python-miio](https://github.com/rytilahti/python-miio)**  
-   *Python library & CLI tools for controlling Xiaomi Smart Home devices.* Referensi protokol paket UDP 54321 dan enkripsi AES-128-CBC MIIO.
-4. **[FFmpeg](https://github.com/FFmpeg/FFmpeg)**  
-   *A complete, cross-platform solution to record, convert and stream audio and video.* Digunakan untuk engine perekam DVR *zero-overhead stream copy* dan segmentasi MP4.
+- <u>[go2rtc](https://github.com/AlexxIT/go2rtc)</u> — Gateway streaming WebRTC, MSE, dan relay protokol P2P kamera Xiaomi (MISS / TUTK CS2).
+- <u>[Xiaomi Cloud Tokens Extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor)</u> — Ekstraktor token lokal, Device ID, dan otentikasi akun Xiaomi cloud.
+- <u>[python-miio](https://github.com/rytilahti/python-miio)</u> — Referensi protokol komunikasi UDP 54321 dan enkripsi AES-128-CBC MIIO.
+- <u>[FFmpeg](https://ffmpeg.org)</u> — Framework multimedia untuk engine perekaman DVR *stream-copy* dan pemecah segmen video MP4.
 
 ---
 
