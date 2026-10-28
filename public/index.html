@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>CCTV Xiaomi CW100 Dual • Surveillance & DVR Dashboard</title>
+  <title>Xiaomi CW100 Dual • Surveillance & DVR NVR Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #000000;
@@ -52,6 +52,21 @@
       display: flex;
       flex-direction: column;
       line-height: 1.5;
+    }
+
+    /* Icon Helper */
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+    .icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
     }
 
     /* Header Nav */
@@ -176,7 +191,7 @@
       transform: scale(0.97);
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 680px) {
       header {
         padding: 0.65rem 0.85rem;
         padding-top: max(0.65rem, env(safe-area-inset-top));
@@ -184,13 +199,12 @@
         padding-right: max(0.85rem, env(safe-area-inset-right));
       }
       .brand-mark { width: 34px; height: 34px; min-width: 34px; }
-      .brand-mark svg { width: 20px; height: 20px; }
       .pill-badge span.pill-long-text { display: none; }
       .pill-badge span.pill-short-text { display: inline; }
       .btn-nav span.btn-label-long { display: none; }
       .btn-nav span.btn-label-short { display: inline; }
     }
-    @media (min-width: 601px) {
+    @media (min-width: 681px) {
       .pill-badge span.pill-long-text { display: inline; }
       .pill-badge span.pill-short-text { display: none; }
       .btn-nav span.btn-label-long { display: inline; }
@@ -224,7 +238,7 @@
       }
     }
 
-    /* Cards - Pure Black with Crisp Definition */
+    /* Cards - Pure Black */
     .card {
       background: #000000;
       border: 1px solid var(--border);
@@ -255,6 +269,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .monitor-header {
@@ -330,8 +345,8 @@
       color: #fca5a5;
     }
     .btn-rec-monitor .rec-dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--danger);
       flex-shrink: 0;
@@ -402,6 +417,9 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
     .metric-val {
       font-size: clamp(0.92rem, 3.2vw, 1.15rem);
@@ -413,7 +431,95 @@
       text-overflow: ellipsis;
     }
 
-    /* DVR Section Styles */
+    /* PTZ D-Pad Controller */
+    .ptz-card {
+      background: #050505;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .ptz-matrix {
+      display: grid;
+      grid-template-columns: 46px 46px 46px;
+      grid-template-rows: 46px 46px 46px;
+      gap: 6px;
+      justify-content: center;
+    }
+    .ptz-btn {
+      background: #000000;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      touch-action: manipulation;
+    }
+    .ptz-btn:hover { background: #141414; border-color: #333333; }
+    .ptz-btn:active { transform: scale(0.92); background: var(--primary); }
+    .ptz-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* Timeline 24h Bar */
+    .timeline-container {
+      background: #050505;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      margin-bottom: 0.65rem;
+    }
+    .timeline-track {
+      position: relative;
+      width: 100%;
+      height: 28px;
+      background: #111111;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      user-select: none;
+    }
+    .timeline-segment {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: rgba(2, 132, 199, 0.6);
+      border-left: 1px solid var(--primary);
+      border-right: 1px solid var(--primary);
+    }
+    .timeline-pointer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--danger);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.9);
+      pointer-events: none;
+      transition: left 0.2s ease;
+    }
+    .timeline-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-sub);
+    }
+
+    /* DVR Storage Meter */
     .storage-meter {
       background: #050505;
       border: 1px solid var(--border);
@@ -516,6 +622,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.35rem;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
     .pill-filter:hover {
@@ -673,10 +780,17 @@
     .control-label {
       min-width: 0;
     }
-    .control-label h4 { font-size: 0.85rem; font-weight: 600; color: #ffffff; }
+    .control-label h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
     .control-label p { font-size: 0.72rem; color: var(--text-muted); }
 
-    /* Switch - Pure Black Slider */
+    /* Switch - Pure Black */
     .toggle-switch {
       position: relative;
       display: inline-flex;
@@ -751,6 +865,17 @@
     }
     .btn-danger:hover { background: rgba(239, 68, 68, 0.18); border-color: var(--danger); }
     .btn-danger:active { background: rgba(239, 68, 68, 0.28); }
+    .btn-siren {
+      background: #000000;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+    .btn-siren:hover { background: rgba(239, 68, 68, 0.15); }
+    .btn-siren.active-siren {
+      background: var(--danger);
+      color: #fff;
+      animation: pulseRecord 0.6s infinite;
+    }
 
     /* Terminal Console */
     .console-box {
@@ -851,7 +976,7 @@
       color: #ffffff;
       padding: 0.65rem 0.85rem;
       border-radius: var(--radius-sm);
-      font-size: 16px; /* iOS Safari auto-zoom prevention */
+      font-size: 16px;
       font-family: inherit;
       outline: none;
       min-height: 44px;
@@ -885,6 +1010,50 @@
       text-align: right;
       word-break: break-all;
     }
+
+    /* Lock Screen Keypad */
+    .pin-display {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 1.5rem 0;
+    }
+    .pin-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .pin-dot.filled {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+    .keypad-btn {
+      height: 52px;
+      background: #000000;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      border-radius: var(--radius-sm);
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .keypad-btn:active {
+      background: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -896,7 +1065,7 @@
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
       </div>
       <div class="brand-text">
-        <h1>Xiaomi CW100 • CCTV Garasi</h1>
+        <h1>Xiaomi CW100 Dual • CCTV Garasi</h1>
         <p id="subNetInfo">192.168.1.11 • DUAL SENSOR H.265</p>
       </div>
     </div>
@@ -907,14 +1076,22 @@
         <span class="pill-short-text" id="netStatusShort">LIVE</span>
       </div>
       <button class="btn-nav" onclick="document.getElementById('dvrSection').scrollIntoView({behavior:'smooth'})" title="Lihat Rekaman DVR">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></span>
         <span class="btn-label-long">DVR & Rekaman</span>
         <span class="btn-label-short">DVR</span>
       </button>
+      <button class="btn-nav" onclick="openTelegramModal()" title="Konfigurasi Notifikasi Telegram">
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></span>
+        <span class="btn-label-long">Telegram</span>
+        <span class="btn-label-short">TG</span>
+      </button>
       <button class="btn-nav" id="btnOpenAuthModal" aria-label="Kelola Sesi Akun Xiaomi">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
         <span class="btn-label-long">Akun Xiaomi</span>
         <span class="btn-label-short">Akun</span>
+      </button>
+      <button class="btn-nav" onclick="openPinModal()" title="Kunci Dashboard (PIN Guard)">
+        <span class="icon" id="lockIconSvg"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
       </button>
     </div>
   </header>
@@ -988,19 +1165,31 @@
         <!-- Telemetry Metrics Bar -->
         <div class="telemetry-row">
           <div class="metric-cell">
-            <div class="metric-name">Sinyal Wi-Fi (RSSI)</div>
+            <div class="metric-name">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 3C6.95 3 3.15 4.85 0 7.23L12 22 24 7.25C20.85 4.87 17.05 3 12 3z"/></svg></span>
+              <span>Sinyal Wi-Fi</span>
+            </div>
             <div class="metric-val" id="wifiRssiVal">-38 dBm</div>
           </div>
           <div class="metric-cell">
-            <div class="metric-name">Latensi Ping (RTT)</div>
+            <div class="metric-name">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span>
+              <span>Latensi Ping</span>
+            </div>
             <div class="metric-val" id="pingRttVal">1.4 ms</div>
           </div>
           <div class="metric-cell">
-            <div class="metric-name">SSID Pemancar</div>
+            <div class="metric-name">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
+              <span>SSID Pemancar</span>
+            </div>
             <div class="metric-val" id="wifiSsidVal">ARVY KAIRI</div>
           </div>
           <div class="metric-cell">
-            <div class="metric-name">Frekuensi Channel</div>
+            <div class="metric-name">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg></span>
+              <span>Frekuensi Channel</span>
+            </div>
             <div class="metric-val">2427 MHz (Ch 4)</div>
           </div>
         </div>
@@ -1010,10 +1199,36 @@
       <div class="card" id="dvrSection">
         <div class="group-header" style="margin-bottom: 1rem;">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--primary)"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            <span class="icon" style="color: var(--primary);"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></span>
             <span>Perekam Video (DVR) & Penyimpanan HDD</span>
           </div>
           <span id="dvrStatusBadge" style="font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; color: var(--accent);">DVR READY</span>
+        </div>
+
+        <!-- 24-Hour Timeline Bar (Pro NVR Scrubber) -->
+        <div class="timeline-container">
+          <div class="timeline-header">
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+              <span class="icon" style="color: var(--primary);"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 12.41V7h2v4.59l3.71 3.71-1.42 1.41z"/></svg></span>
+              <span>Timeline Rekaman 24 Jam</span>
+            </div>
+            <span id="timelineSelectedTime" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted);">Klik timeline untuk memutar</span>
+          </div>
+          <div class="timeline-track" id="timelineTrack" onclick="handleTimelineClick(event)">
+            <!-- Highlighted blocks will be generated here -->
+            <div class="timeline-pointer" id="timelinePointer" style="left: 0%;"></div>
+          </div>
+          <div class="timeline-ticks">
+            <span>00:00</span>
+            <span>03:00</span>
+            <span>06:00</span>
+            <span>09:00</span>
+            <span>12:00</span>
+            <span>15:00</span>
+            <span>18:00</span>
+            <span>21:00</span>
+            <span>24:00</span>
+          </div>
         </div>
 
         <!-- Storage Disk Meter -->
@@ -1032,8 +1247,12 @@
         </div>
 
         <!-- Manual Fast Recording Buttons -->
-        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.04em;">
-          Kontrol Rekam Manual Seketika:
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.04em; display: flex; justify-content: space-between; align-items: center;">
+          <span>Kontrol Rekam Manual:</span>
+          <button class="btn-action-sm btn-action-dl" onclick="triggerTimelapse()" title="Buat video timelapse dari rekaman hari ini">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></span>
+            Buat Timelapse Hari Ini
+          </button>
         </div>
         <div class="manual-actions-bar">
           <button class="btn btn-outline" id="btnManualLeft" onclick="toggleRecord('left')">
@@ -1110,7 +1329,7 @@
             <button class="pill-filter" onclick="setRecFilter('manual', this)">Manual</button>
             <button class="pill-filter" onclick="setRecFilter('dvr', this)">Otomatis</button>
             <button class="pill-filter" onclick="loadRecordings()" title="Muat Ulang Daftar">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
             </button>
           </div>
         </div>
@@ -1130,19 +1349,121 @@
           <span style="font-size: 0.72rem; font-family: 'JetBrains Mono', monospace;">Port UDP 54321 • DVR Stream Copy</span>
         </div>
         <div class="console-box" id="consoleBox">
-          <div class="console-line"><span class="console-time">[INIT]</span> Dashboard terinisialisasi. Dual camera stream & DVR engine aktif.</div>
+          <div class="console-line"><span class="console-time">[INIT]</span> Dashboard terinisialisasi. Dual camera stream, PTZ & DVR engine aktif.</div>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Interactive Hardware Control Deck -->
+    <!-- Right Column: Interactive Hardware Control Deck & PTZ -->
     <div class="deck-group">
+      <!-- PTZ Directional Controller for Lens 2 -->
       <div class="card">
-        <div class="group-header">Kontrol Perangkat Keras</div>
+        <div class="group-header">
+          <span>Kontrol PTZ (Lensa 2)</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Pan & Tilt</span>
+        </div>
+        <div class="ptz-card">
+          <div class="ptz-matrix">
+            <div></div>
+            <button class="ptz-btn" onclick="sendPtz('up')" title="Putar Atas" aria-label="Putar Atas">
+              <svg viewBox="0 0 24 24"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+            </button>
+            <div></div>
+
+            <button class="ptz-btn" onclick="sendPtz('left')" title="Putar Kiri" aria-label="Putar Kiri">
+              <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+            </button>
+            <button class="ptz-btn" onclick="sendPtz('center')" title="Reset / Kalibrasi Posisi" aria-label="Reset Posisi">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+            <button class="ptz-btn" onclick="sendPtz('right')" title="Putar Kanan" aria-label="Putar Kanan">
+              <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+            </button>
+
+            <div></div>
+            <button class="ptz-btn" onclick="sendPtz('down')" title="Putar Bawah" aria-label="Putar Bawah">
+              <svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+            </button>
+            <div></div>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">
+            Gunakan tombol panah atau D-pad untuk mengarahkan lensa sekunder
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Siren / Sound Alarm -->
+      <div class="card">
+        <div class="group-header">
+          <span>Sirine & Peringatan Darurat</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <button class="btn btn-siren" id="btnSirenTrigger" onclick="triggerSiren()">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg></span>
+            Bunyikan Sirine Alarm
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Detection & Smart Motion Controls -->
+      <div class="card">
+        <div class="group-header">
+          <span>Deteksi Gerakan & AI Pintar</span>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <h4>
+              <span class="icon" style="color: var(--primary);"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11z"/></svg></span>
+              Deteksi Gerakan Umum
+            </h4>
+            <p>Pemicu sensor gerak kamera</p>
+          </div>
+          <label class="toggle-switch" aria-label="Toggle Deteksi Gerakan">
+            <input type="checkbox" id="motionDetectToggle" onchange="toggleAiProperty('motion', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <h4>
+              <span class="icon" style="color: var(--accent);"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>
+              Deteksi Manusia (AI)
+            </h4>
+            <p>Penyaring orang & pejalan kaki</p>
+          </div>
+          <label class="toggle-switch" aria-label="Toggle Deteksi Manusia">
+            <input type="checkbox" id="humanDetectToggle" onchange="toggleAiProperty('human', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <h4>
+              <span class="icon" style="color: var(--warning);"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-4.66l.12-.34h13.77l.11.34V17z"/><circle cx="7.5" cy="14.5" r="1.5"/><circle cx="16.5" cy="14.5" r="1.5"/></svg></span>
+              Deteksi Kendaraan (AI)
+            </h4>
+            <p>Penyaring mobil masuk/keluar</p>
+          </div>
+          <label class="toggle-switch" aria-label="Toggle Deteksi Kendaraan">
+            <input type="checkbox" id="carDetectToggle" onchange="toggleAiProperty('car', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Hardware Controls Deck -->
+      <div class="card">
+        <div class="group-header">Kontrol Lampu & Daya</div>
         
         <div class="control-row">
           <div class="control-label">
-            <h4>Lampu Sorot Putih</h4>
+            <h4>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/></svg></span>
+              Lampu Sorot Putih
+            </h4>
             <p>Dual LED spotlight penerangan</p>
           </div>
           <label class="toggle-switch" aria-label="Toggle Lampu Sorot Putih">
@@ -1153,7 +1474,10 @@
 
         <div class="control-row">
           <div class="control-label">
-            <h4>Night Vision (IR)</h4>
+            <h4>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12.3 2a10 10 0 0 0-1.9 20 10 10 0 0 0 10-10 10 10 0 0 0-8.1-10zm-1.3 18a8 8 0 1 1 7.4-11.1A10 10 0 0 0 11 20z"/></svg></span>
+              Night Vision (IR)
+            </h4>
             <p>Inframerah malam otomatis</p>
           </div>
           <label class="toggle-switch" aria-label="Toggle Night Vision Inframerah">
@@ -1164,7 +1488,10 @@
 
         <div class="control-row">
           <div class="control-label">
-            <h4>Sensor Kedua Lensa</h4>
+            <h4>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg></span>
+              Sensor Kedua Lensa
+            </h4>
             <p>Mode siaga / aktif kamera</p>
           </div>
           <label class="toggle-switch" aria-label="Toggle Sensor Kedua Lensa">
@@ -1174,8 +1501,14 @@
         </div>
 
         <div style="margin-top: 1.15rem; display: flex; flex-direction: column; gap: 0.75rem;">
-          <button class="btn btn-outline" id="btnTriggerP2p">Inisialisasi P2P Stream</button>
-          <button class="btn btn-danger" id="btnRebootCam">Restart Kamera CCTV</button>
+          <button class="btn btn-outline" id="btnTriggerP2p">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></span>
+            Inisialisasi P2P Stream
+          </button>
+          <button class="btn btn-danger" id="btnRebootCam">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></span>
+            Restart Kamera CCTV
+          </button>
         </div>
       </div>
 
@@ -1212,14 +1545,75 @@
         <div id="videoModalDetails" style="font-size: 0.78rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;"></div>
         <div style="display: flex; gap: 0.5rem;">
           <a class="btn-action-sm btn-action-dl" id="videoModalDownloadBtn" href="#" download>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
             Unduh MP4
           </a>
           <button class="btn-action-sm btn-action-del" id="videoModalDeleteBtn" onclick="deleteActiveVideo()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></span>
             Hapus
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Telegram Bot Integration -->
+  <div class="modal-backdrop" id="telegramModal" role="dialog" aria-modal="true" aria-labelledby="tgHeading">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="tgHeading">Notifikasi Bot Telegram</h3>
+        <button class="modal-close" onclick="closeTelegramModal()" aria-label="Tutup Dialog">&times;</button>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Kirimkan foto snapshot garasi secara otomatis atau uji coba kirim snapshot seketika ke akun/grup Telegram Anda.
+      </div>
+      <div class="form-group">
+        <label for="tgBotToken">Bot Token Telegram (dari @BotFather)</label>
+        <input type="text" class="form-input" id="tgBotToken" placeholder="Contoh: 123456789:ABCdefGhIJKlmNoPQR">
+      </div>
+      <div class="form-group">
+        <label for="tgChatId">Chat ID Telegram (dari @userinfobot)</label>
+        <input type="text" class="form-input" id="tgChatId" placeholder="Contoh: 987654321">
+      </div>
+      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+        <button class="btn btn-solid" onclick="sendTelegramTest()">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></span>
+          Kirim Foto Snapshot Sekarang
+        </button>
+        <button class="btn btn-outline" style="width: auto;" onclick="saveTelegramSettings()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: PIN Guard (Lock Dashboard) -->
+  <div class="modal-backdrop" id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinHeading">
+    <div class="modal-card" style="max-width: 380px; text-align: center;">
+      <div class="modal-header">
+        <h3 id="pinHeading">Proteksi PIN Dashboard</h3>
+        <button class="modal-close" onclick="closePinModal()" aria-label="Tutup">&times;</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted);">Masukkan 4 digit PIN untuk verifikasi akses:</p>
+      <div class="pin-display">
+        <div class="pin-dot" id="dot0"></div>
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+      </div>
+      <div class="keypad-grid">
+        <button class="keypad-btn" onclick="pressPin('1')">1</button>
+        <button class="keypad-btn" onclick="pressPin('2')">2</button>
+        <button class="keypad-btn" onclick="pressPin('3')">3</button>
+        <button class="keypad-btn" onclick="pressPin('4')">4</button>
+        <button class="keypad-btn" onclick="pressPin('5')">5</button>
+        <button class="keypad-btn" onclick="pressPin('6')">6</button>
+        <button class="keypad-btn" onclick="pressPin('7')">7</button>
+        <button class="keypad-btn" onclick="pressPin('8')">8</button>
+        <button class="keypad-btn" onclick="pressPin('9')">9</button>
+        <button class="keypad-btn" style="font-size: 0.85rem;" onclick="clearPin()">C</button>
+        <button class="keypad-btn" onclick="pressPin('0')">0</button>
+        <button class="keypad-btn" style="font-size: 0.85rem;" onclick="backspacePin()" aria-label="Hapus Digit Terakhir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -1349,6 +1743,231 @@
       log(`Mengambil snapshot lensa ${side}.`);
     }
 
+    // --- PTZ Direction Controls ---
+    async function sendPtz(dir) {
+      log(`Mengirim perintah PTZ: ${dir.toUpperCase()}...`);
+      try {
+        const res = await fetch('/api/control/ptz', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({direction: dir})
+        });
+        const data = await res.json();
+        log(`Sinyal PTZ ${dir} diproses.`);
+      } catch (e) {
+        log(`Gagal kirim sinyal PTZ: ${e}`);
+      }
+    }
+
+    // Keyboard Arrow Keys for PTZ
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
+      if (e.key === 'ArrowUp') { e.preventDefault(); sendPtz('up'); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); sendPtz('down'); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); sendPtz('left'); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); sendPtz('right'); }
+    });
+
+    // --- Emergency Siren ---
+    async function triggerSiren() {
+      const btn = document.getElementById('btnSirenTrigger');
+      btn.classList.add('active-siren');
+      btn.innerHTML = `<span class="icon"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></span> MEMBUNYIKAN SIRINE...`;
+      log('MEMICU SIRINE ALARM PERINGATAN KAMERA!');
+      try {
+        const res = await fetch('/api/control/siren', {method: 'POST'});
+        const data = await res.json();
+        log('Perintah sirine darurat dikirim ke speaker CCTV.');
+      } catch (e) {
+        log(`Gagal bunyikan sirine: ${e}`);
+      }
+      setTimeout(() => {
+        btn.classList.remove('active-siren');
+        btn.innerHTML = `<span class="icon"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg></span> Bunyikan Sirine Alarm`;
+      }, 4000);
+    }
+
+    // --- AI Detection Controls ---
+    async function toggleAiProperty(propType, state) {
+      log(`Mengubah setelan AI [${propType}] -> ${state ? 'AKTIF' : 'NONAKTIF'}...`);
+      try {
+        await fetch('/api/control/ai', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({type: propType, value: state})
+        });
+        log(`Setelan AI [${propType}] diperbarui.`);
+      } catch (e) {
+        log(`Gagal ubah setelan AI: ${e}`);
+      }
+    }
+
+    // --- Timelapse Generator ---
+    async function triggerTimelapse() {
+      log('Membuat video timelapse dari rekaman hari ini...');
+      try {
+        const res = await fetch('/api/record/timelapse', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({lens: 'left'})
+        });
+        const data = await res.json();
+        if (data.success) {
+          log(`Video timelapse berhasil dibuat: ${data.filename}`);
+          alert(`Video timelapse berhasil dibuat: ${data.filename}!`);
+          loadRecordings();
+        } else {
+          alert(`Gagal membuat timelapse: ${data.error}`);
+        }
+      } catch (e) {
+        log(`Gagal membuat timelapse: ${e}`);
+      }
+    }
+
+    // --- Telegram Notification ---
+    const tgModal = document.getElementById('telegramModal');
+    function openTelegramModal() {
+      document.getElementById('tgBotToken').value = localStorage.getItem('cctv_tg_token') || '';
+      document.getElementById('tgChatId').value = localStorage.getItem('cctv_tg_chat_id') || '';
+      tgModal.classList.add('open');
+    }
+    function closeTelegramModal() { tgModal.classList.remove('open'); }
+    tgModal.addEventListener('click', (e) => { if (e.target === tgModal) closeTelegramModal(); });
+
+    function saveTelegramSettings() {
+      const token = document.getElementById('tgBotToken').value.trim();
+      const chat = document.getElementById('tgChatId').value.trim();
+      localStorage.setItem('cctv_tg_token', token);
+      localStorage.setItem('cctv_tg_chat_id', chat);
+      alert('Pengaturan Telegram tersimpan!');
+      closeTelegramModal();
+    }
+
+    async function sendTelegramTest() {
+      const token = document.getElementById('tgBotToken').value.trim();
+      const chat = document.getElementById('tgChatId').value.trim();
+      if (!token || !chat) return alert('Isi Token Bot dan Chat ID Telegram terlebih dahulu!');
+      log('Mengirim foto snapshot CCTV ke Telegram...');
+      try {
+        const res = await fetch('/api/telegram/test', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({bot_token: token, chat_id: chat})
+        });
+        const data = await res.json();
+        if (data.success) {
+          log('Foto snapshot berhasil terkirim ke Telegram!');
+          alert('Berhasil! Foto snapshot telah dikirim ke Telegram.');
+          closeTelegramModal();
+        } else {
+          alert('Gagal kirim ke Telegram: ' + (data.error || 'Periksa token dan chat ID'));
+        }
+      } catch (e) {
+        log('Gagal kirim Telegram: ' + e);
+      }
+    }
+
+    // --- PIN Protection Modal ---
+    const pinModal = document.getElementById('pinModal');
+    let enteredPin = '';
+    const CORRECT_PIN = '1234';
+
+    function openPinModal() {
+      enteredPin = '';
+      updatePinDisplay();
+      pinModal.classList.add('open');
+    }
+    function closePinModal() { pinModal.classList.remove('open'); }
+    pinModal.addEventListener('click', (e) => { if (e.target === pinModal) closePinModal(); });
+
+    function pressPin(digit) {
+      if (enteredPin.length < 4) {
+        enteredPin += digit;
+        updatePinDisplay();
+        if (enteredPin.length === 4) {
+          setTimeout(verifyPin, 150);
+        }
+      }
+    }
+    function clearPin() { enteredPin = ''; updatePinDisplay(); }
+    function backspacePin() { enteredPin = enteredPin.slice(0, -1); updatePinDisplay(); }
+    function updatePinDisplay() {
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`dot${i}`);
+        if (i < enteredPin.length) dot.classList.add('filled');
+        else dot.classList.remove('filled');
+      }
+    }
+    function verifyPin() {
+      if (enteredPin === CORRECT_PIN) {
+        alert('PIN Berhasil! Kunci dashboard dibuka.');
+        closePinModal();
+      } else {
+        alert('PIN Salah! Coba lagi.');
+        clearPin();
+      }
+    }
+
+    // --- 24-Hour Timeline Logic ---
+    function renderTimeline(recordings) {
+      const track = document.getElementById('timelineTrack');
+      // Clean previous segments except pointer
+      const oldSegs = track.querySelectorAll('.timeline-segment');
+      oldSegs.forEach(s => s.remove());
+
+      const now = new Date();
+      const currentPct = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 100;
+      document.getElementById('timelinePointer').style.left = `${currentPct}%`;
+
+      recordings.forEach(rec => {
+        const d = new Date(rec.timestamp * 1000);
+        const mins = d.getHours() * 60 + d.getMinutes();
+        const leftPct = (mins / 1440) * 100;
+        const widthPct = Math.max(0.6, (15 / 1440) * 100);
+
+        const seg = document.createElement('div');
+        seg.className = 'timeline-segment';
+        seg.style.left = `${leftPct}%`;
+        seg.style.width = `${widthPct}%`;
+        seg.title = `${rec.filename} (${rec.created_str})`;
+        seg.onclick = (e) => {
+          e.stopPropagation();
+          playRecording(rec);
+        };
+        track.appendChild(seg);
+      });
+    }
+
+    function handleTimelineClick(e) {
+      const rect = document.getElementById('timelineTrack').getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, clickX / rect.width));
+      const totalMinutes = Math.floor(pct * 1440);
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      const timeStr = `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}`;
+      document.getElementById('timelineSelectedTime').textContent = `Waktu dipilih: ${timeStr}`;
+      document.getElementById('timelinePointer').style.left = `${pct * 100}%`;
+
+      // Find closest recording
+      if (allRecordings.length > 0) {
+        let closest = allRecordings[0];
+        let minDiff = 99999999;
+        allRecordings.forEach(rec => {
+          const d = new Date(rec.timestamp * 1000);
+          const recMins = d.getHours() * 60 + d.getMinutes();
+          const diff = Math.abs(recMins - totalMinutes);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closest = rec;
+          }
+        });
+        if (minDiff <= 60) {
+          playRecording(closest);
+        }
+      }
+    }
+
     // --- DVR & Recording Logic ---
     let allRecordings = [];
     let activeFilter = 'all';
@@ -1446,7 +2065,7 @@
       const ind = document.getElementById('recStatusIndicator');
       if (anyRec) {
         ind.classList.add('pulse-recording');
-        document.getElementById('dvrStatusBadge').innerHTML = '<span style="color:var(--danger)">● SEDANG MEREKAM</span>';
+        document.getElementById('dvrStatusBadge').innerHTML = '<span style="color:var(--danger)">SEDANG MEREKAM</span>';
       } else {
         ind.classList.remove('pulse-recording');
         document.getElementById('dvrStatusBadge').textContent = 'DVR READY';
@@ -1462,7 +2081,7 @@
         }
       }
 
-      // 6. Settings sync (if not actively modified by user)
+      // 6. Settings sync
       const autoToggle = document.getElementById('autoRecordToggle');
       if (autoToggle && !autoToggle.matches(':focus')) {
         autoToggle.checked = !!auto.enabled;
@@ -1519,6 +2138,7 @@
         allRecordings = data.recordings || [];
         updateDvrStatus(data.status);
         renderRecordingsList();
+        renderTimeline(allRecordings);
       } catch (e) {
         console.error('Load recordings err:', e);
       }
@@ -1548,7 +2168,7 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.85rem; border: 1px dashed var(--border); border-radius: var(--radius-md); background: #000000;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.4; margin-bottom: 0.5rem;"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            <span class="icon" style="width: 32px; height: 32px; opacity: 0.4; margin-bottom: 0.5rem;"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></span>
             <div>Belum ada file rekaman ${activeFilter !== 'all' ? 'untuk filter ini' : ''}.</div>
             <div style="font-size: 0.75rem; margin-top: 0.35rem; color: var(--text-sub);">Gunakan tombol "Rekam" di atas untuk merekam klip pertama.</div>
           </div>
@@ -1571,15 +2191,15 @@
           </div>
           <div class="rec-card-actions">
             <button class="btn-action-sm btn-action-play" onclick='playRecording(${JSON.stringify(item)})' aria-label="Putar Video">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
               Putar
             </button>
             <a class="btn-action-sm btn-action-dl" href="${item.download_url}" download title="Unduh File MP4" aria-label="Unduh File MP4">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
               Unduh
             </a>
             <button class="btn-action-sm btn-action-del" onclick="deleteRecording('${item.filename}')" title="Hapus File" aria-label="Hapus File">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+              <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></span>
               Hapus
             </button>
           </div>
@@ -1595,9 +2215,12 @@
         if (data.online) {
           document.getElementById('wifiRssiVal').textContent = (data.info.ap.rssi || '-38') + ' dBm';
           document.getElementById('wifiSsidVal').textContent = data.info.ap.ssid || 'ARVY KAIRI';
-          if (data.properties && data.properties.length >= 2) {
+          if (data.properties && data.properties.length >= 8) {
             document.getElementById('powerToggle').checked = data.properties[0].value;
             document.getElementById('lightToggle').checked = data.properties[1].value;
+            document.getElementById('motionDetectToggle').checked = data.properties[5].value;
+            document.getElementById('humanDetectToggle').checked = data.properties[6].value;
+            document.getElementById('carDetectToggle').checked = data.properties[7].value;
           }
         }
       } catch (e) {

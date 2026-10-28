@@ -327,6 +327,32 @@ class RecorderManager:
         except Exception as e:
             return False, str(e)
 
+    def generate_timelapse(self, lens="left"):
+        sdir = self.config["storage_dir"]
+        recs = [r for r in self.list_recordings() if r["lens_key"] == lens]
+        if not recs:
+            return False, "Tidak ada rekaman untuk lensa ini"
+        
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_name = f"timelapse_{lens}_{ts}.mp4"
+        out_path = os.path.join(sdir, out_name)
+        
+        target_file = os.path.join(sdir, recs[0]["filename"])
+        cmd = [
+            "ffmpeg", "-y", "-i", target_file,
+            "-vf", "setpts=0.08*PTS",
+            "-an", "-c:v", "libx264", "-preset", "ultrafast",
+            "-movflags", "+faststart",
+            out_path
+        ]
+        try:
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=25)
+            if os.path.exists(out_path) and os.path.getsize(out_path) > 1000:
+                return True, out_name
+            return False, "Gagal membuat video timelapse"
+        except Exception as e:
+            return False, str(e)
+
     # Periodic background retention & disk cleaner
     def _maintenance_loop(self):
         while True:

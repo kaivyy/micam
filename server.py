@@ -140,6 +140,61 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             res = send_miio_rpc("action", {"did": DID, "siid": 2, "aiid": 2, "in": []})
             self.send_json({"success": True, "result": res})
 
+        elif parsed.path == "/api/control/siren":
+            res = send_miio_rpc("action", {"did": DID, "siid": 20, "aiid": 1, "in": []})
+            self.send_json({"success": True, "result": res})
+
+        elif parsed.path == "/api/control/ai":
+            prop_type = data.get("type", "")
+            val = bool(data.get("value", False))
+            if prop_type == "motion":
+                res = send_miio_rpc("set_properties", [{"did": DID, "siid": 5, "piid": 1, "value": val}])
+            elif prop_type == "human":
+                res = send_miio_rpc("set_properties", [{"did": DID, "siid": 8, "piid": 6, "value": val}])
+            elif prop_type == "car":
+                res = send_miio_rpc("set_properties", [{"did": DID, "siid": 8, "piid": 21, "value": val}])
+            else:
+                res = None
+            self.send_json({"success": True, "result": res, "type": prop_type, "value": val})
+
+        elif parsed.path == "/api/control/ptz":
+            direction = data.get("direction", "")
+            self.send_json({"success": True, "direction": direction})
+
+        elif parsed.path == "/api/telegram/test":
+            token = data.get("bot_token", "").strip()
+            chat_id = data.get("chat_id", "").strip()
+            if not token or not chat_id:
+                self.send_json({"success": False, "error": "Token dan Chat ID Telegram wajib diisi"})
+            else:
+                try:
+                    with urllib.request.urlopen(f"{GO2RTC_API}/api/frame.jpeg?src=cctv_garasi_kiri", timeout=6) as resp:
+                        img_bytes = resp.read()
+
+                    boundary = "----TelegramFormBoundaryCCTV789"
+                    parts = []
+                    parts.append(f"--{boundary}\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n{chat_id}\r\n".encode())
+                    parts.append(f"--{boundary}\r\nContent-Disposition: form-data; name=\"caption\"\r\n\r\n[ALERT] Notifikasi Snapshot CCTV Xiaomi CW100\nWaktu: {time.strftime('%d %b %Y %H:%M:%S')}\nStatus: Pemantauan Aktif\r\n".encode())
+                    parts.append(f"--{boundary}\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"cctv_snapshot.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n".encode() + img_bytes + b"\r\n")
+                    parts.append(f"--{boundary}--\r\n".encode())
+                    req_body = b"".join(parts)
+
+                    t_req = urllib.request.Request(
+                        f"https://api.telegram.org/bot{token}/sendPhoto",
+                        data=req_body,
+                        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+                    )
+                    with urllib.request.urlopen(t_req, timeout=12) as t_resp:
+                        t_data = json.loads(t_resp.read().decode())
+                        self.send_json({"success": True, "telegram": t_data})
+                except Exception as e:
+                    self.send_json({"success": False, "error": str(e)})
+
+        elif parsed.path == "/api/record/timelapse":
+            lens = data.get("lens", "left")
+            ok, msg = recorder.generate_timelapse(lens)
+            self.send_json({"success": ok, "filename": msg if ok else None, "error": None if ok else msg})
+
         # DVR / Recording Endpoints
         elif parsed.path == "/api/record/start":
             lens = data.get("lens", "both")
@@ -291,6 +346,9 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 {"did": DID, "siid": 2, "piid": 3},   # Nightshot
                 {"did": DID, "siid": 9, "piid": 1},   # Video Codec
                 {"did": DID, "siid": 9, "piid": 9},   # Resolution
+                {"did": DID, "siid": 5, "piid": 1},   # Motion Detection
+                {"did": DID, "siid": 8, "piid": 6},   # Human Detection
+                {"did": DID, "siid": 8, "piid": 21},  # Car Detection
             ])
             self.send_json({
                 "online": True,
