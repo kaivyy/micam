@@ -9,15 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #090d16;
-      --surface: #111827;
-      --surface-elevated: #162032;
-      --surface-hover: #1f2d44;
-      --border: rgba(255, 255, 255, 0.08);
+      --bg: #000000;
+      --surface: #000000;
+      --surface-elevated: #050505;
+      --surface-hover: #0d0d0d;
+      --border: #1a1a1a;
       --border-focus: #0284c7;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-sub: #64748b;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --text-sub: #555555;
       --accent: #10b981;
       --primary: #0284c7;
       --warning: #f59e0b;
@@ -35,6 +35,8 @@
     }
 
     html, body {
+      background-color: #000000;
+      color: var(--text);
       overflow-x: hidden;
       width: 100%;
       max-width: 100vw;
@@ -42,7 +44,7 @@
     }
 
     body {
-      background-color: var(--bg);
+      background-color: #000000;
       color: var(--text);
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
@@ -54,7 +56,7 @@
 
     /* Header Nav */
     header {
-      background: var(--surface);
+      background: #000000;
       border-bottom: 1px solid var(--border);
       padding: 0.85rem 1.75rem;
       padding-top: max(0.85rem, env(safe-area-inset-top));
@@ -98,6 +100,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #ffffff;
     }
     .brand-text p {
       font-size: 0.72rem;
@@ -119,8 +122,8 @@
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      background: #000000;
+      border: 1px solid rgba(16, 185, 129, 0.35);
       color: var(--accent);
       padding: 0.35rem 0.65rem;
       border-radius: var(--radius-sm);
@@ -148,7 +151,7 @@
     }
 
     .btn-nav {
-      background: var(--surface-elevated);
+      background: #050505;
       border: 1px solid var(--border);
       color: var(--text);
       min-height: 44px;
@@ -166,8 +169,8 @@
       touch-action: manipulation;
     }
     .btn-nav:hover {
-      background: var(--surface-hover);
-      border-color: rgba(255, 255, 255, 0.15);
+      background: #111111;
+      border-color: #333333;
     }
     .btn-nav:active {
       transform: scale(0.97);
@@ -205,6 +208,7 @@
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 1.5rem;
+      background-color: #000000;
     }
     @media (max-width: 1100px) {
       main {
@@ -220,9 +224,9 @@
       }
     }
 
-    /* Cards */
+    /* Cards - Pure Black with Crisp Definition */
     .card {
-      background: var(--surface);
+      background: #000000;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 1.25rem;
@@ -245,7 +249,7 @@
     }
 
     .monitor-box {
-      background: #04070d;
+      background: #000000;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       overflow: hidden;
@@ -254,7 +258,7 @@
     }
 
     .monitor-header {
-      background: rgba(17, 24, 39, 0.85);
+      background: #000000;
       padding: 0.5rem 0.85rem;
       display: flex;
       align-items: center;
@@ -270,6 +274,7 @@
       font-size: 0.78rem;
       font-weight: 700;
       min-width: 0;
+      color: #ffffff;
     }
     .monitor-title span:last-child {
       white-space: nowrap;
@@ -308,8 +313,8 @@
       transition: color 0.15s, background 0.15s, transform 0.1s;
       touch-action: manipulation;
     }
-    .btn-icon:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
-    .btn-icon:active { transform: scale(0.92); color: #fff; background: rgba(255, 255, 255, 0.18); }
+    .btn-icon:hover { color: #fff; background: #141414; }
+    .btn-icon:active { transform: scale(0.92); color: #fff; background: #222222; }
     .btn-icon svg { width: 18px; height: 18px; fill: currentColor; }
 
     /* Record Button in Monitor */
@@ -320,8 +325,8 @@
       padding: 0.35rem 0.65rem;
     }
     .btn-rec-monitor.is-recording {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.45);
       color: #fca5a5;
     }
     .btn-rec-monitor .rec-dot {
@@ -339,7 +344,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16/9;
-      background: #000;
+      background: #000000;
       overflow: hidden;
     }
     .video-frame-container iframe {
@@ -347,10 +352,11 @@
       height: 100%;
       border: none;
       display: block;
+      background: #000000;
     }
 
     .monitor-footer {
-      background: rgba(17, 24, 39, 0.6);
+      background: #000000;
       padding: 0.5rem 0.85rem;
       display: flex;
       align-items: center;
@@ -377,7 +383,7 @@
       .telemetry-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
     }
     .metric-cell {
-      background: var(--surface-elevated);
+      background: #050505;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 0.85rem;
@@ -400,7 +406,7 @@
     .metric-val {
       font-size: clamp(0.92rem, 3.2vw, 1.15rem);
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
       font-family: 'JetBrains Mono', monospace;
       white-space: nowrap;
       overflow: hidden;
@@ -409,7 +415,7 @@
 
     /* DVR Section Styles */
     .storage-meter {
-      background: var(--surface-elevated);
+      background: #050505;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 0.85rem 1rem;
@@ -421,13 +427,15 @@
       align-items: center;
       font-size: 0.8rem;
       margin-bottom: 0.45rem;
+      color: #ffffff;
     }
     .progress-bar {
       width: 100%;
       height: 7px;
-      background: #1e293b;
+      background: #111111;
       border-radius: 4px;
       overflow: hidden;
+      border: 1px solid #1a1a1a;
     }
     .progress-fill {
       height: 100%;
@@ -455,12 +463,12 @@
     }
 
     .select-input {
-      background: #04070d;
-      border: 1px solid var(--border);
-      color: #fff;
+      background: #000000;
+      border: 1px solid #222222;
+      color: #ffffff;
       padding: 0.65rem 0.85rem;
       border-radius: var(--radius-sm);
-      font-size: 16px; /* iOS Safari prevention */
+      font-size: 16px;
       font-family: inherit;
       outline: none;
       min-height: 44px;
@@ -473,7 +481,7 @@
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 0.75rem;
       padding: 1rem;
-      background: rgba(0, 0, 0, 0.25);
+      background: #000000;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       margin-bottom: 1.25rem;
@@ -496,7 +504,7 @@
       flex-wrap: wrap;
     }
     .pill-filter {
-      background: var(--surface-elevated);
+      background: #050505;
       border: 1px solid var(--border);
       color: var(--text-muted);
       padding: 0.4rem 0.75rem;
@@ -508,11 +516,16 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.15s, color 0.15s;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pill-filter:hover {
+      background: #111111;
+      border-color: #333333;
+      color: #ffffff;
     }
     .pill-filter.active {
       background: var(--primary);
-      color: #fff;
+      color: #ffffff;
       border-color: var(--primary);
     }
 
@@ -526,7 +539,7 @@
       padding-right: 0.25rem;
     }
     .rec-card {
-      background: var(--surface-elevated);
+      background: #050505;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 0.85rem 1rem;
@@ -537,8 +550,8 @@
       transition: border-color 0.15s, background 0.15s;
     }
     .rec-card:hover {
-      border-color: rgba(255, 255, 255, 0.18);
-      background: var(--surface-hover);
+      border-color: #333333;
+      background: #0c0c0c;
     }
     @media (max-width: 680px) {
       .rec-card {
@@ -561,7 +574,8 @@
       height: 38px;
       min-width: 38px;
       border-radius: var(--radius-sm);
-      background: rgba(2, 132, 199, 0.15);
+      background: #000000;
+      border: 1px solid var(--border);
       color: var(--primary);
       display: flex;
       align-items: center;
@@ -575,6 +589,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #ffffff;
     }
     .rec-meta p {
       font-size: 0.72rem;
@@ -588,8 +603,8 @@
       border-radius: 3px;
       margin-left: 0.4rem;
     }
-    .badge-mode-manual { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-mode-auto { background: rgba(16, 185, 129, 0.15); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-mode-manual { background: #000000; color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-mode-auto { background: #000000; color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.4); }
 
     .rec-card-actions {
       display: flex;
@@ -608,17 +623,18 @@
       align-items: center;
       justify-content: center;
       gap: 0.35rem;
-      transition: background 0.15s, transform 0.1s;
+      transition: background 0.15s, transform 0.1s, border-color 0.15s;
       border: 1px solid transparent;
       touch-action: manipulation;
+      text-decoration: none;
     }
     .btn-action-sm:active { transform: scale(0.96); }
     .btn-action-play { background: var(--primary); color: #fff; }
     .btn-action-play:hover { background: #0369a1; }
-    .btn-action-dl { background: var(--surface); border-color: var(--border); color: var(--text); }
-    .btn-action-dl:hover { background: rgba(255, 255, 255, 0.1); }
-    .btn-action-del { background: rgba(239, 68, 68, 0.12); color: var(--danger); border-color: rgba(239, 68, 68, 0.25); }
-    .btn-action-del:hover { background: rgba(239, 68, 68, 0.24); }
+    .btn-action-dl { background: #000000; border-color: #222222; color: #ffffff; }
+    .btn-action-dl:hover { background: #111111; border-color: #333333; }
+    .btn-action-del { background: #000000; color: var(--danger); border-color: rgba(239, 68, 68, 0.35); }
+    .btn-action-del:hover { background: rgba(239, 68, 68, 0.18); border-color: var(--danger); }
 
     /* Controls Deck */
     .deck-group {
@@ -647,7 +663,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid #141414;
       gap: 0.75rem;
       min-height: 48px;
     }
@@ -657,10 +673,10 @@
     .control-label {
       min-width: 0;
     }
-    .control-label h4 { font-size: 0.85rem; font-weight: 600; }
+    .control-label h4 { font-size: 0.85rem; font-weight: 600; color: #ffffff; }
     .control-label p { font-size: 0.72rem; color: var(--text-muted); }
 
-    /* Switch - with minimum 44px touch height */
+    /* Switch - Pure Black Slider */
     .toggle-switch {
       position: relative;
       display: inline-flex;
@@ -678,7 +694,8 @@
       cursor: pointer;
       width: 48px;
       height: 26px;
-      background-color: #334155;
+      background-color: #141414;
+      border: 1px solid #2a2a2a;
       transition: .2s;
       border-radius: 26px;
     }
@@ -687,14 +704,14 @@
       content: "";
       height: 20px;
       width: 20px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
+      left: 2px;
+      bottom: 2px;
+      background-color: #ffffff;
       transition: .2s;
       border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.7);
     }
-    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
     input:checked + .slider:before { transform: translateX(22px); }
 
     /* Buttons */
@@ -721,23 +738,23 @@
     .btn-solid:hover { background: #0369a1; }
     .btn-solid:active { background: #025380; }
     .btn-outline {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--text);
+      background: #000000;
+      border-color: #222222;
+      color: #ffffff;
     }
-    .btn-outline:hover { background: var(--surface-hover); border-color: rgba(255, 255, 255, 0.2); }
-    .btn-outline:active { background: var(--surface-elevated); }
+    .btn-outline:hover { background: #111111; border-color: #333333; }
+    .btn-outline:active { background: #1a1a1a; }
     .btn-danger {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: rgba(239, 68, 68, 0.3);
+      background: #000000;
+      border-color: rgba(239, 68, 68, 0.4);
       color: var(--danger);
     }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.22); }
-    .btn-danger:active { background: rgba(239, 68, 68, 0.32); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.18); border-color: var(--danger); }
+    .btn-danger:active { background: rgba(239, 68, 68, 0.28); }
 
     /* Terminal Console */
     .console-box {
-      background: #04070d;
+      background: #000000;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 0.65rem 0.85rem;
@@ -746,7 +763,7 @@
       height: 120px;
       overflow-y: auto;
       overflow-x: auto;
-      color: #cbd5e1;
+      color: #cccccc;
       word-break: break-word;
     }
     .console-line { margin-bottom: 2px; }
@@ -756,8 +773,8 @@
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.82);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.94);
+      backdrop-filter: blur(8px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -767,8 +784,8 @@
     .modal-backdrop.open { display: flex; }
 
     .modal-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: #000000;
+      border: 1px solid #222222;
       border-radius: var(--radius-lg);
       width: 100%;
       max-width: 520px;
@@ -776,7 +793,7 @@
       max-height: calc(100dvh - 2rem);
       overflow-y: auto;
       padding: 1.5rem;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95);
       -webkit-overflow-scrolling: touch;
     }
     .modal-card-video {
@@ -797,7 +814,7 @@
       border-bottom: 1px solid var(--border);
       gap: 0.5rem;
     }
-    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; color: #ffffff; }
     .modal-close {
       background: transparent;
       border: none;
@@ -814,8 +831,8 @@
       transition: color 0.15s, background 0.15s;
       touch-action: manipulation;
     }
-    .modal-close:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-    .modal-close:active { background: rgba(255, 255, 255, 0.16); }
+    .modal-close:hover { color: #fff; background: #141414; }
+    .modal-close:active { background: #222222; }
 
     .form-group {
       margin-bottom: 1rem;
@@ -829,12 +846,12 @@
     }
     .form-input {
       width: 100%;
-      background: #04070d;
-      border: 1px solid var(--border);
-      color: #fff;
+      background: #000000;
+      border: 1px solid #222222;
+      color: #ffffff;
       padding: 0.65rem 0.85rem;
       border-radius: var(--radius-sm);
-      font-size: 16px; /* iOS Safari */
+      font-size: 16px; /* iOS Safari auto-zoom prevention */
       font-family: inherit;
       outline: none;
       min-height: 44px;
@@ -857,14 +874,14 @@
       justify-content: space-between;
       padding: 0.45rem 0;
       font-size: 0.78rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid #141414;
       gap: 0.5rem;
     }
     .info-kv span:first-child { color: var(--text-muted); flex-shrink: 0; }
     .info-kv span:last-child {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
-      color: #fff;
+      color: #ffffff;
       text-align: right;
       word-break: break-all;
     }
@@ -1082,8 +1099,8 @@
         <!-- Recordings Gallery & File Manager -->
         <div class="rec-filter-bar">
           <div style="display: flex; align-items: center; gap: 0.65rem;">
-            <div style="font-size: 0.9rem; font-weight: 700;">Galeri Rekaman Video</div>
-            <span id="recCountBadge" style="font-size: 0.72rem; background: var(--surface-elevated); padding: 0.2rem 0.5rem; border-radius: 10px; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace;">0 File</span>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #ffffff;">Galeri Rekaman Video</div>
+            <span id="recCountBadge" style="font-size: 0.72rem; background: #000000; padding: 0.2rem 0.5rem; border-radius: 10px; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; color: #ffffff;">0 File</span>
           </div>
 
           <div class="filter-pills">
@@ -1187,8 +1204,8 @@
         <button class="modal-close" onclick="closeVideoModal()" aria-label="Tutup Pemutar Video">&times;</button>
       </div>
 
-      <div style="width: 100%; background: #000; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 1rem;">
-        <video id="dvrVideoPlayer" controls playsinline style="width: 100%; max-height: 65vh; display: block; outline: none;"></video>
+      <div style="width: 100%; background: #000000; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 1rem;">
+        <video id="dvrVideoPlayer" controls playsinline style="width: 100%; max-height: 65vh; display: block; outline: none; background: #000000;"></video>
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
@@ -1228,8 +1245,8 @@
         <button class="btn btn-solid" id="btnSyncGateway">Sinkronkan Ulang Gateway Stream</button>
 
         <!-- Form Input OTP Jika Diperlukan di Masa Depan -->
-        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem; margin-top: 0.25rem;">
-          <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.45rem;">Verifikasi Kode OTP Xiaomi (Jika Re-auth):</div>
+        <div style="background: #000000; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem; margin-top: 0.25rem;">
+          <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.45rem; color: #ffffff;">Verifikasi Kode OTP Xiaomi (Jika Re-auth):</div>
           <div class="otp-input-group">
             <input type="text" class="form-input" id="otpInput" placeholder="Masukkan 6 digit kode OTP" maxlength="6" inputmode="numeric">
             <button class="btn btn-solid" style="width: auto; min-width: 80px;" id="btnSubmitOtp">Kirim</button>
@@ -1520,7 +1537,7 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.85rem; border: 1px dashed var(--border); border-radius: var(--radius-md);">
+          <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.85rem; border: 1px dashed var(--border); border-radius: var(--radius-md); background: #000000;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.4; margin-bottom: 0.5rem;"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             <div>Belum ada file rekaman ${activeFilter !== 'all' ? 'untuk filter ini' : ''}.</div>
             <div style="font-size: 0.75rem; margin-top: 0.35rem; color: var(--text-sub);">Gunakan tombol "Rekam" di atas untuk merekam klip pertama.</div>
