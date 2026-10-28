@@ -947,7 +947,7 @@
               </div>
             </div>
             <div class="video-frame-container">
-              <iframe id="camLeft" src="http://192.168.1.44:1984/stream.html?src=cctv_garasi_kiri" allow="autoplay; fullscreen"></iframe>
+              <iframe id="camLeft" src="" allow="autoplay; fullscreen"></iframe>
             </div>
             <div class="monitor-footer">
               <span>Resolusi: 2304x1296 (2.5K)</span>
@@ -976,7 +976,7 @@
               </div>
             </div>
             <div class="video-frame-container">
-              <iframe id="camRight" src="http://192.168.1.44:1984/stream.html?src=cctv_garasi_kanan" allow="autoplay; fullscreen"></iframe>
+              <iframe id="camRight" src="" allow="autoplay; fullscreen"></iframe>
             </div>
             <div class="monitor-footer">
               <span>Channel: Secondary Lens</span>
@@ -1027,7 +1027,7 @@
           </div>
           <div style="margin-top: 0.45rem; font-size: 0.72rem; color: var(--text-muted); display: flex; justify-content: space-between;">
             <span id="recordingsUsageText">Total Rekaman: 0 File (0 MB)</span>
-            <span>Lokasi: /root/cctv_recordings</span>
+            <span id="lblStoragePath">Lokasi: /root/cctv_recordings</span>
           </div>
         </div>
 
@@ -1329,11 +1329,18 @@
       }
     }
 
+    function initStreams() {
+      const host = window.location.hostname || '127.0.0.1';
+      document.getElementById('camLeft').src = `http://${host}:1984/stream.html?src=cctv_garasi_kiri`;
+      document.getElementById('camRight').src = `http://${host}:1984/stream.html?src=cctv_garasi_kanan`;
+    }
+
     function reloadFrame(frameId) {
       const frame = document.getElementById(frameId);
-      const curSrc = frame.src;
+      const host = window.location.hostname || '127.0.0.1';
+      const srcName = (frameId === 'camLeft') ? 'cctv_garasi_kiri' : 'cctv_garasi_kanan';
       frame.src = 'about:blank';
-      setTimeout(() => { frame.src = curSrc; }, 150);
+      setTimeout(() => { frame.src = `http://${host}:1984/stream.html?src=${srcName}`; }, 150);
       log(`Stream ${frameId} dimuat ulang.`);
     }
 
@@ -1450,6 +1457,9 @@
         document.getElementById('storageStatsText').textContent = `${disk.free_gb} GB Bebas / ${disk.total_gb} GB (${disk.free_pct}%)`;
         document.getElementById('storageProgressFill').style.width = `${Math.min(100, Math.max(2, 100 - disk.free_pct))}%`;
         document.getElementById('recordingsUsageText').textContent = `Total Rekaman: ${disk.recordings_count} File (${disk.recordings_mb} MB)`;
+        if (config.storage_dir) {
+          document.getElementById('lblStoragePath').textContent = `Lokasi: ${config.storage_dir}`;
+        }
       }
 
       // 6. Settings sync (if not actively modified by user)
@@ -1688,6 +1698,7 @@
     });
 
     // Initializations
+    initStreams();
     fetchStatus();
     loadRecordings();
     setInterval(fetchStatus, 4000);

@@ -12,15 +12,21 @@ import urllib.request
 from urllib.parse import urlparse, parse_qs
 from Crypto.Cipher import AES
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_DIR = os.path.join(BASE_DIR, "public")
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 # Import recorder module
 from recorder import recorder
 
-CAMERA_IP = "192.168.1.11"
-CAMERA_PORT = 54321
-TOKEN_HEX = "5a757051646b6175546d4a524d38726c"
+CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.11")
+CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
+TOKEN_HEX = os.environ.get("CCTV_TOKEN_HEX", "5a757051646b6175546d4a524d38726c")
 TOKEN = bytes.fromhex(TOKEN_HEX)
-PORT = 8088
-GO2RTC_API = "http://127.0.0.1:1984"
+DID = os.environ.get("CCTV_DID", "1178517372")
+PORT = int(os.environ.get("CCTV_PORT", 8088))
+GO2RTC_API = os.environ.get("GO2RTC_API", "http://127.0.0.1:1984")
 
 def send_miio_rpc(method, params, timeout=2.5):
     hello = bytes.fromhex("21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
@@ -52,7 +58,7 @@ def send_miio_rpc(method, params, timeout=2.5):
 
 class CCTVHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory="/root/cctv_dashboard/public", **kwargs)
+        super().__init__(*args, directory=PUBLIC_DIR, **kwargs)
 
     def do_HEAD(self):
         self.do_GET()
@@ -113,25 +119,25 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
 
         if parsed.path == "/api/control/light":
             state = bool(data.get("state", False))
-            res = send_miio_rpc("set_properties", [{"did": "1178517372", "siid": 16, "piid": 1, "value": state}])
+            res = send_miio_rpc("set_properties", [{"did": DID, "siid": 16, "piid": 1, "value": state}])
             self.send_json({"success": True, "result": res, "state": state})
 
         elif parsed.path == "/api/control/power":
             state = bool(data.get("state", True))
-            res = send_miio_rpc("set_properties", [{"did": "1178517372", "siid": 2, "piid": 1, "value": state}])
+            res = send_miio_rpc("set_properties", [{"did": DID, "siid": 2, "piid": 1, "value": state}])
             self.send_json({"success": True, "result": res, "state": state})
 
         elif parsed.path == "/api/control/nightshot":
             val = int(data.get("value", 2))
-            res = send_miio_rpc("set_properties", [{"did": "1178517372", "siid": 2, "piid": 3, "value": val}])
+            res = send_miio_rpc("set_properties", [{"did": DID, "siid": 2, "piid": 3, "value": val}])
             self.send_json({"success": True, "result": res, "value": val})
 
         elif parsed.path == "/api/action/p2p":
-            res = send_miio_rpc("action", {"did": "1178517372", "siid": 9, "aiid": 1, "in": []})
+            res = send_miio_rpc("action", {"did": DID, "siid": 9, "aiid": 1, "in": []})
             self.send_json({"success": True, "result": res})
 
         elif parsed.path == "/api/action/reboot":
-            res = send_miio_rpc("action", {"did": "1178517372", "siid": 2, "aiid": 2, "in": []})
+            res = send_miio_rpc("action", {"did": DID, "siid": 2, "aiid": 2, "in": []})
             self.send_json({"success": True, "result": res})
 
         # DVR / Recording Endpoints
@@ -280,11 +286,11 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         try:
             info = send_miio_rpc("miIO.info", [])
             props = send_miio_rpc("get_properties", [
-                {"did": "1178517372", "siid": 2, "piid": 1},   # Power
-                {"did": "1178517372", "siid": 16, "piid": 1},  # Light
-                {"did": "1178517372", "siid": 2, "piid": 3},   # Nightshot
-                {"did": "1178517372", "siid": 9, "piid": 1},   # Video Codec
-                {"did": "1178517372", "siid": 9, "piid": 9},   # Resolution
+                {"did": DID, "siid": 2, "piid": 1},   # Power
+                {"did": DID, "siid": 16, "piid": 1},  # Light
+                {"did": DID, "siid": 2, "piid": 3},   # Nightshot
+                {"did": DID, "siid": 9, "piid": 1},   # Video Codec
+                {"did": DID, "siid": 9, "piid": 9},   # Resolution
             ])
             self.send_json({
                 "online": True,
@@ -318,7 +324,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 "user_id": "1778813257",
                 "email": "tadincahrancamaya@gmail.com",
                 "region": "sg",
-                "did": "1178517372",
+                "did": DID,
                 "model": "chuangmi.camera.075ae1",
                 "streams": {
                     "kiri": "cctv_garasi_kiri",
@@ -354,7 +360,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
 if __name__ == "__main__":
-    os.makedirs("/root/cctv_dashboard/public", exist_ok=True)
+    os.makedirs(PUBLIC_DIR, exist_ok=True)
     socketserver.TCPServer.allow_reuse_address = True
     server = socketserver.TCPServer(("", PORT), CCTVHandler)
     print(f"CCTV Dashboard Server listening on http://0.0.0.0:{PORT}")

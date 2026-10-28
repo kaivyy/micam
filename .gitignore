@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
+*.log
+go2rtc
+recordings/
+.env
 .DS_Store

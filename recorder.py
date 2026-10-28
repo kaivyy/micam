@@ -9,19 +9,24 @@ import subprocess
 import threading
 from datetime import datetime
 
-DEFAULT_STORAGE_DIR = "/root/cctv_recordings"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_STORAGE_DIR = os.environ.get(
+    "CCTV_STORAGE_DIR",
+    "/root/cctv_recordings" if os.path.exists("/root/cctv_recordings") else os.path.join(BASE_DIR, "recordings")
+)
 CONFIG_FILE = os.path.join(DEFAULT_STORAGE_DIR, "recorder_config.json")
+RTSP_HOST = os.environ.get("RTSP_HOST", "127.0.0.1:8554")
 
 STREAMS = {
     "left": {
         "id": "left",
         "name": "Lensa 1 (Kiri)",
-        "rtsp": "rtsp://127.0.0.1:8554/cctv_garasi_kiri"
+        "rtsp": f"rtsp://{RTSP_HOST}/cctv_garasi_kiri"
     },
     "right": {
         "id": "right",
         "name": "Lensa 2 (Kanan)",
-        "rtsp": "rtsp://127.0.0.1:8554/cctv_garasi_kanan"
+        "rtsp": f"rtsp://{RTSP_HOST}/cctv_garasi_kanan"
     }
 }
 
