@@ -698,41 +698,6 @@
       text-overflow: ellipsis;
     }
 
-    /* PTZ D-Pad Controller */
-    .ptz-card {
-      background: #050505;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-    }
-    .ptz-matrix {
-      display: grid;
-      grid-template-columns: 46px 46px 46px;
-      grid-template-rows: 46px 46px 46px;
-      gap: 6px;
-      justify-content: center;
-    }
-    .ptz-btn {
-      background: #000000;
-      border: 1px solid var(--border);
-      color: #ffffff;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      touch-action: manipulation;
-    }
-    .ptz-btn:hover { background: #141414; border-color: #333333; }
-    .ptz-btn:active { transform: scale(0.92); background: var(--primary); }
-    .ptz-btn svg { width: 18px; height: 18px; fill: currentColor; }
-
     /* Timeline 24h Bar */
     .timeline-container {
       background: #050505;
@@ -747,6 +712,8 @@
       align-items: center;
       font-size: 0.8rem;
       margin-bottom: 0.65rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
     .timeline-track {
       position: relative;
@@ -763,9 +730,13 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      background: rgba(2, 132, 199, 0.6);
-      border-left: 1px solid var(--primary);
-      border-right: 1px solid var(--primary);
+      background: rgba(16, 185, 129, 0.55);
+      border-left: 1px solid var(--accent);
+      border-right: 1px solid var(--accent);
+      transition: background 0.15s;
+    }
+    .timeline-segment:hover {
+      background: rgba(16, 185, 129, 0.85);
     }
     .timeline-pointer {
       position: absolute;
@@ -775,7 +746,16 @@
       background: var(--danger);
       box-shadow: 0 0 6px rgba(239, 68, 68, 0.9);
       pointer-events: none;
-      transition: left 0.2s ease;
+      transition: left 0.15s ease;
+    }
+    .timeline-live-marker {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--primary);
+      opacity: 0.8;
+      pointer-events: none;
     }
     .timeline-ticks {
       display: flex;
@@ -784,6 +764,17 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.65rem;
       color: var(--text-sub);
+    }
+    .timeline-feedback {
+      font-size: 0.72rem;
+      margin-top: 0.5rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: var(--radius-sm);
+      background: #080808;
+      border: 1px solid var(--border);
+      display: none;
+      align-items: center;
+      gap: 0.45rem;
     }
 
     /* DVR Storage Meter */
@@ -1415,7 +1406,7 @@
             <div class="monitor-header">
               <div class="monitor-title">
                 <span class="badge-live">LIVE</span>
-                <span>Lensa 2: PTZ Tele (Kanan)</span>
+                <span>Lensa 2: Telephoto (Kanan)</span>
               </div>
               <div class="monitor-actions">
                 <button class="btn-icon btn-rec-monitor" id="btnRecMonRight" onclick="toggleRecord('right')" title="Mulai/Stop Rekam Lensa Kanan">
@@ -1486,15 +1477,19 @@
         <!-- 24-Hour Timeline Bar (Pro NVR Scrubber) -->
         <div class="timeline-container">
           <div class="timeline-header">
-            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">
-              <span class="icon" style="color: var(--primary);"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 12.41V7h2v4.59l3.71 3.71-1.42 1.41z"/></svg></span>
-              <span>Timeline Rekaman 24 Jam</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+                <span class="icon" style="color: var(--primary);"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 12.41V7h2v4.59l3.71 3.71-1.42 1.41z"/></svg></span>
+                <span>Linimasa Rekaman 24 Jam (Hari Ini)</span>
+              </div>
+              <span id="timelineRecordStateBadge" style="font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; padding: 2px 7px; border-radius: 3px; background: #111111; color: var(--text-muted); border: 1px solid var(--border);">PEREKAM STANDBY</span>
             </div>
-            <span id="timelineSelectedTime" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted);">Klik timeline untuk memutar</span>
+            <span id="timelineSelectedTime" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted);">Pilih waktu di linimasa</span>
           </div>
-          <div class="timeline-track" id="timelineTrack" onclick="handleTimelineClick(event)">
-            <!-- Highlighted blocks will be generated here -->
-            <div class="timeline-pointer" id="timelinePointer" style="left: 0%;"></div>
+          <div class="timeline-track" id="timelineTrack" onclick="handleTimelineClick(event)" title="Klik linimasa untuk memilih waktu rekaman">
+            <!-- Segment rekaman berwarna hijau neon akan dirender di sini -->
+            <div class="timeline-live-marker" id="timelineLiveMarker" style="left: 0%;" title="Waktu Sekarang"></div>
+            <div class="timeline-pointer" id="timelinePointer" style="left: 0%;" title="Playhead"></div>
           </div>
           <div class="timeline-ticks">
             <span>00:00</span>
@@ -1506,6 +1501,10 @@
             <span>18:00</span>
             <span>21:00</span>
             <span>24:00</span>
+          </div>
+          <div class="timeline-feedback" id="timelineFeedback">
+            <span class="icon" id="timelineFeedbackIcon" style="color: var(--warning);"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></span>
+            <span id="timelineFeedbackText" style="color: var(--text);">Perekaman tidak aktif pada jam tersebut.</span>
           </div>
         </div>
 
@@ -1627,49 +1626,13 @@
           <span style="font-size: 0.72rem; font-family: 'JetBrains Mono', monospace;">Port UDP 54321 • DVR Stream Copy</span>
         </div>
         <div class="console-box" id="consoleBox">
-          <div class="console-line"><span class="console-time">[INIT]</span> Dashboard terinisialisasi. Dual camera stream, PTZ & DVR engine aktif.</div>
+          <div class="console-line"><span class="console-time">[INIT]</span> Dashboard terinisialisasi. Dual camera stream & DVR engine aktif.</div>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Interactive Hardware Control Deck & PTZ -->
+    <!-- Right Column: Interactive Hardware Control Deck -->
     <div class="deck-group">
-      <!-- PTZ Directional Controller for Lens 2 -->
-      <div class="card" id="ptzSection">
-        <div class="group-header">
-          <span>Kontrol PTZ (Lensa 2)</span>
-          <span style="font-size: 0.7rem; color: var(--text-muted);">Pan & Tilt</span>
-        </div>
-        <div class="ptz-card">
-          <div class="ptz-matrix">
-            <div></div>
-            <button class="ptz-btn" onclick="sendPtz('up')" title="Putar Atas" aria-label="Putar Atas">
-              <svg viewBox="0 0 24 24"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
-            </button>
-            <div></div>
-
-            <button class="ptz-btn" onclick="sendPtz('left')" title="Putar Kiri" aria-label="Putar Kiri">
-              <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
-            </button>
-            <button class="ptz-btn" onclick="sendPtz('center')" title="Reset / Kalibrasi Posisi" aria-label="Reset Posisi">
-              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            </button>
-            <button class="ptz-btn" onclick="sendPtz('right')" title="Putar Kanan" aria-label="Putar Kanan">
-              <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </button>
-
-            <div></div>
-            <button class="ptz-btn" onclick="sendPtz('down')" title="Putar Bawah" aria-label="Putar Bawah">
-              <svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
-            </button>
-            <div></div>
-          </div>
-          <div style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">
-            Gunakan tombol panah atau D-pad untuk mengarahkan lensa sekunder
-          </div>
-        </div>
-      </div>
-
       <!-- Emergency Siren / Sound Alarm -->
       <div class="card" id="sirenSection">
         <div class="group-header">
@@ -1936,11 +1899,11 @@
       </span>
       <span class="bottom-nav-label">Live</span>
     </button>
-    <button class="bottom-nav-item" onclick="scrollToSection('ptzSection', this)" aria-label="Kontrol Arah PTZ">
+    <button class="bottom-nav-item" onclick="scrollToSection('sirenSection', this)" aria-label="Sirine & Alarm">
       <span class="bottom-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 2L8 6h3v4H7V7L3 11l4 4v-3h4v4H8l4 4 4-4h-3v-4h4v3l4-4-4-4v3h-4V6h3l-4-4z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
       </span>
-      <span class="bottom-nav-label">PTZ</span>
+      <span class="bottom-nav-label">Sirine</span>
     </button>
     <button class="bottom-nav-item" onclick="scrollToSection('dvrSection', this)" aria-label="Rekaman DVR & Linimasa">
       <span class="bottom-nav-icon">
@@ -2187,31 +2150,6 @@
       log(`Mengambil snapshot lensa ${side}.`);
     }
 
-    // --- PTZ Direction Controls ---
-    async function sendPtz(dir) {
-      log(`Mengirim perintah PTZ: ${dir.toUpperCase()}...`);
-      try {
-        const res = await fetch('/api/control/ptz', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({direction: dir})
-        });
-        const data = await res.json();
-        log(`Sinyal PTZ ${dir} diproses.`);
-      } catch (e) {
-        log(`Gagal kirim sinyal PTZ: ${e}`);
-      }
-    }
-
-    // Keyboard Arrow Keys for PTZ
-    window.addEventListener('keydown', (e) => {
-      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
-      if (e.key === 'ArrowUp') { e.preventDefault(); sendPtz('up'); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); sendPtz('down'); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); sendPtz('left'); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); sendPtz('right'); }
-    });
-
     // --- Emergency Siren ---
     async function triggerSiren() {
       const btn = document.getElementById('btnSirenTrigger');
@@ -2355,28 +2293,49 @@
     // --- 24-Hour Timeline Logic ---
     function renderTimeline(recordings) {
       const track = document.getElementById('timelineTrack');
-      // Clean previous segments except pointer
+      // Clean previous segments except pointer & live marker
       const oldSegs = track.querySelectorAll('.timeline-segment');
       oldSegs.forEach(s => s.remove());
 
       const now = new Date();
-      const currentPct = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 100;
-      document.getElementById('timelinePointer').style.left = `${currentPct}%`;
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const currentPct = (nowMinutes / 1440) * 100;
+
+      const liveMarker = document.getElementById('timelineLiveMarker');
+      if (liveMarker) liveMarker.style.left = `${currentPct}%`;
+
+      // Update state badge
+      const isCurrentlyRecording = dvrStatus && (
+        (dvrStatus.manual && ((dvrStatus.manual.left && dvrStatus.manual.left.active) || (dvrStatus.manual.right && dvrStatus.manual.right.active))) ||
+        (dvrStatus.auto && dvrStatus.auto.enabled)
+      );
+      const stateBadge = document.getElementById('timelineRecordStateBadge');
+      if (stateBadge) {
+        if (isCurrentlyRecording) {
+          stateBadge.innerHTML = '<span style="color:var(--danger);font-weight:700;">● SEDANG MEREKAM</span>';
+          stateBadge.style.borderColor = 'rgba(239, 68, 68, 0.45)';
+        } else {
+          stateBadge.innerHTML = '<span style="color:var(--text-muted);">○ PEREKAM STANDBY (TIDAK MEREKAM)</span>';
+          stateBadge.style.borderColor = 'var(--border)';
+        }
+      }
 
       recordings.forEach(rec => {
         const d = new Date(rec.timestamp * 1000);
         const mins = d.getHours() * 60 + d.getMinutes();
         const leftPct = (mins / 1440) * 100;
-        const widthPct = Math.max(0.6, (15 / 1440) * 100);
+        const widthPct = Math.max(0.8, (15 / 1440) * 100);
 
         const seg = document.createElement('div');
         seg.className = 'timeline-segment';
         seg.style.left = `${leftPct}%`;
         seg.style.width = `${widthPct}%`;
-        seg.title = `${rec.filename} (${rec.created_str})`;
+        seg.title = `Rekaman Tersedia: ${rec.created_str} • ${rec.lens}`;
         seg.onclick = (e) => {
           e.stopPropagation();
           playRecording(rec);
+          document.getElementById('timelineSelectedTime').innerHTML = `<span style="color:var(--accent);">Memutar: ${d.toTimeString().slice(0,5)} • ${rec.lens}</span>`;
+          hideTimelineFeedback();
         };
         track.appendChild(seg);
       });
@@ -2390,26 +2349,61 @@
       const h = Math.floor(totalMinutes / 60);
       const m = totalMinutes % 60;
       const timeStr = `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}`;
-      document.getElementById('timelineSelectedTime').textContent = `Waktu dipilih: ${timeStr}`;
+
       document.getElementById('timelinePointer').style.left = `${pct * 100}%`;
 
-      // Find closest recording
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+      // Cek apakah waktu yang diklik berada di masa depan
+      if (totalMinutes > nowMinutes) {
+        document.getElementById('timelineSelectedTime').innerHTML = `<span style="color:var(--text-muted);">${timeStr} (Masa Depan)</span>`;
+        showTimelineFeedback('warning', `Waktu ${timeStr} belum terjadi. Belum ada rekaman.`);
+        return;
+      }
+
+      // Cek apakah ada rekaman nyata yang mencakup jam/menit ini
+      let foundRec = null;
       if (allRecordings.length > 0) {
-        let closest = allRecordings[0];
-        let minDiff = 99999999;
         allRecordings.forEach(rec => {
           const d = new Date(rec.timestamp * 1000);
           const recMins = d.getHours() * 60 + d.getMinutes();
-          const diff = Math.abs(recMins - totalMinutes);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closest = rec;
+          if (totalMinutes >= recMins && totalMinutes <= recMins + 15) {
+            foundRec = rec;
           }
         });
-        if (minDiff <= 60) {
-          playRecording(closest);
+      }
+
+      if (foundRec) {
+        document.getElementById('timelineSelectedTime').innerHTML = `<span style="color:var(--accent);font-weight:700;">${timeStr} • Ada Rekaman (${foundRec.lens})</span>`;
+        showTimelineFeedback('success', `Memutar rekaman ${foundRec.filename} (${foundRec.created_str}).`);
+        playRecording(foundRec);
+      } else {
+        document.getElementById('timelineSelectedTime').innerHTML = `<span style="color:var(--text-muted);">${timeStr} • Tidak Ada Rekaman</span>`;
+        showTimelineFeedback('warning', `Tidak ada rekaman pada jam ${timeStr} karena tombol rekam sedang OFF saat itu. CCTV hanya menyimpan rekaman jika tombol rekam manual atau fitur otomatis diaktifkan.`);
+      }
+    }
+
+    function showTimelineFeedback(type, text) {
+      const fb = document.getElementById('timelineFeedback');
+      const icon = document.getElementById('timelineFeedbackIcon');
+      const txt = document.getElementById('timelineFeedbackText');
+      if (fb && txt) {
+        fb.style.display = 'flex';
+        txt.textContent = text;
+        if (type === 'success') {
+          fb.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          icon.style.color = 'var(--accent)';
+        } else {
+          fb.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+          icon.style.color = 'var(--warning)';
         }
       }
+    }
+
+    function hideTimelineFeedback() {
+      const fb = document.getElementById('timelineFeedback');
+      if (fb) fb.style.display = 'none';
     }
 
     // --- DVR & Recording Logic ---
@@ -2790,7 +2784,7 @@
         });
       }, { rootMargin: '-20% 0px -70% 0px' });
 
-      ['liveSection', 'ptzSection', 'dvrSection'].forEach(id => {
+      ['liveSection', 'dvrSection', 'sirenSection'].forEach(id => {
         const el = document.getElementById(id);
         if (el) navObserver.observe(el);
       });

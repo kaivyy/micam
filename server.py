@@ -158,8 +158,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"success": True, "result": res, "type": prop_type, "value": val})
 
         elif parsed.path == "/api/control/ptz":
-            direction = data.get("direction", "")
-            self.send_json({"success": True, "direction": direction})
+            self.send_json({"success": False, "message": "Kamera Xiaomi CW100 bertipe Fixed Dual-Lens (tanpa motor mekanis PTZ)"})
 
         elif parsed.path == "/api/telegram/test":
             token = data.get("bot_token", "").strip()

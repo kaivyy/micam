@@ -23,11 +23,8 @@
 
 - **Dual-Lens Live Streaming Simultan (~200ms Latency):**
   - **Lensa 1:** Sensor Utama *Wide Angle* (2.5K / HD)
-  - **Lensa 2:** Sensor Sekunder *PTZ Telephoto* (2.5K / HD)
+  - **Lensa 2:** Sensor Sekunder *Telephoto Long-Range* (2.5K / HD)
   - Streaming menggunakan teknologi **WebRTC & MSE** via gateway lokal, menghasilkan latensi sangat minim tanpa buffering cloud.
-- **PTZ Direction Controller & Keyboard Navigation:**
-  - Navigasi D-Pad interaktif (Atas, Bawah, Kiri, Kanan, Center/Reset) khusus Lensa 2.
-  - Mendukung kontrol langsung melalui keyboard (tombol panah dan Spacebar).
 - **Emergency Siren / Alarm Suara Darurat:**
   - Memicu sirene buzzer hardware bawaan kamera seketika untuk mengusir penyusup atau peringatan bahaya di lokasi.
   - Dilengkapi animasi strobo visual pada dashboard saat aktif.
@@ -75,7 +72,7 @@ Seluruh komponen dirancang **berdikari penuh (*self-contained*)** di dalam repos
 flowchart TD
     subgraph Xiaomi_Hardware ["Kamera CCTV Xiaomi CW100"]
         CAM_L1["Lensa 1 (Wide Angle)"]
-        CAM_L2["Lensa 2 (PTZ Tele)"]
+        CAM_L2["Lensa 2 (Telephoto)"]
         CAM_RPC["MIIO Protocol (UDP 54321 / AES-128)"]
     end
 
@@ -176,7 +173,7 @@ Stream video RTSP lokal dapat langsung dihubungkan ke software NVR seperti **Fri
 | Lensa Kamera | Endpoint RTSP (Lokal) | Endpoint WebRTC / Browser |
 | :--- | :--- | :--- |
 | **Lensa 1: Wide Angle (Kiri)** | `rtsp://<IP_SERVER>:8554/cctv_garasi_kiri` | `http://<IP_SERVER>:1984/stream.html?src=cctv_garasi_kiri` |
-| **Lensa 2: PTZ Tele (Kanan)** | `rtsp://<IP_SERVER>:8554/cctv_garasi_kanan` | `http://<IP_SERVER>:1984/stream.html?src=cctv_garasi_kanan` |
+| **Lensa 2: Telephoto (Kanan)** | `rtsp://<IP_SERVER>:8554/cctv_garasi_kanan` | `http://<IP_SERVER>:1984/stream.html?src=cctv_garasi_kanan` |
 
 ---
 
