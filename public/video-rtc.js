@@ -239,8 +239,13 @@ export class VideoRTC extends HTMLElement {
     oninit() {
         this.video = document.createElement('video');
         this.video.controls = false;
+        this.video.autoplay = true;
         this.video.playsInline = true;
         this.video.preload = 'auto';
+        this.video.muted = true;
+        this.video.defaultMuted = true;
+        this.video.setAttribute('playsinline', '');
+        this.video.setAttribute('webkit-playsinline', '');
 
         this.video.style.display = 'block'; // fix bottom margin 4px
         this.video.style.width = '100%';
@@ -601,6 +606,17 @@ export class VideoRTC extends HTMLElement {
                 rtcPriority += isH265Supported ? 0x240 : 0x220;
             }
             if (stream.getAudioTracks().length > 0) rtcPriority += 0x102;
+
+            if (this.media.includes('video') && stream.getVideoTracks().length === 0) {
+                // If video was requested but WebRTC has no video track (audio only),
+                // do not let WebRTC hijack the player over MSE or video streams.
+                this.pcState = WebSocket.CLOSED;
+                if (this.pc) {
+                    this.pc.close();
+                    this.pc = null;
+                }
+                return;
+            }
 
             if (this.mseCodecs.includes('hvc1.')) msePriority += 0x230;
             if (this.mseCodecs.includes('avc1.')) msePriority += 0x210;

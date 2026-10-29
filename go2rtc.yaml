@@ -1,5 +1,6 @@
 api:
   listen: ":1984"
+  origin: "*"
 
 rtsp:
   listen: ":8554"
@@ -14,11 +15,13 @@ streams:
   # Lensa Kiri (Primary / Wide Angle)
   cctv_garasi_kiri:
     - xiaomi://1778813257:sg@192.168.1.11?did=1178517372&model=chuangmi.camera.075ae1
+    - ffmpeg:cctv_garasi_kiri#video=h264
   cctv_garasi_left:
     - cctv_garasi_kiri
 
   # Lensa Kanan (Secondary / PTZ Lens)
   cctv_garasi_kanan:
     - xiaomi://1778813257:sg@192.168.1.11?did=1178517372&model=chuangmi.camera.075ae1&channel=2
+    - ffmpeg:cctv_garasi_kanan#video=h264
   cctv_garasi_right:
     - cctv_garasi_kanan
