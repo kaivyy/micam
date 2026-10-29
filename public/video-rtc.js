@@ -254,6 +254,7 @@ export class VideoRTC extends HTMLElement {
         this.appendChild(this.video);
 
         this.video.addEventListener('error', ev => {
+            if (!this.video.src && !this.video.srcObject) return; // ignore expected reset
             const err = this.video.error;
             // https://developer.mozilla.org/en-US/docs/Web/API/MediaError/code
             const MEDIA_ERRORS = {
@@ -343,7 +344,7 @@ export class VideoRTC extends HTMLElement {
             this.pc = null;
         }
 
-        this.video.src = '';
+        this.video.removeAttribute('src');
         this.video.srcObject = null;
     }
 
