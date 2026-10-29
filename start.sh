@@ -50,7 +50,8 @@ fi
 echo "[*] Memeriksa status go2rtc gateway..."
 if ! pgrep -f "go2rtc.*go2rtc.yaml" > /dev/null; then
     echo "    Menjalankan go2rtc gateway..."
-    "$GO2RTC_BIN" -c "$DIR/go2rtc.yaml" > "$DIR/go2rtc.log" 2>&1 &
+    nohup "$GO2RTC_BIN" -c "$DIR/go2rtc.yaml" > "$DIR/go2rtc.log" 2>&1 </dev/null &
+    disown
     sleep 1
 else
     echo "    go2rtc gateway sudah aktif."
@@ -58,9 +59,10 @@ fi
 
 # 5. Jalankan server dashboard jika belum berjalan
 echo "[*] Memeriksa status CCTV Dashboard Server..."
-if ! pgrep -f "server.py" > /dev/null; then
+if ! pgrep -f "$DIR/server.py" > /dev/null; then
     echo "    Menjalankan CCTV Dashboard Server di port 8088..."
-    PYTHONPATH="$DIR" python3 "$DIR/server.py" > "$DIR/server.log" 2>&1 &
+    PYTHONPATH="$DIR" nohup python3 -u "$DIR/server.py" > "$DIR/server.log" 2>&1 </dev/null &
+    disown
     sleep 1
 else
     echo "    CCTV Dashboard Server sudah aktif."
