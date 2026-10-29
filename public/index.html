@@ -291,7 +291,87 @@
         padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important;
       }
       main {
-        padding-bottom: 0.5rem !important;
+        padding: 0.5rem 0.35rem 0.5rem !important;
+        gap: 0.75rem !important;
+      }
+
+      /* Unbox liveSection so video monitors stretch to maximum width */
+      #liveSection {
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+      }
+
+      .viewports-grid {
+        gap: 0.65rem;
+      }
+
+      .monitor-box {
+        border-radius: var(--radius-sm);
+        border: 1px solid #1a1a1a;
+      }
+
+      .monitor-header {
+        padding: 0.35rem 0.55rem;
+        min-height: 40px;
+      }
+
+      .monitor-title {
+        font-size: 0.75rem;
+        gap: 0.4rem;
+      }
+
+      .badge-live {
+        font-size: 0.6rem;
+        padding: 0.12rem 0.35rem;
+      }
+
+      .btn-icon {
+        min-width: 38px;
+        min-height: 38px;
+        padding: 6px;
+      }
+
+      .monitor-footer {
+        padding: 0.35rem 0.55rem;
+        font-size: 0.65rem;
+      }
+
+      /* Baseline Mobile Video Aspect Ratio */
+      .video-frame-container {
+        aspect-ratio: 16/9;
+        min-height: 220px;
+      }
+
+      /* Mode Besar on Mobile */
+      .viewports-grid.size-expanded .video-frame-container {
+        aspect-ratio: unset;
+        height: 52vh;
+        min-height: 320px;
+      }
+
+      /* Focused Single Lens on Mobile */
+      .monitor-box.is-single-lens .video-frame-container {
+        min-height: 250px;
+      }
+      .viewports-grid.size-expanded .monitor-box.is-single-lens .video-frame-container {
+        height: 58vh;
+        min-height: 360px;
+      }
+
+      .viewports-control-bar {
+        padding: 0 0.15rem;
+        gap: 0.4rem;
+      }
+
+      .view-pill {
+        padding: 0.35rem 0.55rem;
+        font-size: 0.72rem;
+      }
+
+      .view-size-btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.72rem;
       }
     }
 
@@ -516,6 +596,162 @@
       .card {
         padding: 0.95rem;
         border-radius: var(--radius-md);
+      }
+    }
+
+    /* Viewports Control & Size Switcher Bar */
+    .viewports-control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .lens-switcher-group {
+      display: inline-flex;
+      align-items: center;
+      background: #080808;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+    .view-pill {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.65rem;
+      border-radius: calc(var(--radius-sm) - 2px);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-height: 34px;
+      touch-action: manipulation;
+      transition: all 0.15s ease;
+    }
+    .view-pill:hover {
+      color: #fff;
+      background: #141414;
+    }
+    .view-pill.active {
+      color: #fff;
+      background: #202020;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    }
+    .view-pill .icon svg {
+      width: 14px;
+      height: 14px;
+    }
+    .view-size-group {
+      display: inline-flex;
+      align-items: center;
+    }
+    .view-size-btn {
+      background: #080808;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-height: 36px;
+      touch-action: manipulation;
+      transition: all 0.15s ease;
+    }
+    .view-size-btn:hover {
+      color: #fff;
+      border-color: #333333;
+      background: #121212;
+    }
+    .view-size-btn.active {
+      color: var(--accent);
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .view-size-btn .icon svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Single Lens Focus View */
+    .monitor-box.is-single-lens {
+      grid-column: 1 / -1;
+    }
+
+    /* Size Expanded (Desktop & Tablet) */
+    .viewports-grid.size-expanded {
+      grid-template-columns: 1fr;
+    }
+    .viewports-grid.size-expanded .video-frame-container {
+      aspect-ratio: 16/9;
+      min-height: 440px;
+    }
+
+    /* Native Fullscreen Enhancement */
+    :fullscreen, :-webkit-full-screen {
+      background: #000000 !important;
+    }
+    .monitor-box:fullscreen,
+    .monitor-box:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #000000 !important;
+      z-index: 999999 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    .monitor-box:fullscreen .video-frame-container,
+    .monitor-box:-webkit-full-screen .video-frame-container {
+      flex: 1 1 0% !important;
+      width: 100% !important;
+      height: 100% !important;
+      aspect-ratio: unset !important;
+      background: #000000 !important;
+    }
+    .monitor-box:fullscreen .monitor-header,
+    .monitor-box:-webkit-full-screen .monitor-header {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 10 !important;
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%) !important;
+      border-bottom: none !important;
+      padding: max(0.5rem, env(safe-area-inset-top)) 1rem 1rem 1rem !important;
+    }
+    .monitor-box:fullscreen .monitor-footer,
+    .monitor-box:-webkit-full-screen .monitor-footer {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) and (orientation: landscape) {
+      .viewports-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .monitor-box.is-single-lens {
+        grid-column: 1 / -1;
+      }
+      .monitor-box.is-single-lens .video-frame-container {
+        height: calc(100vh - 120px);
+        min-height: 260px;
+        aspect-ratio: unset;
       }
     }
 
@@ -1370,10 +1606,35 @@
     <!-- Left Column: Video Viewports, DVR Manager & Telemetry -->
     <div style="display: flex; flex-direction: column; gap: 1.25rem;">
       <div class="card" id="liveSection">
+        <!-- Viewports Control & Size Switcher Bar -->
+        <div class="viewports-control-bar">
+          <div class="lens-switcher-group" role="tablist" aria-label="Pilih Tampilan Lensa">
+            <button class="view-pill active" id="btnViewBoth" onclick="switchLensView('both')" title="Tampilkan Kedua Lensa Bersamaan">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 5h7v14H4V5zm9 0h7v14h-7V5z"/></svg></span>
+              <span class="view-pill-text">Kedua Lensa</span>
+            </button>
+            <button class="view-pill" id="btnViewLeft" onclick="switchLensView('left')" title="Fokus Lensa 1 (Kiri) - Tampilan Penuh">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8z"/></svg></span>
+              <span class="view-pill-text">Lensa Kiri</span>
+            </button>
+            <button class="view-pill" id="btnViewRight" onclick="switchLensView('right')" title="Fokus Lensa 2 (Kanan) - Tampilan Penuh">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3 14h-2V8h2v8z"/></svg></span>
+              <span class="view-pill-text">Lensa Kanan</span>
+            </button>
+          </div>
+
+          <div class="view-size-group">
+            <button class="view-size-btn" id="btnToggleSize" onclick="toggleVideoSize()" title="Perbesar / Normalisasi Ukuran Video">
+              <span class="icon" id="iconSizeState"><svg viewBox="0 0 24 24"><path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z"/></svg></span>
+              <span id="txtSizeState">Mode Besar</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Dual Lens Grid -->
         <div class="viewports-grid">
           <!-- Monitor 1: Kamera Kiri -->
-          <div class="monitor-box">
+          <div class="monitor-box" id="monBoxLeft">
             <div class="monitor-header">
               <div class="monitor-title">
                 <span class="badge-live">LIVE</span>
@@ -1390,6 +1651,9 @@
                 <button class="btn-icon" onclick="takeSnapshot('kiri')" title="Ambil Foto Snapshot" aria-label="Ambil Snapshot Lensa Kiri">
                   <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
                 </button>
+                <button class="btn-icon" onclick="toggleMonitorFullscreen('monBoxLeft')" title="Layar Penuh (Fullscreen)" aria-label="Layar Penuh Lensa Kiri">
+                  <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                </button>
               </div>
             </div>
             <div class="video-frame-container">
@@ -1402,7 +1666,7 @@
           </div>
 
           <!-- Monitor 2: Kamera Kanan -->
-          <div class="monitor-box">
+          <div class="monitor-box" id="monBoxRight">
             <div class="monitor-header">
               <div class="monitor-title">
                 <span class="badge-live">LIVE</span>
@@ -1418,6 +1682,9 @@
                 </button>
                 <button class="btn-icon" onclick="takeSnapshot('kanan')" title="Ambil Foto Snapshot" aria-label="Ambil Snapshot Lensa Kanan">
                   <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                </button>
+                <button class="btn-icon" onclick="toggleMonitorFullscreen('monBoxRight')" title="Layar Penuh (Fullscreen)" aria-label="Layar Penuh Lensa Kanan">
+                  <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                 </button>
               </div>
             </div>
@@ -2058,6 +2325,75 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeMobileDrawer();
     });
+
+    // --- Mobile & Responsive Video Viewport Enhancements ---
+    let currentLensView = 'both';
+    let isExpandedSize = false;
+
+    function switchLensView(mode) {
+      currentLensView = mode;
+      const leftBox = document.getElementById('monBoxLeft');
+      const rightBox = document.getElementById('monBoxRight');
+      const btnBoth = document.getElementById('btnViewBoth');
+      const btnLeft = document.getElementById('btnViewLeft');
+      const btnRight = document.getElementById('btnViewRight');
+
+      if (btnBoth) btnBoth.classList.toggle('active', mode === 'both');
+      if (btnLeft) btnLeft.classList.toggle('active', mode === 'left');
+      if (btnRight) btnRight.classList.toggle('active', mode === 'right');
+
+      if (mode === 'both') {
+        if (leftBox) { leftBox.style.display = ''; leftBox.classList.remove('is-single-lens'); }
+        if (rightBox) { rightBox.style.display = ''; rightBox.classList.remove('is-single-lens'); }
+      } else if (mode === 'left') {
+        if (leftBox) { leftBox.style.display = ''; leftBox.classList.add('is-single-lens'); }
+        if (rightBox) { rightBox.style.display = 'none'; rightBox.classList.remove('is-single-lens'); }
+      } else if (mode === 'right') {
+        if (leftBox) { leftBox.style.display = 'none'; leftBox.classList.remove('is-single-lens'); }
+        if (rightBox) { rightBox.style.display = ''; rightBox.classList.add('is-single-lens'); }
+      }
+      log(`Tampilan lensa diubah ke: ${mode === 'both' ? 'Kedua Lensa' : (mode === 'left' ? 'Lensa Kiri' : 'Lensa Kanan')}`);
+    }
+
+    function toggleVideoSize() {
+      isExpandedSize = !isExpandedSize;
+      const grid = document.querySelector('.viewports-grid');
+      const btn = document.getElementById('btnToggleSize');
+      const txt = document.getElementById('txtSizeState');
+
+      if (grid) grid.classList.toggle('size-expanded', isExpandedSize);
+      if (btn) btn.classList.toggle('active', isExpandedSize);
+      if (txt) txt.textContent = isExpandedSize ? 'Mode Standar' : 'Mode Besar';
+      log(`Ukuran video diubah ke: ${isExpandedSize ? 'Mode Besar' : 'Mode Standar'}`);
+    }
+
+    function toggleMonitorFullscreen(boxId) {
+      const el = document.getElementById(boxId);
+      if (!el) return;
+
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+      if (!isFs) {
+        if (el.requestFullscreen) {
+          el.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (el.mozRequestFullScreen) {
+          el.mozRequestFullScreen();
+        } else if (el.msRequestFullscreen) {
+          el.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    }
     const consoleBox = document.getElementById('consoleBox');
     function log(msg) {
       const now = new Date().toTimeString().split(' ')[0];
