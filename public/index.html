@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="/fsr-upscaler.js?v=20261030_05"></script>
-  <script type="module" src="/video-rtc.js?v=20261030_05"></script>
+  <script type="module" src="/video-rtc.js?v=20261030_06"></script>
   <style>
     :root {
       --bg: #000000;
@@ -4308,6 +4308,21 @@
       }
     }
 
+    function tickLocalRecordingTimer() {
+      if (!dvrStatus || !dvrStatus.manual) return;
+      let updated = false;
+      const nowSec = Date.now() / 1000;
+      ['left', 'right'].forEach(l => {
+        if (dvrStatus.manual[l] && dvrStatus.manual[l].active && dvrStatus.manual[l].started_at) {
+          dvrStatus.manual[l].duration_sec = Math.max(0, Math.floor(nowSec - dvrStatus.manual[l].started_at));
+          updated = true;
+        }
+      });
+      if (updated) {
+        updateDvrStatus(dvrStatus);
+      }
+    }
+
     async function fetchRecordStatus() {
       try {
         const res = await fetch('/api/record/status');
@@ -5037,9 +5052,44 @@
     checkFirstRunSetup();
     fetchStatus();
     loadRecordings();
-    setInterval(fetchStatus, 4000);
-    setInterval(fetchRecordStatus, 1500); // Poll recording timers smoothly
-    setInterval(pingLoop, 2000);
+    fetchRecordStatus();
+
+    let statusPollInterval = null;
+    let dvrPollInterval = null;
+    let pingPollInterval = null;
+    let localRecTickerInterval = null;
+
+    function startDashboardPolling() {
+      stopDashboardPolling();
+      statusPollInterval = setInterval(fetchStatus, 8000);
+      dvrPollInterval = setInterval(fetchRecordStatus, 8000);
+      pingPollInterval = setInterval(pingLoop, 3000);
+      localRecTickerInterval = setInterval(tickLocalRecordingTimer, 1000);
+    }
+
+    function stopDashboardPolling() {
+      if (statusPollInterval) clearInterval(statusPollInterval);
+      if (dvrPollInterval) clearInterval(dvrPollInterval);
+      if (pingPollInterval) clearInterval(pingPollInterval);
+      if (localRecTickerInterval) clearInterval(localRecTickerInterval);
+      statusPollInterval = null;
+      dvrPollInterval = null;
+      pingPollInterval = null;
+      localRecTickerInterval = null;
+    }
+
+    startDashboardPolling();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopDashboardPolling();
+      } else {
+        fetchStatus();
+        fetchRecordStatus();
+        pingLoop();
+        startDashboardPolling();
+      }
+    });
 
     // Highlight active bottom nav item on scroll
     if ('IntersectionObserver' in window) {

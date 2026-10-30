@@ -8,6 +8,7 @@ import time
 import os
 import sys
 import shutil
+import threading
 import urllib.request
 from urllib.parse import urlparse, parse_qs
 from Crypto.Cipher import AES
@@ -48,6 +49,13 @@ XIAOMI_USER_ID = os.environ.get("XIAOMI_USER_ID", "-")
 XIAOMI_USER_EMAIL = os.environ.get("XIAOMI_USER_EMAIL", "Connected Account")
 STREAM_LEFT = os.environ.get("CCTV_STREAM_LEFT", "cctv_lensa_kiri")
 STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
+
+_status_cache = {"data": None, "timestamp": 0}
+_status_lock = threading.Lock()
+
+def invalidate_status_cache():
+    with _status_lock:
+        _status_cache["timestamp"] = 0
 
 def refresh_runtime_config():
     global CAMERA_IP, CAMERA_PORT, TOKEN_HEX, TOKEN, DID, CCTV_NAME, XIAOMI_USER_ID, XIAOMI_USER_EMAIL
@@ -176,16 +184,19 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         if parsed.path == "/api/control/light":
             state = bool(data.get("state", False))
             res = send_miio_rpc("set_properties", [{"did": DID, "siid": 16, "piid": 1, "value": state}])
+            invalidate_status_cache()
             self.send_json({"success": True, "result": res, "state": state})
 
         elif parsed.path == "/api/control/power":
             state = bool(data.get("state", True))
             res = send_miio_rpc("set_properties", [{"did": DID, "siid": 2, "piid": 1, "value": state}])
+            invalidate_status_cache()
             self.send_json({"success": True, "result": res, "state": state})
 
         elif parsed.path == "/api/control/nightshot":
             val = int(data.get("value", 2))
             res = send_miio_rpc("set_properties", [{"did": DID, "siid": 2, "piid": 3, "value": val}])
+            invalidate_status_cache()
             self.send_json({"success": True, "result": res, "value": val})
 
         elif parsed.path == "/api/action/p2p":
@@ -194,6 +205,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
 
         elif parsed.path == "/api/action/reboot":
             res = send_miio_rpc("action", {"did": DID, "siid": 2, "aiid": 2, "in": []})
+            invalidate_status_cache()
             self.send_json({"success": True, "result": res})
 
         elif parsed.path == "/api/control/siren":
@@ -211,6 +223,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 res = send_miio_rpc("set_properties", [{"did": DID, "siid": 8, "piid": 21, "value": val}])
             else:
                 res = None
+            invalidate_status_cache()
             self.send_json({"success": True, "result": res, "type": prop_type, "value": val})
 
         elif parsed.path == "/api/control/ptz":
@@ -429,6 +442,12 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 shutil.copyfileobj(f, self.wfile)
 
     def handle_api_status(self):
+        now = time.time()
+        with _status_lock:
+            if _status_cache["data"] is not None and (now - _status_cache["timestamp"]) < 4.0:
+                self.send_json(_status_cache["data"])
+                return
+
         try:
             info = send_miio_rpc("miIO.info", [])
             props = send_miio_rpc("get_properties", [
@@ -441,12 +460,16 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 {"did": DID, "siid": 8, "piid": 6},   # Human Detection
                 {"did": DID, "siid": 8, "piid": 21},  # Car Detection
             ])
-            self.send_json({
+            payload = {
                 "online": True,
                 "info": info.get("result", {}),
                 "properties": props.get("result", []),
-                "timestamp": time.time()
-            })
+                "timestamp": now
+            }
+            with _status_lock:
+                _status_cache["data"] = payload
+                _status_cache["timestamp"] = now
+            self.send_json(payload)
         except Exception as e:
             self.send_json({"online": False, "error": str(e)}, status=500)
 
@@ -532,10 +555,13 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
 if __name__ == "__main__":
     os.makedirs(PUBLIC_DIR, exist_ok=True)
-    socketserver.TCPServer.allow_reuse_address = True
-    server = socketserver.TCPServer(("", PORT), CCTVHandler)
+    server = ThreadedTCPServer(("", PORT), CCTVHandler)
     print(f"CCTV Dashboard Server listening on http://0.0.0.0:{PORT}")
     try:
         server.serve_forever()

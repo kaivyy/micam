@@ -17,7 +17,7 @@ webrtc:
 
 ffmpeg:
   bin: "ffmpeg"
-  h264: "-c:v libx264 -preset:v ultrafast -tune:v zerolatency -b:v 2500k -maxrate 3500k -bufsize 3500k -profile:v high -level:v 4.2"
+  h264: "-c:v libx264 -preset:v ultrafast -tune:v zerolatency -threads 2 -b:v 2500k -maxrate 3500k -bufsize 3500k -profile:v high -level:v 4.2"
 
 # Session PassToken Xiaomi Cloud (Didapatkan dari Xiaomi Cloud Tokens Extractor)
 xiaomi:

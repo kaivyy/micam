@@ -68,6 +68,9 @@ class RecorderManager:
         self.manual_start_times = {}
         self.manual_filepaths = {}
         self.auto_procs = {}    # "left": Popen, "right": Popen
+        self._storage_cache_time = 0
+        self._storage_cached_count = 0
+        self._storage_cached_bytes = 0
         self.load_config()
         self.ensure_storage_dir()
 
@@ -276,6 +279,10 @@ class RecorderManager:
             }
 
     def _calc_storage_usage(self, sdir):
+        now = time.time()
+        if (now - self._storage_cache_time) < 30.0:
+            return self._storage_cached_count, self._storage_cached_bytes
+
         count = 0
         total_size = 0
         if not os.path.exists(sdir):
@@ -287,6 +294,9 @@ class RecorderManager:
                     total_size += entry.stat().st_size
                 except Exception:
                     pass
+        self._storage_cache_time = now
+        self._storage_cached_count = count
+        self._storage_cached_bytes = total_size
         return count, total_size
 
     def list_recordings(self):
@@ -363,6 +373,7 @@ class RecorderManager:
 
         try:
             os.remove(target)
+            self._storage_cache_time = 0
             return True, "Deleted successfully"
         except Exception as e:
             return False, str(e)

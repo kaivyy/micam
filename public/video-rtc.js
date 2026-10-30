@@ -22,14 +22,16 @@ export class VideoRTC extends HTMLElement {
         this.RECONNECT_TIMEOUT = 1000;
 
         this.CODECS = [
-            'avc1.640029',      // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
-            'avc1.64002A',      // H.264 high 4.2 (Chromecast 3rd Gen)
-            'avc1.640033',      // H.264 high 5.1 (Chromecast with Google TV)
-            'hvc1.1.6.L153.B0', // H.265 main 5.1 (Chromecast Ultra)
+            'avc1.640029',      // H.264 high 4.1
+            'avc1.64002A',      // H.264 high 4.2
+            'avc1.640033',      // H.264 high 5.1
+            'hvc1.1.6.L153.B0', // H.265 main 5.1
+            'hev1.1.6.L153.B0', // H.265 alternative identifier
+            'hvc1.1.6.L93.B0',  // H.265 main 3.1
             'mp4a.40.2',        // AAC LC
             'mp4a.40.5',        // AAC HE
-            'flac',             // FLAC (PCM compatible)
-            'opus',             // OPUS Chrome, Firefox
+            'flac',             // FLAC
+            'opus',             // OPUS
         ];
 
         /**
@@ -69,10 +71,11 @@ export class VideoRTC extends HTMLElement {
          * [config] WebRTC configuration
          * @type {RTCConfiguration}
          */
+        const isLan = typeof window !== 'undefined' && window.location && /^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|100\.)/.test(window.location.hostname);
         this.pcConfig = {
             bundlePolicy: 'max-bundle',
-            iceServers: [{urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302']}],
-            sdpSemantics: 'unified-plan',  // important for Chromecast 1
+            iceServers: isLan ? [] : [{urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302']}],
+            sdpSemantics: 'unified-plan',
         };
 
         /**
@@ -374,11 +377,30 @@ export class VideoRTC extends HTMLElement {
         this.onmessage = {};
 
         const modes = [];
+        const hasMediaSource = ('MediaSource' in window || 'ManagedMediaSource' in window);
+        const MS = window.MediaSource || window.ManagedMediaSource;
+        const supportsH265Mse = Boolean(hasMediaSource && MS && (
+            (typeof MS.isTypeSupported === 'function') && (
+                MS.isTypeSupported('video/mp4; codecs="hvc1.1.6.L153.B0"') ||
+                MS.isTypeSupported('video/mp4; codecs="hev1.1.6.L153.B0"') ||
+                MS.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.B0"')
+            )
+        ));
 
-        if (this.mode.includes('webrtc') && 'RTCPeerConnection' in window) {
+        const preferH265Mse = supportsH265Mse && this.mode.includes('mse');
+
+        if (preferH265Mse) {
+            modes.push('mse');
+            this.onmse();
+            this.onmessage['mse_fallback'] = msg => {
+                if (msg.type === 'error' && this.mode.includes('webrtc') && 'RTCPeerConnection' in window && this.pcState === WebSocket.CLOSED) {
+                    this.onwebrtc();
+                }
+            };
+        } else if (this.mode.includes('webrtc') && 'RTCPeerConnection' in window) {
             modes.push('webrtc');
             this.onwebrtc();
-        } else if (this.mode.includes('mse') && ('MediaSource' in window || 'ManagedMediaSource' in window)) {
+        } else if (this.mode.includes('mse') && hasMediaSource) {
             modes.push('mse');
             this.onmse();
         } else if (this.mode.includes('hls') && this.video.canPlayType('application/vnd.apple.mpegurl')) {
