@@ -17,16 +17,36 @@ PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-# Import recorder module
+def load_env(env_path):
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, val = line.split("=", 1)
+            key = key.strip()
+            val = val.strip().strip("'\"")
+            if key not in os.environ:
+                os.environ[key] = val
+
+load_env(os.path.join(BASE_DIR, ".env"))
+
 from recorder import recorder
 
-CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.11")
+CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.100")
 CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
-TOKEN_HEX = os.environ.get("CCTV_TOKEN_HEX", "5a757051646b6175546d4a524d38726c")
+TOKEN_HEX = os.environ.get("CCTV_TOKEN_HEX", "0" * 32)
 TOKEN = bytes.fromhex(TOKEN_HEX)
-DID = os.environ.get("CCTV_DID", "1178517372")
+DID = os.environ.get("CCTV_DID", "0")
 PORT = int(os.environ.get("CCTV_PORT", 8088))
 GO2RTC_API = os.environ.get("GO2RTC_API", "http://127.0.0.1:1984")
+CCTV_NAME = os.environ.get("CCTV_NAME", "Xiaomi CW100 Dual")
+XIAOMI_USER_ID = os.environ.get("XIAOMI_USER_ID", "-")
+XIAOMI_USER_EMAIL = os.environ.get("XIAOMI_USER_EMAIL", "Connected Account")
+STREAM_LEFT = os.environ.get("CCTV_STREAM_LEFT", "cctv_lensa_kiri")
+STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
 
 def send_miio_rpc(method, params, timeout=2.5):
     hello = bytes.fromhex("21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
@@ -378,21 +398,22 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             has_xiaomi = "xiaomi:" in cfg_text and "V1:" in cfg_text
             self.send_json({
                 "authenticated": has_xiaomi,
-                "user_id": "1778813257",
-                "email": "tadincahrancamaya@gmail.com",
-                "region": "sg",
+                "user_id": XIAOMI_USER_ID,
+                "email": XIAOMI_USER_EMAIL,
+                "region": os.environ.get("XIAOMI_REGION", "sg"),
                 "did": DID,
                 "model": "chuangmi.camera.075ae1",
+                "cctv_name": CCTV_NAME,
                 "streams": {
-                    "kiri": "cctv_garasi_kiri",
-                    "kanan": "cctv_garasi_kanan"
+                    "kiri": STREAM_LEFT,
+                    "kanan": STREAM_RIGHT
                 }
             })
         except Exception as e:
             self.send_json({"authenticated": False, "error": str(e)})
 
     def handle_snapshot(self, path):
-        stream_name = "cctv_garasi_kanan" if "right" in path or "kanan" in path else "cctv_garasi_kiri"
+        stream_name = STREAM_RIGHT if "right" in path or "kanan" in path else STREAM_LEFT
         try:
             with urllib.request.urlopen(f"{GO2RTC_API}/api/frame.jpeg?src={stream_name}", timeout=6) as resp:
                 data = resp.read()

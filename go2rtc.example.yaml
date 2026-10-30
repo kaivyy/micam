@@ -1,0 +1,41 @@
+# ==========================================
+# go2rtc Streaming Gateway Configuration Template
+# Xiaomi Outdoor Camera CW100 Dual (2.5K Ultra HD)
+# ==========================================
+
+api:
+  listen: ":1984"
+  origin: "*"
+
+rtsp:
+  listen: ":8554"
+
+webrtc:
+  listen: ":8555"
+
+ffmpeg:
+  bin: "ffmpeg"
+  h264: "-c:v libx264 -preset:v veryfast -tune:v zerolatency -crf 18 -b:v 4500k -maxrate 6500k -bufsize 8000k -profile:v high -level:v 4.2"
+
+# Session PassToken Xiaomi Cloud (Didapatkan dari Xiaomi Cloud Tokens Extractor)
+xiaomi:
+  "YOUR_XIAOMI_USER_ID": "YOUR_ENCRYPTED_PASSTOKEN_V1"
+
+streams:
+  # Lensa 1 (Primary / Wide Angle - Native 2.5K Ultra HD)
+  cctv_lensa_kiri:
+    - xiaomi://YOUR_XIAOMI_USER_ID:sg@YOUR_CAMERA_IP?did=YOUR_CAMERA_DID&model=chuangmi.camera.075ae1&subtype=3
+    - ffmpeg:cctv_lensa_kiri#video=h264
+  cctv_garasi_kiri:
+    - cctv_lensa_kiri
+  cctv_garasi_left:
+    - cctv_lensa_kiri
+
+  # Lensa 2 (Secondary / PTZ Lens - Native 2.5K Ultra HD)
+  cctv_lensa_kanan:
+    - xiaomi://YOUR_XIAOMI_USER_ID:sg@YOUR_CAMERA_IP?did=YOUR_CAMERA_DID&model=chuangmi.camera.075ae1&channel=2&subtype=3
+    - ffmpeg:cctv_lensa_kanan#video=h264
+  cctv_garasi_kanan:
+    - cctv_lensa_kanan
+  cctv_garasi_right:
+    - cctv_lensa_kanan

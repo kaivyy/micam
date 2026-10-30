@@ -10,23 +10,39 @@ import threading
 from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_STORAGE_DIR = os.environ.get(
-    "CCTV_STORAGE_DIR",
-    "/root/cctv_recordings" if os.path.exists("/root/cctv_recordings") else os.path.join(BASE_DIR, "recordings")
-)
+
+def load_env(env_path):
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, val = line.split("=", 1)
+            key = key.strip()
+            val = val.strip().strip("'\"")
+            if key not in os.environ:
+                os.environ[key] = val
+
+load_env(os.path.join(BASE_DIR, ".env"))
+
+DEFAULT_STORAGE_DIR = os.environ.get("CCTV_STORAGE_DIR", os.path.join(BASE_DIR, "recordings"))
 CONFIG_FILE = os.path.join(DEFAULT_STORAGE_DIR, "recorder_config.json")
 RTSP_HOST = os.environ.get("RTSP_HOST", "127.0.0.1:8554")
+STREAM_LEFT = os.environ.get("CCTV_STREAM_LEFT", "cctv_lensa_kiri")
+STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
 
 STREAMS = {
     "left": {
         "id": "left",
         "name": "Lensa 1 (Kiri)",
-        "rtsp": f"rtsp://{RTSP_HOST}/cctv_garasi_kiri"
+        "rtsp": f"rtsp://{RTSP_HOST}/{STREAM_LEFT}"
     },
     "right": {
         "id": "right",
         "name": "Lensa 2 (Kanan)",
-        "rtsp": f"rtsp://{RTSP_HOST}/cctv_garasi_kanan"
+        "rtsp": f"rtsp://{RTSP_HOST}/{STREAM_RIGHT}"
     }
 }
 

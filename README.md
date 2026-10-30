@@ -13,7 +13,7 @@
 
 ---
 
-[Fitur Utama](#fitur-utama) • [Arsitektur](#arsitektur-sistem) • [Instalasi Cepat](#instalasi-cepat) • [Integrasi NVR](#integrasi-nvr--pihak-ketiga) • [Kredit & Referensi](#kredit--referensi-proyek)
+[Fitur Utama](#fitur-utama) • [Arsitektur](docs/ARCHITECTURE.md) • [Instalasi Cepat](#instalasi-cepat) • [REST API](docs/API.md) • [Integrasi NVR](docs/NVR_INTEGRATION.md) • [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 </div>
 
@@ -25,8 +25,14 @@
   - **Lensa 1:** Sensor Utama *Wide Angle* (2.5K / HD)
   - **Lensa 2:** Sensor Sekunder *Telephoto Long-Range* (2.5K / HD)
   - Streaming menggunakan teknologi **WebRTC & MSE** via gateway lokal, menghasilkan latensi sangat minim tanpa buffering cloud.
+- **Digital Zoom & Pan Interaktif:**
+  - Zoom independen 0–100% per lensa dengan preset cepat (0%, 25%, 50%, 100%).
+  - Dukungan drag / pan intuitif di desktop maupun layar sentuh smartphone.
+- **Audio Fokus & Dua Arah (Intercom):**
+  - Mikrofon fisik terpadu dengan perlindungan **Anti-Gema Otomatis** (mendengarkan satu lensa me-mute lensa lainnya).
+  - Bicara dua arah (*backchannel*) langsung dari browser ke speaker CCTV.
 - **Emergency Siren / Alarm Suara Darurat:**
-  - Memicu sirene buzzer hardware bawaan kamera seketika untuk mengusir penyusup atau peringatan bahaya di lokasi.
+  - Memicu sirene buzzer hardware bawaan kamera seketika untuk peringatan bahaya di lokasi.
   - Dilengkapi animasi strobo visual pada dashboard saat aktif.
 - **AI Smart Detection Analytics & Toggle Switch:**
   - Kontrol saklar deteksi pintar langsung ke kamera:
@@ -43,8 +49,6 @@
   - **DVR Otomatis 24/7 (Continuous):** Otomatis merekam dan memecah file video per segmen waktu (**5, 15, 30, atau 60 menit** per file `.mp4`).
   - **Rekam Manual Seketika:** Tombol rekam cepat di atas live feed dengan timer berkedip realtime.
   - **Auto-Cleanup & Manajemen Retensi:** Otomatis menghapus file rekaman terlama berdasarkan masa simpan (**3, 7, 14, 30 hari**) atau saat kapasitas harddisk menyentuh batas aman (< 5 GB).
-- **Timelapse Video Generator:**
-  - Pembuat video timelapse instan dari kumpulan rekaman DVR dengan akselerasi mulus berbasis FFmpeg.
 - **In-Browser Video Player & File Manager:**
   - Putar rekaman langsung di browser dengan dukungan **HTTP 206 Partial Content Range** (bisa digeser maju/mundur dengan instan).
   - Unduh file `.mp4` asli atau hapus dengan satu klik.
@@ -59,44 +63,17 @@
   - Tampilan tema hitam pekat tanpa kabur abu-abu, sangat tajam dan hemat daya pada layar OLED/AMOLED.
   - Menggunakan icon vektor SVG inline yang bersih dan profesional tanpa emoji.
   - Desain responsif (*mobile-friendly*) dengan target sentuh ibu jari minimal **44x44px** sesuai kaidah *antislop UI*.
-- **Otentikasi Xiaomi Satset di Halaman Web:**
-  - Fitur sinkronisasi akun Xiaomi dan form verifikasi OTP terintegrasi langsung di UI tanpa perlu perintah terminal manual.
 
 ---
 
-## Arsitektur Sistem
+## Dokumentasi Proyek
 
-Seluruh komponen dirancang **berdikari penuh (*self-contained*)** di dalam repositori ini:
+Panduan teknis mendalam tersedia di direktori [`docs/`](docs/):
 
-```mermaid
-flowchart TD
-    subgraph Xiaomi_Hardware ["Kamera CCTV Xiaomi CW100"]
-        CAM_L1["Lensa 1 (Wide Angle)"]
-        CAM_L2["Lensa 2 (Telephoto)"]
-        CAM_RPC["MIIO Protocol (UDP 54321 / AES-128)"]
-    end
-
-    subgraph Server_Backend ["Server Lokal / Raspberry Pi"]
-        G2R["go2rtc Streaming Gateway<br/>(Port 1984 WebRTC / 8554 RTSP)"]
-        SRV["CCTV Dashboard Server (Python 3)<br/>(Port 8088 / HTTP 206 Video Stream)"]
-        DVR["DVR Engine (FFmpeg Stream-Copy)<br/>Auto-Segmentation & Retention"]
-        STORE[("HDD / SSD Storage<br/>(/cctv_recordings)")]
-    end
-
-    subgraph Client ["Browser Pengguna (Mobile / Desktop)"]
-        UI["Web Dashboard UI<br/>(Pure OLED Black Theme + SVG Icons)"]
-    end
-
-    CAM_L1 -->|P2P MISS / TUTK UDP| G2R
-    CAM_L2 -->|P2P MISS / TUTK UDP| G2R
-    SRV <-->|Encrypted AES-128 MIIO| CAM_RPC
-
-    G2R -->|WebRTC / MSE Stream| UI
-    G2R -->|RTSP Stream Copy| DVR
-    DVR -->|MP4 Segments| STORE
-    STORE -->|HTTP Range 206 Seekable| SRV
-    SRV -->|REST API & Web UI| UI
-```
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Arsitektur sistem, diagram alur, dan protokol jaringan.
+- [docs/API.md](docs/API.md) — Spesifikasi lengkap endpoint REST API backend.
+- [docs/NVR_INTEGRATION.md](docs/NVR_INTEGRATION.md) — Panduan integrasi Home Assistant, Frigate, Scrypted, dan VLC.
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — Solusi kendala token, P2P handshake, WebRTC, dan audio.
 
 ---
 
@@ -104,16 +81,23 @@ flowchart TD
 
 ```text
 cctv_dashboard/
+├── docs/
+│   ├── ARCHITECTURE.md    # Detail arsitektur & diagram protokol
+│   ├── API.md             # Dokumentasi REST API server.py
+│   ├── NVR_INTEGRATION.md # Panduan integrasi Frigate & Home Assistant
+│   └── TROUBLESHOOTING.md # Solusi masalah umum & tuning performa
 ├── public/
-│   └── index.html         # Antarmuka Dashboard (Pure Black, WebRTC, Controls, SVG Icons, DVR UI)
+│   ├── index.html         # Antarmuka Dashboard (OLED Black, WebRTC, Controls, DVR UI)
+│   └── video-rtc.js       # WebRTC custom element gateway streaming
 ├── server.py              # Server REST API & Layanan Video Stream HTTP 206 (Port 8088)
 ├── recorder.py            # Engine Perekam DVR FFmpeg, Retensi Disk & Auto-Cleanup
-├── go2rtc.yaml            # Konfigurasi gateway streaming P2P / WebRTC
 ├── start.sh               # Skrip inisialisasi & peluncuran 1-klik (auto-download go2rtc)
 ├── stop.sh                # Skrip penghentian layanan
 ├── requirements.txt       # Dependensi Python (pycryptodome)
-├── .env.example           # Template konfigurasi variabel lingkungan
-└── README.md              # Dokumentasi lengkap proyek
+├── .env.example           # Template variabel lingkungan (IP, Token, DID)
+├── go2rtc.example.yaml    # Template konfigurasi gateway streaming P2P
+├── LICENSE                # Lisensi MIT
+└── README.md              # Dokumentasi pengantar proyek
 ```
 
 ---
@@ -139,12 +123,15 @@ cd cctv_dashboard
 pip3 install -r requirements.txt
 ```
 
-### 4. Konfigurasi Variabel Lingkungan (Opsional)
-Jika IP kamera atau kredensial token Anda berbeda dari default:
+### 4. Konfigurasi Variabel Lingkungan & Stream
+Salin file template dan sesuaikan dengan informasi kamera Anda:
+
 ```bash
 cp .env.example .env
-# Sesuaikan CCTV_CAMERA_IP, CCTV_TOKEN_HEX, atau CCTV_DID
+cp go2rtc.example.yaml go2rtc.yaml
 ```
+
+Isi nilai `CCTV_CAMERA_IP`, `CCTV_TOKEN_HEX`, dan `CCTV_DID` pada `.env` (lihat [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) untuk cara mendapatkan token).
 
 ### 5. Jalankan Sistem (1-Klik)
 ```bash
@@ -172,8 +159,10 @@ Stream video RTSP lokal dapat langsung dihubungkan ke software NVR seperti **Fri
 
 | Lensa Kamera | Endpoint RTSP (Lokal) | Endpoint WebRTC / Browser |
 | :--- | :--- | :--- |
-| **Lensa 1: Wide Angle (Kiri)** | `rtsp://<IP_SERVER>:8554/cctv_garasi_kiri` | `http://<IP_SERVER>:1984/stream.html?src=cctv_garasi_kiri` |
-| **Lensa 2: Telephoto (Kanan)** | `rtsp://<IP_SERVER>:8554/cctv_garasi_kanan` | `http://<IP_SERVER>:1984/stream.html?src=cctv_garasi_kanan` |
+| **Lensa 1: Wide Angle (Kiri)** | `rtsp://<IP_SERVER>:8554/cctv_lensa_kiri` | `http://<IP_SERVER>:1984/stream.html?src=cctv_lensa_kiri` |
+| **Lensa 2: Telephoto (Kanan)** | `rtsp://<IP_SERVER>:8554/cctv_lensa_kanan` | `http://<IP_SERVER>:1984/stream.html?src=cctv_lensa_kanan` |
+
+*Panduan konfigurasi lengkap Frigate dan Home Assistant tersedia di [docs/NVR_INTEGRATION.md](docs/NVR_INTEGRATION.md).*
 
 ---
 
@@ -192,13 +181,13 @@ Perekaman resolusi penuh 2.5K / HD dengan kompresi **H.265 (HEVC)** rata-rata me
 
 Proyek ini dibangun menggunakan fondasi dan terinspirasi dari proyek-proyek open-source hebat berikut:
 
-- <u>[go2rtc](https://github.com/AlexxIT/go2rtc)</u> — Gateway streaming WebRTC, MSE, dan relay protokol P2P kamera Xiaomi (MISS / TUTK CS2).
-- <u>[Xiaomi Cloud Tokens Extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor)</u> — Ekstraktor token lokal, Device ID, dan otentikasi akun Xiaomi cloud.
-- <u>[python-miio](https://github.com/rytilahti/python-miio)</u> — Referensi protokol komunikasi UDP 54321 dan enkripsi AES-128-CBC MIIO.
-- <u>[FFmpeg](https://ffmpeg.org)</u> — Framework multimedia untuk engine perekaman DVR *stream-copy* dan pemecah segmen video MP4.
+- [go2rtc](https://github.com/AlexxIT/go2rtc) — Gateway streaming WebRTC, MSE, dan relay protokol P2P kamera Xiaomi (MISS / TUTK CS2).
+- [Xiaomi Cloud Tokens Extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor) — Ekstraktor token lokal, Device ID, dan otentikasi akun Xiaomi cloud.
+- [python-miio](https://github.com/rytilahti/python-miio) — Referensi protokol komunikasi UDP 54321 dan enkripsi AES-128-CBC MIIO.
+- [FFmpeg](https://ffmpeg.org) — Framework multimedia untuk engine perekaman DVR *stream-copy* dan pemecah segmen video MP4.
 
 ---
 
 ## Lisensi
 
-Didistribusikan di bawah lisensi **MIT License**. Silakan gunakan, modifikasi, dan kembangkan secara bebas untuk penggunaan pribadi maupun komunitas.
+Didistribusikan di bawah lisensi [MIT License](LICENSE).

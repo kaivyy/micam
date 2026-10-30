@@ -1,7 +1,25 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.log
-go2rtc
-recordings/
+*.py[cod]
+*$py.class
+
+# Local environment & secrets
 .env
+go2rtc.yaml
+
+# Binaries & external runtime
+go2rtc
+
+# Log files
+*.log
+server.log
+go2rtc.log
+
+# Video recordings storage
+recordings/
+
+# Knowledge graph and OS files
+graphify-out/
 .DS_Store
+.idea/
+.vscode/

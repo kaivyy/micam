@@ -1845,9 +1845,9 @@
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
       </div>
       <div class="brand-text">
-        <h1 class="brand-title-full">Xiaomi CW100 Dual • CCTV Garasi</h1>
-        <h1 class="brand-title-short">Xiaomi CW100</h1>
-        <p id="subNetInfo">192.168.1.11 • DUAL SENSOR H.265</p>
+        <h1 class="brand-title-full" id="brandTitleFull">Xiaomi CW100 Dual • CCTV Monitor</h1>
+        <h1 class="brand-title-short" id="brandTitleShort">Xiaomi CW100</h1>
+        <p id="subNetInfo">2.5K ULTRA HD • DUAL SENSOR H.265</p>
       </div>
     </div>
     <div class="header-actions">
@@ -1934,7 +1934,7 @@
                 <button class="btn-icon btn-rec-monitor" id="btnRecMonLeft" onclick="toggleRecord('left')" title="Mulai/Stop Rekam Lensa Kiri" aria-label="Mulai/Stop Rekam Lensa Kiri">
                   <span class="rec-dot"></span>
                 </button>
-                <button class="btn-icon" id="btnAudioLeft" onclick="toggleAudio('camLeft')" title="Dengarkan Suara Garasi (Mic CW100)" aria-label="Dengarkan Suara Garasi Lensa Kiri">
+                <button class="btn-icon" id="btnAudioLeft" onclick="toggleAudio('camLeft')" title="Dengarkan Suara Kamera (Mic CW100)" aria-label="Dengarkan Suara Kamera Lensa Kiri">
                   <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                 </button>
                 <div class="zoom-control-wrapper">
@@ -1959,7 +1959,7 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn-icon" id="btnMicLeft" onclick="toggleTalk()" title="Bicara ke Speaker CCTV Garasi (Intercom)" aria-label="Bicara ke Speaker CCTV Garasi">
+                <button class="btn-icon" id="btnMicLeft" onclick="toggleTalk()" title="Bicara ke Speaker CCTV (Intercom)" aria-label="Bicara ke Speaker CCTV">
                   <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                 </button>
                 <button class="btn-icon" onclick="reloadFrame('camLeft')" title="Muat Ulang Stream" aria-label="Muat Ulang Stream Lensa Kiri">
@@ -2002,7 +2002,7 @@
                 <button class="btn-icon btn-rec-monitor" id="btnRecMonRight" onclick="toggleRecord('right')" title="Mulai/Stop Rekam Lensa Kanan" aria-label="Mulai/Stop Rekam Lensa Kanan">
                   <span class="rec-dot"></span>
                 </button>
-                <button class="btn-icon" id="btnAudioRight" onclick="toggleAudio('camRight')" title="Dengarkan Suara Garasi (Mic CW100)" aria-label="Dengarkan Suara Garasi Lensa Kanan">
+                <button class="btn-icon" id="btnAudioRight" onclick="toggleAudio('camRight')" title="Dengarkan Suara Kamera (Mic CW100)" aria-label="Dengarkan Suara Lensa Kanan">
                   <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                 </button>
                 <div class="zoom-control-wrapper">
@@ -2027,7 +2027,7 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn-icon" id="btnMicRight" onclick="toggleTalk()" title="Bicara ke Speaker CCTV Garasi (Intercom)" aria-label="Bicara ke Speaker CCTV Garasi">
+                <button class="btn-icon" id="btnMicRight" onclick="toggleTalk()" title="Bicara ke Speaker CCTV (Intercom)" aria-label="Bicara ke Speaker CCTV">
                   <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                 </button>
                 <button class="btn-icon" onclick="reloadFrame('camRight')" title="Muat Ulang Stream" aria-label="Muat Ulang Stream Lensa Kanan">
@@ -2076,7 +2076,7 @@
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
               <span>SSID Pemancar</span>
             </div>
-            <div class="metric-val" id="wifiSsidVal">ARVY KAIRI</div>
+            <div class="metric-val" id="wifiSsidVal">-</div>
           </div>
           <div class="metric-cell">
             <div class="metric-name">
@@ -2106,7 +2106,7 @@
             </button>
             <button class="btn btn-outline" onclick="openMicModal()" style="font-size: 0.76rem;">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></span>
-              Panduan Mic & Suara Garasi
+              Panduan Mic & Suara CCTV
             </button>
           </div>
         </div>
@@ -2223,8 +2223,8 @@
           <div class="group-header">Identitas Hardware</div>
           <div style="margin-top: 0.5rem;">
             <div class="info-kv"><span>Model</span><span>chuangmi.075ae1</span></div>
-            <div class="info-kv"><span>Device ID</span><span>1178517372</span></div>
-            <div class="info-kv"><span>MAC</span><span>B8:88:80:5D:DD:B5</span></div>
+            <div class="info-kv"><span>Device ID</span><span id="deviceIdVal">-</span></div>
+            <div class="info-kv"><span>MAC</span><span id="deviceMacVal">-</span></div>
             <div class="info-kv"><span>Enkripsi</span><span>AES-128-CBC</span></div>
             <div class="info-kv"><span>DVR Codec</span><span>HEVC + Opus Copy</span></div>
           </div>
@@ -2444,14 +2444,14 @@
           <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem;">
             <span>1. Mendengarkan Suara (Audio Live & Anti-Gema)</span>
           </div>
-          <div>CCTV Xiaomi CW100 memiliki 1 mikrofon fisik terpadu (Opus 48 kHz). Dashboard dilengkapi <strong>Anti-Gema Otomatis</strong>: mengaktifkan audio di salah satu lensa otomatis me-mute lensa lainnya agar suara garasi terdengar jernih tanpa gema tumpang-tindih.</div>
+          <div>CCTV Xiaomi CW100 memiliki 1 mikrofon fisik terpadu (Opus 48 kHz). Dashboard dilengkapi <strong>Anti-Gema Otomatis</strong>: mengaktifkan audio di salah satu lensa otomatis me-mute lensa lainnya agar suara lingkungan sekitar terdengar jernih tanpa gema tumpang-tindih.</div>
         </div>
 
         <div style="background: #080808; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem;">
           <div style="font-weight: 700; color: #ffffff; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem;">
             <span>2. Bicara Dua Arah (Intercom ke Speaker CW100)</span>
           </div>
-          <div style="margin-bottom: 0.5rem;">Kedua monitor terhubung ke 1 speaker fisik CW100 di garasi. Mengklik tombol mic di monitor mana pun langsung menghubungkan suara Anda ke speaker kamera secara terpusat.</div>
+          <div style="margin-bottom: 0.5rem;">Kedua monitor terhubung ke 1 speaker fisik CW100. Mengklik tombol mic di monitor mana pun langsung menghubungkan suara Anda ke speaker kamera secara terpusat.</div>
           <div style="font-size: 0.76rem; color: var(--text-sub);">
             <strong>Catatan Keamanan Browser:</strong><br>
             • Browser smartphone (Chrome Android & Safari iOS) mewajibkan koneksi <strong>HTTPS / SSL</strong> untuk mengizinkan rekaman mikrofon HP.<br>
@@ -2474,7 +2474,7 @@
         <button class="modal-close" onclick="closeTelegramModal()" aria-label="Tutup Dialog">&times;</button>
       </div>
       <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
-        Kirimkan foto snapshot garasi secara otomatis atau uji coba kirim snapshot seketika ke akun/grup Telegram Anda.
+        Kirimkan foto snapshot CCTV secara otomatis atau uji coba kirim snapshot seketika ke akun/grup Telegram Anda.
       </div>
       <div class="form-group">
         <label for="tgBotToken">Bot Token Telegram (dari @BotFather)</label>
@@ -2536,8 +2536,8 @@
       </div>
 
       <div style="margin-bottom: 1.25rem;">
-        <div class="info-kv"><span>Akun Terhubung</span><span id="authEmailVal">tadincahrancamaya@gmail.com</span></div>
-        <div class="info-kv"><span>User ID</span><span id="authUidVal">1778813257</span></div>
+        <div class="info-kv"><span>Akun Terhubung</span><span id="authEmailVal">-</span></div>
+        <div class="info-kv"><span>User ID</span><span id="authUidVal">-</span></div>
         <div class="info-kv"><span>Status Sesi</span><span style="color: var(--accent);">AKTIF (PassToken V1)</span></div>
         <div class="info-kv"><span>Region Server</span><span>Singapore (sg)</span></div>
       </div>
@@ -3149,6 +3149,9 @@
     const SVG_AUDIO_OFF = `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>`;
     const SVG_AUDIO_ON = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
 
+    let streamLeftName = 'cctv_lensa_kiri';
+    let streamRightName = 'cctv_lensa_kanan';
+
     function getWsUrl(srcName) {
       const isHttps = (window.location.protocol === 'https:');
       const wsProto = isHttps ? 'wss:' : 'ws:';
@@ -3163,12 +3166,12 @@
       if (camL) {
         camL.background = true;
         camL.visibilityCheck = false;
-        camL.src = getWsUrl('cctv_garasi_kiri');
+        camL.src = getWsUrl(streamLeftName);
       }
       if (camR) {
         camR.background = true;
         camR.visibilityCheck = false;
-        camR.src = getWsUrl('cctv_garasi_kanan');
+        camR.src = getWsUrl(streamRightName);
       }
       setupZoomPan('camLeft');
       setupZoomPan('camRight');
@@ -3198,7 +3201,7 @@
     function reloadFrame(frameId) {
       const el = document.getElementById(frameId);
       if (!el) return;
-      const srcName = (frameId === 'camLeft') ? 'cctv_garasi_kiri' : 'cctv_garasi_kanan';
+      const srcName = (frameId === 'camLeft') ? streamLeftName : streamRightName;
       if (el.ondisconnect) el.ondisconnect();
       setTimeout(() => {
         el.src = getWsUrl(srcName);
@@ -3217,7 +3220,7 @@
       if (!activeEl) return;
       const activeVideo = activeEl.querySelector('video') || activeEl.video;
       if (!activeVideo) {
-        log(`[AUDIO] Memuat stream audio garasi...`);
+        log(`[AUDIO] Memuat stream audio kamera...`);
         return;
       }
 
@@ -3230,7 +3233,7 @@
         }
         if (otherBtn) {
           otherBtn.classList.remove('audio-on');
-          otherBtn.title = 'Dengarkan Suara Garasi (Mic CW100)';
+          otherBtn.title = 'Dengarkan Suara Kamera (Mic CW100)';
           otherBtn.innerHTML = SVG_AUDIO_OFF;
         }
 
@@ -3240,7 +3243,7 @@
         activeVideo.play().catch(e => console.warn('Audio play:', e));
         if (activeBtn) {
           activeBtn.classList.add('audio-on');
-          activeBtn.title = 'Matikan Suara Garasi (Mute)';
+          activeBtn.title = 'Matikan Suara Kamera (Mute)';
           activeBtn.innerHTML = SVG_AUDIO_ON;
         }
         log(`[AUDIO] Audio mikrofon fisik CW100 diaktifkan [Fokus: ${isLeft ? 'Lensa Kiri' : 'Lensa Kanan'}]. Anti-gema aktif.`);
@@ -3249,7 +3252,7 @@
         activeVideo.muted = true;
         if (activeBtn) {
           activeBtn.classList.remove('audio-on');
-          activeBtn.title = 'Dengarkan Suara Garasi (Mic CW100)';
+          activeBtn.title = 'Dengarkan Suara Kamera (Mic CW100)';
           activeBtn.innerHTML = SVG_AUDIO_OFF;
         }
         log(`[AUDIO] Audio mikrofon fisik CW100 dimatikan (Mute).`);
@@ -3298,11 +3301,11 @@
         allMicBtns.forEach(btn => {
           btn.classList.remove('mic-connecting');
           btn.classList.add('mic-active');
-          btn.title = 'Sedang Bicara ke Speaker CCTV Garasi (Klik untuk Berhenti)';
+          btn.title = 'Sedang Bicara ke Speaker CCTV (Klik untuk Berhenti)';
         });
         if (btnDeck) btnDeck.classList.add('btn-danger');
         if (txtDeck) txtDeck.textContent = 'Bicara Aktif (Stop)';
-        log(`[INTERCOM] Mikrofon Anda terhubung ke speaker fisik CW100 Garasi. Silakan berbicara!`);
+        log(`[INTERCOM] Mikrofon Anda terhubung ke speaker fisik CCTV. Silakan berbicara!`);
       } catch (err) {
         allMicBtns.forEach(btn => btn.classList.remove('mic-connecting', 'mic-active'));
         if (btnDeck) btnDeck.classList.remove('btn-danger');
@@ -3329,7 +3332,7 @@
 
       allMicBtns.forEach(btn => {
         btn.classList.remove('mic-active', 'mic-connecting');
-        btn.title = 'Bicara ke Speaker CCTV Garasi (Intercom)';
+        btn.title = 'Bicara ke Speaker CCTV (Intercom)';
       });
       if (btnDeck) btnDeck.classList.remove('btn-danger');
       if (txtDeck) txtDeck.textContent = 'Bicara Intercom (Mic)';
@@ -3861,13 +3864,48 @@
     }
 
     // --- Status and Hardware Polling ---
+    async function fetchAuthStatus() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+        if (data.email) {
+          const el = document.getElementById('authEmailVal');
+          if (el) el.textContent = data.email;
+        }
+        if (data.user_id) {
+          const el = document.getElementById('authUidVal');
+          if (el) el.textContent = data.user_id;
+        }
+        if (data.did) {
+          const el = document.getElementById('deviceIdVal');
+          if (el) el.textContent = data.did;
+        }
+        if (data.streams) {
+          if (data.streams.kiri) streamLeftName = data.streams.kiri;
+          if (data.streams.kanan) streamRightName = data.streams.kanan;
+        }
+      } catch (e) {
+        // Non-critical background fetch
+      }
+    }
+
     async function fetchStatus() {
       try {
         const res = await fetch('/api/status');
         const data = await res.json();
         if (data.online) {
-          document.getElementById('wifiRssiVal').textContent = (data.info.ap.rssi || '-38') + ' dBm';
-          document.getElementById('wifiSsidVal').textContent = data.info.ap.ssid || 'ARVY KAIRI';
+          if (data.info) {
+            if (data.info.ap && data.info.ap.rssi) {
+              document.getElementById('wifiRssiVal').textContent = data.info.ap.rssi + ' dBm';
+            }
+            if (data.info.ap && data.info.ap.ssid) {
+              document.getElementById('wifiSsidVal').textContent = data.info.ap.ssid;
+            }
+            if (data.info.mac) {
+              const elMac = document.getElementById('deviceMacVal');
+              if (elMac) elMac.textContent = data.info.mac;
+            }
+          }
           if (data.properties && data.properties.length >= 8) {
             document.getElementById('powerToggle').checked = data.properties[0].value;
             document.getElementById('lightToggle').checked = data.properties[1].value;
@@ -3982,6 +4020,7 @@
     } else {
       initStreams();
     }
+    fetchAuthStatus();
     fetchStatus();
     loadRecordings();
     setInterval(fetchStatus, 4000);
