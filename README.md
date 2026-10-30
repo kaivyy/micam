@@ -21,6 +21,14 @@
 
 ## Fitur Utama
 
+- **Web Setup Wizard & Zero-Config Onboarding (Satset):**
+  - **Setup 1-Klik di Browser**: Pengguna baru cukup membuka dashboard di browser. Jika belum ada kamera, wizard onboarding otomatis muncul.
+  - **Login QR & Link SSO Mi Home**: Cukup scan QR code dari aplikasi Mi Home atau klik link verifikasi browser tanpa repot memasukkan token/DID manual di terminal.
+  - **Auto-Scan Multi-Region**: Otomatis mendeteksi kamera di server Singapore (`sg`), China (`cn`), dan Global.
+  - **Layout Adaptif Otomatis**: Mendukung kamera **Dual-Lens** (CW100 / CW700S) maupun **Single-Lens** (C200 / C300 / C400) secara otomatis tanpa layar kedua kosong.
+- **2-Pass WebGL FSR Super-Resolution Zoom (EASU + RCAS):**
+  - Rekonstruksi gambar zoom adaptif berbasis algoritma **AMD FidelityFX Super Resolution 1.0** di sisi client browser (WebGL).
+  - Pass 1 (EASU 12-tap directional Lanczos) + Pass 2 (RCAS ringing-free sharpening) memberikan detail plat nomor, wajah, dan teks jauh lebih tajam dibanding interpolasi browser standar.
 - **Dual-Lens Live Streaming Simultan (~200ms Latency):**
   - **Lensa 1:** Sensor Utama *Wide Angle* (2.5K / HD)
   - **Lensa 2:** Sensor Sekunder *Telephoto Long-Range* (2.5K / HD)
@@ -123,17 +131,7 @@ cd cctv_dashboard
 pip3 install -r requirements.txt
 ```
 
-### 4. Konfigurasi Variabel Lingkungan & Stream
-Salin file template dan sesuaikan dengan informasi kamera Anda:
-
-```bash
-cp .env.example .env
-cp go2rtc.example.yaml go2rtc.yaml
-```
-
-Isi nilai `CCTV_CAMERA_IP`, `CCTV_TOKEN_HEX`, dan `CCTV_DID` pada `.env` (lihat [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) untuk cara mendapatkan token).
-
-### 5. Jalankan Sistem (1-Klik)
+### 4. Jalankan Sistem (1-Klik)
 ```bash
 chmod +x start.sh stop.sh
 ./start.sh
@@ -141,10 +139,15 @@ chmod +x start.sh stop.sh
 > [!NOTE]
 > Skrip `start.sh` akan secara otomatis mendeteksi arsitektur prosesor (`x86_64`, `arm64`, `armv7l`) dan mengunduh binary resmi `go2rtc` jika belum tersedia di sistem.
 
-Akses dashboard melalui browser:
+### 5. Hubungkan CCTV via Web Setup Wizard (Satset)
+Buka browser dan akses:
 ```text
 http://<IP_SERVER_ANDA>:8088
 ```
+1. Dashboard otomatis menampilkan dialog **Setup Wizard**.
+2. Scan **QR Code** menggunakan aplikasi **Mi Home** (atau klik *Buka Link Verifikasi*).
+3. Pilih kamera CCTV dari daftar yang terdeteksi di akun Anda.
+4. Klik **Pasang & Aktifkan Kamera Ini** &mdash; sistem otomatis men-generate file konfigurasi dan live stream langsung tayang!
 
 Untuk menghentikan layanan:
 ```bash
