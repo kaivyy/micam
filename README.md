@@ -10,22 +10,70 @@
 [![UI Theme](https://img.shields.io/badge/Design-Pure%20OLED%20Black-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge)](LICENSE)
 
-*A self-hosted, lightweight, and modern surveillance platform for Xiaomi smart cameras. Built with native WebRTC, zero-config QR onboarding, zero-CPU DVR recording, and AMD FSR WebGL super-resolution.*
+*A self-hosted, lightweight surveillance platform for Xiaomi smart cameras. Built with native WebRTC, zero-config QR onboarding, zero-CPU DVR recording, and AMD FSR WebGL super-resolution.*
 
 ---
 
-[Quick Start](#quick-start) • [Features](#key-features) • [Hardware Compatibility](#hardware-compatibility) • [Architecture](#architecture) • [NVR & RTSP](#nvr--third-party-integration) • [Docs](docs/)
+[Quick Start](#quick-start) • [Screenshot](#screenshot) • [Features](#key-features) • [Hardware Compatibility](#hardware-compatibility) • [Architecture](#architecture) • [NVR & RTSP](#nvr--third-party-integration) • [Docs](docs/)
 
+</div>
+
+---
+
+## Quick Start
+
+### 1. Prerequisites
+- Linux host (Debian, Ubuntu, Raspberry Pi OS, or any Linux server)
+- Python 3.8+
+- FFmpeg:
+  ```bash
+  sudo apt-get update && sudo apt-get install -y ffmpeg
+  ```
+
+### 2. Install & Launch (1-Command)
+```bash
+git clone https://github.com/kaivyy/micam.git
+cd micam
+pip3 install -r requirements.txt
+chmod +x start.sh stop.sh
+./start.sh
+```
+
+> [!TIP]
+> `start.sh` automatically detects your system CPU architecture (`x86_64`, `arm64`, `armv7l`) and fetches the latest official `go2rtc` binary if not already present.
+
+### 3. Pair via Web Setup Wizard
+Open your browser at:
+```text
+http://<SERVER_IP>:8088
+```
+1. The **Setup Wizard** appears automatically on first launch.
+2. Scan the on-screen **QR Code** using your **Mi Home** app (or click *Buka Link Verifikasi*).
+3. Select your camera from the detected list.
+4. Click **Pasang & Aktifkan Kamera Ini** &mdash; live stream starts immediately with zero manual configuration.
+
+To stop the background services:
+```bash
+./stop.sh
+```
+
+---
+
+## Screenshot
+
+<div align="center">
+  <img src="docs/screenshots/desktop_preview.png" alt="micam Desktop Surveillance Dashboard" width="100%" style="border-radius: 8px; border: 1px solid #222;" />
+  <p><em>Desktop surveillance view (Dual-Lens 2.5K live stream with integrated 2-Pass WebGL FSR super-resolution zoom)</em></p>
 </div>
 
 ---
 
 ## Key Features
 
-* **Zero-Config Web Setup Wizard (Satset):**
+* **Zero-Config Web Setup Wizard:**
   * No manual terminal editing of IP addresses, DIDs, or 32-character hex tokens.
-  * Scan the on-screen **QR Code** directly with the **Mi Home** app or click the SSO verification link.
-  * **Multi-Region Auto-Scanning**: Automatically searches and discovers your cameras across server regions (`sg`, `cn`, `de`, `us`, `global`).
+  * Scan the on-screen QR Code directly with the Mi Home app or click the SSO verification link.
+  * Multi-region auto-scanner probes Singapore (`sg`), China Mainland (`cn`), and Global regions automatically.
 
 * **Adaptive Camera Layout (Single-Lens & Dual-Lens):**
   * **Dual-Lens Mode** (CW100 / CW700S): Synchronized dual-stream playback with independent zoom and audio focus.
@@ -33,12 +81,12 @@
 
 * **Ultra-Low Latency Live Streaming (~200ms):**
   * Direct peer-to-peer WebRTC & MSE streaming via integrated `go2rtc` gateway.
-  * Sub-second latency without cloud relay buffering or subscription fees.
+  * Sub-second latency without cloud relay buffering or recurring fees.
 
 * **2-Pass WebGL FSR Super-Resolution Zoom:**
   * Client-side GPU-accelerated upscaler based on **AMD FidelityFX Super Resolution (FSR 1.0)**.
   * **Pass 1 (EASU)**: 12-tap directional Lanczos interpolation preserves sharp edge orientation.
-  * **Pass 2 (RCAS)**: Ringing-free adaptive sharpening brings out fine details on license plates and faces without pixelation.
+  * **Pass 2 (RCAS)**: Ringing-free adaptive sharpening brings out fine details on license plates and faces.
   * Switch on the fly between Standard SVG and 2-Pass FSR.
 
 * **Zero-CPU DVR Recording & 24-Hour Timeline Scrubber:**
@@ -50,7 +98,7 @@
 * **Local Encrypted Hardware Controls (MIIO RPC AES-128-CBC):**
   * Dual white LED spotlight toggle.
   * Infrared night vision modes (Auto / On / Off).
-  * Emergency siren alarm buzzer with visual strobe animation.
+  * Emergency siren alarm buzzer with visual strobe alert.
   * AI Detection toggles: Motion, Human, and Vehicle analytics.
   * Remote device reboot directly from browser.
 
@@ -58,66 +106,6 @@
   * High-contrast interface optimized for AMOLED/OLED displays.
   * Touch targets $\ge 44\times44\text{px}$ adhering to clean anti-slop ergonomics.
   * PIN guard keypad lock screen for shared workstation security.
-
----
-
-## Quick Start
-
-### 1. Prerequisites
-- Linux host (Debian, Ubuntu, Raspberry Pi OS, or any Linux server)
-- Python 3.8+
-- FFmpeg installed:
-  ```bash
-  sudo apt-get update && sudo apt-get install -y ffmpeg
-  ```
-
-### 2. Clone Repository
-```bash
-git clone https://github.com/<your-username>/micam.git
-cd micam
-```
-
-### 3. Install Python Dependencies
-```bash
-pip3 install -r requirements.txt
-```
-
-### 4. Launch micam (1-Command)
-```bash
-chmod +x start.sh stop.sh
-./start.sh
-```
-> [!TIP]
-> `start.sh` automatically detects your system CPU architecture (`x86_64`, `arm64`, `armv7l`) and fetches the latest official `go2rtc` binary if not already present.
-
-### 5. Pair via Web Setup Wizard
-Open your browser at:
-```text
-http://<SERVER_IP>:8088
-```
-1. The **Setup Wizard** will appear automatically on first launch.
-2. Scan the on-screen **QR Code** using your **Mi Home** app (or click *Buka Link Verifikasi*).
-3. Select your camera from the detected list.
-4. Click **Pasang & Aktifkan Kamera Ini** &mdash; your live stream starts immediately!
-
-To stop the background services:
-```bash
-./stop.sh
-```
-
----
-
-## Screenshots
-
-<div align="center">
-  <p><strong>Desktop Surveillance View (Dual-Lens 2.5K with 2-Pass FSR Super-Resolution)</strong></p>
-  <img src="docs/screenshots/desktop_preview.png" alt="micam Desktop Dashboard" width="90%" style="border-radius: 8px; border: 1px solid #222;" />
-  <br><br>
-  <p><strong>Zero-Config Web Setup Wizard (QR SSO Onboarding) & Mobile Responsive UI</strong></p>
-  <img src="docs/screenshots/wizard_preview.png" alt="micam Setup Wizard" width="45%" style="border-radius: 8px; border: 1px solid #222;" />
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/mobile_preview.png" alt="micam Mobile View" width="45%" style="border-radius: 8px; border: 1px solid #222;" />
-</div>
 
 ---
 
@@ -148,32 +136,38 @@ To stop the background services:
 
 ## Architecture
 
-```text
-               +----------------------------------------+
-               |         Mi Home Mobile App             |
-               +-------------------+--------------------+
-                                   | (QR Scan / Auth)
-                                   v
-+-------------------+    +--------------------+    +--------------------+
-|   Xiaomi Camera   |<---|   Xiaomi Cloud     |--->|  xiaomi_wizard.py  |
-| (Local LAN RTSP)  |    | (SSO & Token Ex.)  |    | (Auto-Discovery)   |
-+---------+---------+    +--------------------+    +---------+----------+
-          |                                                  |
-          | P2P / RTSP Handshake                             | Auto-Generates
-          v                                                  v
-+-------------------+                              +--------------------+
-|   go2rtc Gateway  |<-----------------------------|  .env & go2rtc.yaml|
-| (WebRTC / RTSP)   |                              +--------------------+
-+---------+---------+
-          |
-          +-------------------------------+
-          |                               |
-          v                               v
-+-------------------+           +--------------------+
-| In-Browser Client |           | FFmpeg DVR Engine  |
-| - 2-Pass WebGL FSR|           | - Zero-CPU Copy    |
-| - Adaptive Layout |           | - Auto-Retention   |
-+-------------------+           +--------------------+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Devices"]
+        Browser["Browser Dashboard<br>(WebGL FSR 1.0 Upscaling)"]
+        MobileApp["Mi Home Mobile App<br>(QR Scan & SSO Verification)"]
+    end
+
+    subgraph Cloud ["Xiaomi Cloud Services"]
+        MiCloud["Xiaomi Cloud Auth Server<br>(SSO Ticket & Token Extraction)"]
+    end
+
+    subgraph Host ["micam Host Server"]
+        Wizard["xiaomi_wizard.py<br>(Multi-Region Scanner)"]
+        ConfigFile["Auto-Generated Config<br>(.env & go2rtc.yaml)"]
+        Gateway["go2rtc Gateway<br>(WebRTC & RTSP Demuxer)"]
+        DVREngine["FFmpeg DVR Engine<br>(Stream-Copy & Auto-Retention)"]
+        LocalServer["server.py REST API<br>(Hardware MIIO RPC AES-128)"]
+    end
+
+    subgraph Device ["Hardware Surveillance"]
+        Camera["Xiaomi Smart Camera<br>(Local LAN Dual/Single Lens)"]
+    end
+
+    MobileApp -->|QR Login Approval| MiCloud
+    MiCloud -->|Encrypted Tokens| Wizard
+    Wizard -->|Writes Configuration| ConfigFile
+    ConfigFile -->|Reloads Streams| Gateway
+    Camera -->|Local P2P RTSP Stream| Gateway
+    Gateway -->|Sub-Second WebRTC| Browser
+    Gateway -->|Direct RTSP Ingestion| DVREngine
+    Browser -->|MIIO Controls: Light, Siren, IR| LocalServer
+    LocalServer -->|Encrypted UDP Packets| Camera
 ```
 
 ---
