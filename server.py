@@ -34,6 +34,7 @@ def load_env(env_path):
 load_env(os.path.join(BASE_DIR, ".env"))
 
 from recorder import recorder
+from xiaomi_wizard import wizard_session
 
 CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.100")
 CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
@@ -47,6 +48,35 @@ XIAOMI_USER_ID = os.environ.get("XIAOMI_USER_ID", "-")
 XIAOMI_USER_EMAIL = os.environ.get("XIAOMI_USER_EMAIL", "Connected Account")
 STREAM_LEFT = os.environ.get("CCTV_STREAM_LEFT", "cctv_lensa_kiri")
 STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
+
+def refresh_runtime_config():
+    global CAMERA_IP, CAMERA_PORT, TOKEN_HEX, TOKEN, DID, CCTV_NAME, XIAOMI_USER_ID, XIAOMI_USER_EMAIL
+    load_env(os.path.join(BASE_DIR, ".env"))
+    CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.100")
+    CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
+    TOKEN_HEX = os.environ.get("CCTV_TOKEN_HEX", "0" * 32)
+    TOKEN = bytes.fromhex(TOKEN_HEX)
+    DID = os.environ.get("CCTV_DID", "0")
+    CCTV_NAME = os.environ.get("CCTV_NAME", "Xiaomi CW100 Dual")
+    XIAOMI_USER_ID = os.environ.get("XIAOMI_USER_ID", "-")
+    XIAOMI_USER_EMAIL = os.environ.get("XIAOMI_USER_EMAIL", "Connected Account")
+
+def get_wizard_configuration_status():
+    cam_ip = os.environ.get("CCTV_CAMERA_IP", "").strip()
+    token = os.environ.get("CCTV_TOKEN_HEX", "").strip()
+    did = os.environ.get("CCTV_DID", "").strip()
+    is_valid = bool(cam_ip and cam_ip != "192.168.1.100" and token and token != "0"*32 and did)
+    return {
+        "configured": is_valid,
+        "camera": {
+            "ip": cam_ip,
+            "did": did,
+            "name": os.environ.get("CCTV_NAME", "Xiaomi CCTV"),
+            "model": os.environ.get("CCTV_MODEL", "chuangmi.camera.075ae1"),
+            "lens_type": os.environ.get("CCTV_LENS_MODE", "dual"),
+            "region": os.environ.get("XIAOMI_REGION", "sg")
+        }
+    }
 
 def send_miio_rpc(method, params, timeout=2.5):
     hello = bytes.fromhex("21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
@@ -87,6 +117,12 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/api/status":
             self.handle_api_status()
+        elif parsed.path == "/api/wizard/check":
+            self.send_json(get_wizard_configuration_status())
+        elif parsed.path == "/api/wizard/status":
+            self.send_json(wizard_session.poll_qr_status())
+        elif parsed.path == "/api/wizard/devices":
+            self.send_json(wizard_session.discover_cameras())
         elif parsed.path == "/api/ping":
             self.handle_api_ping()
         elif parsed.path == "/api/auth/status":
@@ -266,6 +302,42 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self.send_json({"success": False, "error": str(e)})
 
+        elif parsed.path == "/api/wizard/start":
+            self.send_json(wizard_session.start_qr_session())
+
+        elif parsed.path == "/api/wizard/save":
+            did = str(data.get("did", "")).strip()
+            custom_ip = data.get("ip", "").strip()
+            cam_info = None
+            for c in wizard_session.discovered_cameras:
+                if str(c.get("did")) == did:
+                    cam_info = dict(c)
+                    break
+            if not cam_info:
+                cam_info = {
+                    "did": did,
+                    "ip": custom_ip or data.get("ip", "192.168.1.11"),
+                    "token": data.get("token", "0"*32),
+                    "name": data.get("name", "Xiaomi CCTV"),
+                    "model": data.get("model", "chuangmi.camera.075ae1"),
+                    "lens_type": data.get("lens_type", "dual"),
+                    "region": data.get("region", wizard_session.active_region)
+                }
+            if custom_ip:
+                cam_info["ip"] = custom_ip
+
+            ok = wizard_session.apply_camera_config(cam_info, base_dir=BASE_DIR)
+            if ok:
+                refresh_runtime_config()
+                try:
+                    req = urllib.request.Request(f"{GO2RTC_API}/api/restart", data=b"", method="POST")
+                    urllib.request.urlopen(req, timeout=3)
+                except:
+                    pass
+                self.send_json({"success": True, "message": "Konfigurasi kamera berhasil disimpan dan diterapkan!", "camera": cam_info})
+            else:
+                self.send_json({"success": False, "error": "Gagal menyimpan konfigurasi kamera"}, status=500)
+
         elif parsed.path == "/api/auth/reload_streams":
             try:
                 with urllib.request.urlopen(f"{GO2RTC_API}/api/streams", timeout=5) as resp:
@@ -441,6 +513,13 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(data)
         except Exception as e:
             self.send_error(502, f"Failed to fetch snapshot from go2rtc: {e}")
+
+    def end_headers(self):
+        if self.path.endswith(".html") or self.path.endswith(".js") or self.path == "/" or ".js?" in self.path:
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+        super().end_headers()
 
     def send_json(self, payload, status=200):
         data = json.dumps(payload).encode("utf-8")
