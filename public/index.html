@@ -1974,7 +1974,7 @@
               </div>
             </div>
             <div class="video-frame-container" id="containerCamLeft">
-              <video-rtc id="camLeft"></video-rtc>
+              <video-rtc id="camLeft" background></video-rtc>
               <div class="video-zoom-overlay" id="zoomOverlay_camLeft">
                 <span class="zoom-val" id="zoomVal_camLeft">1.0x</span>
                 <button type="button" class="zoom-reset-btn" onclick="resetZoom('camLeft')" title="Reset Zoom ke Normal (1.0x)">Reset</button>
@@ -2042,7 +2042,7 @@
               </div>
             </div>
             <div class="video-frame-container" id="containerCamRight">
-              <video-rtc id="camRight"></video-rtc>
+              <video-rtc id="camRight" background></video-rtc>
               <div class="video-zoom-overlay" id="zoomOverlay_camRight">
                 <span class="zoom-val" id="zoomVal_camRight">1.0x</span>
                 <button type="button" class="zoom-reset-btn" onclick="resetZoom('camRight')" title="Reset Zoom ke Normal (1.0x)">Reset</button>
@@ -3160,11 +3160,40 @@
     function initStreams() {
       const camL = document.getElementById('camLeft');
       const camR = document.getElementById('camRight');
-      if (camL) camL.src = getWsUrl('cctv_garasi_kiri');
-      if (camR) camR.src = getWsUrl('cctv_garasi_kanan');
+      if (camL) {
+        camL.background = true;
+        camL.visibilityCheck = false;
+        camL.src = getWsUrl('cctv_garasi_kiri');
+      }
+      if (camR) {
+        camR.background = true;
+        camR.visibilityCheck = false;
+        camR.src = getWsUrl('cctv_garasi_kanan');
+      }
       setupZoomPan('camLeft');
       setupZoomPan('camRight');
     }
+
+    function resumeStreams() {
+      ['camLeft', 'camRight'].forEach(camId => {
+        const el = document.getElementById(camId);
+        if (!el) return;
+        const video = el.querySelector('video') || el.video;
+        if (video && video.paused) {
+          video.play().catch(() => {});
+        }
+        // Auto-recover jika koneksi benar-benar terputus akibat OS/sinyal
+        if (el.pc && (el.pc.connectionState === 'failed' || el.pc.connectionState === 'disconnected')) {
+          if (el.onconnect) el.onconnect();
+        }
+      });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) resumeStreams();
+    });
+    window.addEventListener('pageshow', resumeStreams);
+    window.addEventListener('focus', resumeStreams);
 
     function reloadFrame(frameId) {
       const el = document.getElementById(frameId);

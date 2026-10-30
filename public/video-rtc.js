@@ -18,8 +18,8 @@ export class VideoRTC extends HTMLElement {
     constructor() {
         super();
 
-        this.DISCONNECT_TIMEOUT = 5000;
-        this.RECONNECT_TIMEOUT = 15000;
+        this.DISCONNECT_TIMEOUT = 60000;
+        this.RECONNECT_TIMEOUT = 1000;
 
         this.CODECS = [
             'avc1.640029',      // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
@@ -45,10 +45,10 @@ export class VideoRTC extends HTMLElement {
         this.media = 'video,audio';
 
         /**
-         * [config] Run stream when not displayed on the screen. Default `false`.
+         * [config] Run stream when not displayed on the screen. Default `true` for CCTV dashboard.
          * @type {boolean}
          */
-        this.background = false;
+        this.background = true;
 
         /**
          * [config] Run stream only when player in the viewport. Stop when user scroll out player.
@@ -59,11 +59,11 @@ export class VideoRTC extends HTMLElement {
         this.visibilityThreshold = 0;
 
         /**
-         * [config] Run stream only when browser page on the screen. Stop when user change browser
-         * tab or minimise browser windows.
+         * [config] Run stream only when browser page on the screen.
+         * Default `false` to prevent stream killing on tab/browser switch.
          * @type {boolean}
          */
-        this.visibilityCheck = true;
+        this.visibilityCheck = false;
 
         /**
          * [config] WebRTC configuration
@@ -282,7 +282,11 @@ export class VideoRTC extends HTMLElement {
             this.CODECS.splice(this.CODECS.indexOf(skip));
         }
 
-        if (this.background) return;
+        if (this.hasAttribute('background') || this.background) {
+            this.background = true;
+            this.visibilityCheck = false;
+            return;
+        }
 
         if ('hidden' in document && this.visibilityCheck) {
             document.addEventListener('visibilitychange', () => {
