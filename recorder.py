@@ -33,16 +33,21 @@ RTSP_HOST = os.environ.get("RTSP_HOST", "127.0.0.1:8554")
 STREAM_LEFT = os.environ.get("CCTV_STREAM_LEFT", "cctv_lensa_kiri")
 STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
 
+def get_stream_rtsp(stream_name):
+    base = f"rtsp://{RTSP_HOST}/{stream_name}"
+    sep = "&" if "?" in stream_name else "?"
+    return f"{base}{sep}video=h264&audio=opus"
+
 STREAMS = {
     "left": {
         "id": "left",
         "name": "Lensa 1 (Kiri)",
-        "rtsp": f"rtsp://{RTSP_HOST}/{STREAM_LEFT}"
+        "rtsp": get_stream_rtsp(STREAM_LEFT)
     },
     "right": {
         "id": "right",
         "name": "Lensa 2 (Kanan)",
-        "rtsp": f"rtsp://{RTSP_HOST}/{STREAM_RIGHT}"
+        "rtsp": get_stream_rtsp(STREAM_RIGHT)
     }
 }
 
@@ -61,6 +66,7 @@ class RecorderManager:
         self.config = dict(DEFAULT_CONFIG)
         self.manual_procs = {}  # "left": Popen, "right": Popen
         self.manual_start_times = {}
+        self.manual_filepaths = {}
         self.auto_procs = {}    # "left": Popen, "right": Popen
         self.load_config()
         self.ensure_storage_dir()
@@ -130,14 +136,16 @@ class RecorderManager:
                 cmd = [
                     "ffmpeg", "-y", "-rtsp_transport", "tcp",
                     "-i", STREAMS[l]["rtsp"],
-                    "-c", "copy",
-                    "-tag:v", "hvc1",
+                    "-map", "0:v:0", "-map", "0:a?",
+                    "-c:v", "copy",
+                    "-c:a", "aac", "-b:a", "128k",
                     "-movflags", "+faststart",
                     filepath
                 ]
                 proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 self.manual_procs[l] = proc
                 self.manual_start_times[l] = time.time()
+                self.manual_filepaths[l] = filepath
                 res[l] = "started"
             return res
 
@@ -147,6 +155,7 @@ class RecorderManager:
             res = {}
             for l in lenses:
                 p = self.manual_procs.get(l)
+                filepath = self.manual_filepaths.get(l)
                 if p and p.poll() is None:
                     try:
                         p.send_signal(signal.SIGINT)
@@ -161,6 +170,16 @@ class RecorderManager:
                     res[l] = "not_running"
                 self.manual_procs.pop(l, None)
                 self.manual_start_times.pop(l, None)
+                self.manual_filepaths.pop(l, None)
+
+                # Clean up if file is empty or corrupted (< 10KB)
+                if filepath and os.path.exists(filepath):
+                    try:
+                        if os.path.getsize(filepath) < 10000:
+                            os.remove(filepath)
+                            print(f"[Recorder] Removed empty/aborted recording: {filepath}")
+                    except Exception:
+                        pass
             return res
 
     # Auto Segmented Recording (DVR Continuous)
@@ -181,8 +200,9 @@ class RecorderManager:
             cmd = [
                 "ffmpeg", "-y", "-rtsp_transport", "tcp",
                 "-i", STREAMS[l]["rtsp"],
-                "-c", "copy",
-                "-tag:v", "hvc1",
+                "-map", "0:v:0", "-map", "0:a?",
+                "-c:v", "copy",
+                "-c:a", "aac", "-b:a", "128k",
                 "-f", "segment",
                 "-segment_time", str(seg_sec),
                 "-segment_format", "mp4",
@@ -283,6 +303,8 @@ class RecorderManager:
                 st = entry.stat()
                 size_bytes = st.st_size
                 mtime = st.st_mtime
+                if size_bytes < 10000:
+                    continue
             except Exception:
                 continue
 
