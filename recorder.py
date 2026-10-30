@@ -131,6 +131,7 @@ class RecorderManager:
                     "ffmpeg", "-y", "-rtsp_transport", "tcp",
                     "-i", STREAMS[l]["rtsp"],
                     "-c", "copy",
+                    "-tag:v", "hvc1",
                     "-movflags", "+faststart",
                     filepath
                 ]
@@ -181,6 +182,7 @@ class RecorderManager:
                 "ffmpeg", "-y", "-rtsp_transport", "tcp",
                 "-i", STREAMS[l]["rtsp"],
                 "-c", "copy",
+                "-tag:v", "hvc1",
                 "-f", "segment",
                 "-segment_time", str(seg_sec),
                 "-segment_format", "mp4",

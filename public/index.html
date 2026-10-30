@@ -1107,6 +1107,59 @@
       color: var(--accent);
       font-weight: 700;
     }
+    .zoom-clarity-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding-top: 5px;
+      border-top: 1px solid #222222;
+      font-size: 0.65rem;
+      color: #999999;
+    }
+    .zoom-clarity-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .zoom-clarity-switch {
+      position: relative;
+      display: inline-block;
+      width: 28px;
+      height: 16px;
+    }
+    .zoom-clarity-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .zoom-clarity-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #333333;
+      border-radius: 16px;
+      transition: 0.2s;
+    }
+    .zoom-clarity-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .zoom-clarity-switch input:checked + .zoom-clarity-slider {
+      background-color: var(--accent);
+    }
+    .zoom-clarity-switch input:checked + .zoom-clarity-slider:before {
+      transform: translateX(12px);
+    }
     .video-frame-container iframe,
     .video-frame-container video-rtc,
     .video-frame-container video,
@@ -1117,8 +1170,8 @@
       display: block;
       background: #000000;
       object-fit: contain;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
+      image-rendering: high-quality;
+      image-rendering: auto;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       transform: translateZ(0);
@@ -1837,6 +1890,15 @@
   </style>
 </head>
 <body>
+  <!-- Hardware-Accelerated Contrast-Adaptive Unsharp Filter for Digital Zoom -->
+  <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
+    <filter id="cctvSharpen" color-interpolation-filters="sRGB">
+      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="
+        0    -0.22   0
+       -0.22  1.88 -0.22
+        0    -0.22   0" />
+    </filter>
+  </svg>
 
   <!-- Top Navigation -->
   <header>
@@ -1957,6 +2019,15 @@
                       <button type="button" class="zoom-preset-btn" onclick="setZoomPercent('camLeft', 50)">50%</button>
                       <button type="button" class="zoom-preset-btn" onclick="setZoomPercent('camLeft', 100)">100%</button>
                     </div>
+                    <div class="zoom-clarity-row">
+                      <label class="zoom-clarity-label" for="clarityToggle_camLeft">
+                        <span>Penajam Adaptif (Anti-Blur)</span>
+                      </label>
+                      <label class="zoom-clarity-switch">
+                        <input type="checkbox" id="clarityToggle_camLeft" checked onchange="toggleClarityBoost('camLeft', this.checked)">
+                        <span class="zoom-clarity-slider"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
                 <button class="btn-icon" id="btnMicLeft" onclick="toggleTalk()" title="Bicara ke Speaker CCTV (Intercom)" aria-label="Bicara ke Speaker CCTV">
@@ -2024,6 +2095,15 @@
                       <button type="button" class="zoom-preset-btn" onclick="setZoomPercent('camRight', 25)">25%</button>
                       <button type="button" class="zoom-preset-btn" onclick="setZoomPercent('camRight', 50)">50%</button>
                       <button type="button" class="zoom-preset-btn" onclick="setZoomPercent('camRight', 100)">100%</button>
+                    </div>
+                    <div class="zoom-clarity-row">
+                      <label class="zoom-clarity-label" for="clarityToggle_camRight">
+                        <span>Penajam Adaptif (Anti-Blur)</span>
+                      </label>
+                      <label class="zoom-clarity-switch">
+                        <input type="checkbox" id="clarityToggle_camRight" checked onchange="toggleClarityBoost('camRight', this.checked)">
+                        <span class="zoom-clarity-slider"></span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -2805,6 +2885,7 @@
         scale: 1.0,
         x: 0,
         y: 0,
+        clarity: true,
         isDragging: false,
         startX: 0,
         startY: 0,
@@ -2817,6 +2898,7 @@
         scale: 1.0,
         x: 0,
         y: 0,
+        clarity: true,
         isDragging: false,
         startX: 0,
         startY: 0,
@@ -2825,6 +2907,14 @@
         lastTapTime: 0
       }
     };
+
+    function toggleClarityBoost(camId, enabled) {
+      if (zoomPanState[camId]) {
+        zoomPanState[camId].clarity = enabled;
+        updateZoomTransform(camId, false);
+        log(`Penajam Adaptif ${camId === 'camLeft' ? 'Lensa 1' : 'Lensa 2'} -> ${enabled ? 'AKTIF' : 'NONAKTIF'}`);
+      }
+    }
 
     function toggleZoomPopup(camId, e) {
       if (e) e.stopPropagation();
@@ -2917,6 +3007,17 @@
       camEl.style.transition = animate ? 'transform 0.22s cubic-bezier(0.2, 0, 0, 1)' : 'none';
       camEl.style.transformOrigin = 'center center';
       camEl.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale(${state.scale})`;
+
+      // Dynamic Edge Sharpening & Micro-contrast curve
+      if (state.scale > 1.0 && state.clarity !== false) {
+        const factor = Math.min(1.0, (state.scale - 1.0) / 2.0); // 0.0 to 1.0
+        const contrast = (1.0 + 0.10 * factor).toFixed(3);
+        const brightness = (1.0 + 0.015 * factor).toFixed(3);
+        const saturate = (1.0 + 0.04 * factor).toFixed(3);
+        camEl.style.filter = `url(#cctvSharpen) contrast(${contrast}) brightness(${brightness}) saturate(${saturate})`;
+      } else {
+        camEl.style.filter = 'none';
+      }
 
       if (state.scale > 1.0) {
         container.classList.add('is-zoomed');
@@ -3352,8 +3453,8 @@
     }
 
     function takeSnapshot(side) {
-      window.open(`/api/snapshot/${side}`, '_blank');
-      log(`Mengambil snapshot lensa ${side}.`);
+      window.open(`/api/snapshot/${side}?enhance=1`, '_blank');
+      log(`Mengambil snapshot HD lensa ${side} dengan penajaman adaptif.`);
     }
 
     // --- Emergency Siren ---

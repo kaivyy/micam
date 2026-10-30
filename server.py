@@ -414,15 +414,31 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_snapshot(self, path):
         stream_name = STREAM_RIGHT if "right" in path or "kanan" in path else STREAM_LEFT
+        enhance = "enhance=1" in path or "enhance=true" in path or "clarity=1" in path
         try:
             with urllib.request.urlopen(f"{GO2RTC_API}/api/frame.jpeg?src={stream_name}", timeout=6) as resp:
                 data = resp.read()
-                self.send_response(200)
-                self.send_header("Content-Type", "image/jpeg")
-                self.send_header("Content-Length", str(len(data)))
-                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
-                self.end_headers()
-                self.wfile.write(data)
+
+            if enhance and data:
+                try:
+                    proc = subprocess.Popen(
+                        ["ffmpeg", "-v", "error", "-i", "-", "-vf", "cas=0.50", "-q:v", "2", "-f", "image2", "-"],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.DEVNULL
+                    )
+                    enhanced_data, _ = proc.communicate(input=data, timeout=3)
+                    if proc.returncode == 0 and enhanced_data:
+                        data = enhanced_data
+                except Exception as ex:
+                    print(f"[Snapshot Enhance] Fallback to raw frame: {ex}", file=sys.stderr)
+
+            self.send_response(200)
+            self.send_header("Content-Type", "image/jpeg")
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.end_headers()
+            self.wfile.write(data)
         except Exception as e:
             self.send_error(502, f"Failed to fetch snapshot from go2rtc: {e}")
 
