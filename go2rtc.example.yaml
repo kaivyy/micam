@@ -12,10 +12,12 @@ rtsp:
 
 webrtc:
   listen: ":8555"
+  candidates:
+    - YOUR_SERVER_IP:8555
 
 ffmpeg:
   bin: "ffmpeg"
-  h264: "-vf cas=0.35 -c:v libx264 -preset:v veryfast -tune:v zerolatency -crf 18 -b:v 4500k -maxrate 6500k -bufsize 8000k -profile:v high -level:v 4.2"
+  h264: "-c:v libx264 -preset:v ultrafast -tune:v zerolatency -b:v 2500k -maxrate 3500k -bufsize 3500k -profile:v high -level:v 4.2"
 
 # Session PassToken Xiaomi Cloud (Didapatkan dari Xiaomi Cloud Tokens Extractor)
 xiaomi:

@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="/fsr-upscaler.js?v=20261030_04"></script>
-  <script type="module" src="/video-rtc.js"></script>
+  <script src="/fsr-upscaler.js?v=20261030_05"></script>
+  <script type="module" src="/video-rtc.js?v=20261030_05"></script>
   <style>
     :root {
       --bg: #000000;
@@ -3502,7 +3502,7 @@
       const canvasEl = document.getElementById(`fsrCanvas_${camId}`);
       const videoEl = camEl.video || camEl.querySelector('video');
 
-      if (mode === 'fsr' && isClarityOn) {
+      if (mode === 'fsr' && isClarityOn && state.scale > 1.01) {
         const upscaler = getOrCreateFsrUpscaler(camId);
         if (upscaler) {
           if (upscaler.hasRenderedFirstFrame) {
