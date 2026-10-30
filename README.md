@@ -12,9 +12,15 @@
 
 *A self-hosted, lightweight surveillance platform for Xiaomi smart cameras. Built with native WebRTC, zero-config QR onboarding, zero-CPU DVR recording, and AMD FSR WebGL super-resolution.*
 
+<br>
+
+<img src="docs/screenshots/desktop_preview.png" alt="micam Desktop Surveillance Dashboard" width="100%" style="border-radius: 8px; border: 1px solid #222;" />
+
+<br>
+
 ---
 
-[Quick Start](#quick-start) • [Screenshot](#screenshot) • [Features](#key-features) • [Hardware Compatibility](#hardware-compatibility) • [Architecture](#architecture) • [NVR & RTSP](#nvr--third-party-integration) • [Docs](docs/)
+[Quick Start](#quick-start) • [Features](#key-features) • [Hardware Compatibility](#hardware-compatibility) • [Architecture](#architecture) • [NVR & RTSP](#nvr--third-party-integration) • [Docs](docs/)
 
 </div>
 
@@ -56,15 +62,6 @@ To stop the background services:
 ```bash
 ./stop.sh
 ```
-
----
-
-## Screenshot
-
-<div align="center">
-  <img src="docs/screenshots/desktop_preview.png" alt="micam Desktop Surveillance Dashboard" width="100%" style="border-radius: 8px; border: 1px solid #222;" />
-  <p><em>Desktop surveillance view (Dual-Lens 2.5K live stream with integrated 2-Pass WebGL FSR super-resolution zoom)</em></p>
-</div>
 
 ---
 
