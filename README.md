@@ -1,196 +1,220 @@
 <div align="center">
 
-# Xiaomi Outdoor Camera CW100 Dual
-### Surveillance, AI Control & NVR DVR Dashboard
+# 📷 micam
+### Ultra-Low-Latency WebRTC Surveillance Dashboard, DVR & Hardware Controller for Xiaomi Smart Cameras
 
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![WebRTC](https://img.shields.io/badge/Streaming-WebRTC%20%7C%20MSE%20%7C%20RTSP-0284c7?style=for-the-badge)](https://github.com/AlexxIT/go2rtc)
-[![Codec](https://img.shields.io/badge/Codec-H.265%20%2F%20HEVC-10b981?style=for-the-badge)](https://ffmpeg.org)
-[![UI](https://img.shields.io/badge/Theme-Pure%20OLED%20Black-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Streaming](https://img.shields.io/badge/Streaming-WebRTC%20%7C%20MSE%20%7C%20RTSP-0284c7?style=for-the-badge&logo=webrtc&logoColor=white)](https://github.com/AlexxIT/go2rtc)
+[![FFmpeg](https://img.shields.io/badge/FFmpeg-7.1%20HEVC%20%2F%20H.265-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org)
+[![Super Resolution](https://img.shields.io/badge/Upscaling-2--Pass%20WebGL%20FSR-ed1c24?style=for-the-badge&logo=amd&logoColor=white)](https://gpuopen.com/fidelityfx-superresolution/)
+[![UI Theme](https://img.shields.io/badge/Design-Pure%20OLED%20Black-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge)](LICENSE)
 
-*Sistem dashboard pengawasan, kontrol hardware pintar lokal, AI analytics, dan perekam video (DVR) mandiri (100% self-hosted & self-contained) untuk kamera pintar **Xiaomi Outdoor Camera CW100 Dual-Lens** (`chuangmi.camera.075ae1`).*
+*A self-hosted, lightweight, and modern surveillance platform for Xiaomi smart cameras. Built with native WebRTC, zero-config QR onboarding, zero-CPU DVR recording, and AMD FSR WebGL super-resolution.*
 
 ---
 
-[Fitur Utama](#fitur-utama) • [Arsitektur](docs/ARCHITECTURE.md) • [Instalasi Cepat](#instalasi-cepat) • [REST API](docs/API.md) • [Integrasi NVR](docs/NVR_INTEGRATION.md) • [Troubleshooting](docs/TROUBLESHOOTING.md)
+[Quick Start](#-quick-start) • [Features](#-key-features) • [Hardware Compatibility](#-hardware-compatibility) • [Architecture](#-architecture) • [NVR & RTSP](#-nvr--third-party-integration) • [Docs](docs/)
 
 </div>
 
 ---
 
-## Fitur Utama
+## ⚡ Key Features
 
-- **Web Setup Wizard & Zero-Config Onboarding (Satset):**
-  - **Setup 1-Klik di Browser**: Pengguna baru cukup membuka dashboard di browser. Jika belum ada kamera, wizard onboarding otomatis muncul.
-  - **Login QR & Link SSO Mi Home**: Cukup scan QR code dari aplikasi Mi Home atau klik link verifikasi browser tanpa repot memasukkan token/DID manual di terminal.
-  - **Auto-Scan Multi-Region**: Otomatis mendeteksi kamera di server Singapore (`sg`), China (`cn`), dan Global.
-  - **Layout Adaptif Otomatis**: Mendukung kamera **Dual-Lens** (CW100 / CW700S) maupun **Single-Lens** (C200 / C300 / C400) secara otomatis tanpa layar kedua kosong.
-- **2-Pass WebGL FSR Super-Resolution Zoom (EASU + RCAS):**
-  - Rekonstruksi gambar zoom adaptif berbasis algoritma **AMD FidelityFX Super Resolution 1.0** di sisi client browser (WebGL).
-  - Pass 1 (EASU 12-tap directional Lanczos) + Pass 2 (RCAS ringing-free sharpening) memberikan detail plat nomor, wajah, dan teks jauh lebih tajam dibanding interpolasi browser standar.
-- **Dual-Lens Live Streaming Simultan (~200ms Latency):**
-  - **Lensa 1:** Sensor Utama *Wide Angle* (2.5K / HD)
-  - **Lensa 2:** Sensor Sekunder *Telephoto Long-Range* (2.5K / HD)
-  - Streaming menggunakan teknologi **WebRTC & MSE** via gateway lokal, menghasilkan latensi sangat minim tanpa buffering cloud.
-- **Digital Zoom & Pan Interaktif:**
-  - Zoom independen 0–100% per lensa dengan preset cepat (0%, 25%, 50%, 100%).
-  - Dukungan drag / pan intuitif di desktop maupun layar sentuh smartphone.
-- **Audio Fokus & Dua Arah (Intercom):**
-  - Mikrofon fisik terpadu dengan perlindungan **Anti-Gema Otomatis** (mendengarkan satu lensa me-mute lensa lainnya).
-  - Bicara dua arah (*backchannel*) langsung dari browser ke speaker CCTV.
-- **Emergency Siren / Alarm Suara Darurat:**
-  - Memicu sirene buzzer hardware bawaan kamera seketika untuk peringatan bahaya di lokasi.
-  - Dilengkapi animasi strobo visual pada dashboard saat aktif.
-- **AI Smart Detection Analytics & Toggle Switch:**
-  - Kontrol saklar deteksi pintar langsung ke kamera:
-    - **General Motion Detection** (Deteksi Gerakan Umum)
-    - **AI Human Detection** (Deteksi AI Bentuk Tubuh Manusia)
-    - **AI Vehicle Detection** (Deteksi AI Kendaraan Mobil/Motor)
-- **Telegram Alert Bot & Live Snapshot:**
-  - Integrasi bot Telegram langsung dari dashboard: kirim notifikasi dan foto snapshot JPEG resolusi tinggi seketika ke ponsel pengguna.
-- **24-Hour NVR Timeline Scrubber:**
-  - Bilah linimasa 24 jam interaktif visual untuk meninjau rekaman sepanjang hari.
-  - Fitur *click-to-seek* untuk langsung memutar rekaman pada jam tertentu.
-- **Perekam Video (DVR) Cerdas & Zero-CPU Overhead:**
-  - **Stream Copy (`-c copy`):** Video dan audio disalin langsung ke disk tanpa proses rendering ulang (*transcoding*), menjaga penggunaan CPU server mendekati **~0%**.
-  - **DVR Otomatis 24/7 (Continuous):** Otomatis merekam dan memecah file video per segmen waktu (**5, 15, 30, atau 60 menit** per file `.mp4`).
-  - **Rekam Manual Seketika:** Tombol rekam cepat di atas live feed dengan timer berkedip realtime.
-  - **Auto-Cleanup & Manajemen Retensi:** Otomatis menghapus file rekaman terlama berdasarkan masa simpan (**3, 7, 14, 30 hari**) atau saat kapasitas harddisk menyentuh batas aman (< 5 GB).
-- **In-Browser Video Player & File Manager:**
-  - Putar rekaman langsung di browser dengan dukungan **HTTP 206 Partial Content Range** (bisa digeser maju/mundur dengan instan).
-  - Unduh file `.mp4` asli atau hapus dengan satu klik.
-- **PIN Security Guard / Lock Screen:**
-  - Sistem penguncian dashboard 4 digit PIN dengan dialog keypad numerik untuk mencegah akses kontrol yang tidak diinginkan.
-- **Kontrol Hardware Lokal Terenkripsi (MIIO RPC AES-128 CBC):**
-  - **Lampu Sorot LED:** Saklar on/off lampu penerangan ganda (*dual white spotlight*).
-  - **Night Vision (Infrared):** Mode Malam IR otomatis / nyala / mati.
-  - **Sensor Lensa:** Saklar mode siaga (*sleep*) / aktif kedua sensor kamera.
-  - **Remote Reboot:** Mulai ulang perangkat CCTV langsung dari browser.
-- **Desain Modern Pure OLED Black (`#000000`) & Bespoke SVG Icons:**
-  - Tampilan tema hitam pekat tanpa kabur abu-abu, sangat tajam dan hemat daya pada layar OLED/AMOLED.
-  - Menggunakan icon vektor SVG inline yang bersih dan profesional tanpa emoji.
-  - Desain responsif (*mobile-friendly*) dengan target sentuh ibu jari minimal **44x44px** sesuai kaidah *antislop UI*.
+* **Zero-Config Web Setup Wizard (Satset):**
+  * No manual terminal editing of IP addresses, DIDs, or 32-character hex tokens.
+  * Scan the on-screen **QR Code** directly with the **Mi Home** app or click the SSO verification link.
+  * **Multi-Region Auto-Scanning**: Automatically searches and discovers your cameras across server regions (`sg`, `cn`, `de`, `us`, `global`).
+
+* **Adaptive Camera Layout (Single-Lens & Dual-Lens):**
+  * **Dual-Lens Mode** (CW100 / CW700S): Synchronized dual-stream playback with independent zoom and audio focus.
+  * **Single-Lens Mode** (C200 / C300 / C400): Automatically adjusts to a full-width single monitor without empty or offline secondary frames.
+
+* **Ultra-Low Latency Live Streaming (~200ms):**
+  * Direct peer-to-peer WebRTC & MSE streaming via integrated `go2rtc` gateway.
+  * Sub-second latency without cloud relay buffering or subscription fees.
+
+* **2-Pass WebGL FSR Super-Resolution Zoom:**
+  * Client-side GPU-accelerated upscaler based on **AMD FidelityFX Super Resolution (FSR 1.0)**.
+  * **Pass 1 (EASU)**: 12-tap directional Lanczos interpolation preserves sharp edge orientation.
+  * **Pass 2 (RCAS)**: Ringing-free adaptive sharpening brings out fine details on license plates and faces without pixelation.
+  * Switch on the fly between Standard SVG and 2-Pass FSR.
+
+* **Zero-CPU DVR Recording & 24-Hour Timeline Scrubber:**
+  * **Stream-Copy Mode (`-c copy`)**: Saves raw H.265/H.264 bitstreams directly to disk with **~0% CPU usage**.
+  * **Continuous 24/7 DVR**: Automatically splits video into segments (5, 15, 30, or 60 minutes).
+  * **Instant Scrubbing**: Play recordings in-browser with **HTTP 206 Partial Content Range** seeking.
+  * **Storage Retention**: Auto-deletes old files when disk storage reaches safe thresholds or age limits.
+
+* **Local Encrypted Hardware Controls (MIIO RPC AES-128-CBC):**
+  * Dual white LED spotlight toggle.
+  * Infrared night vision modes (Auto / On / Off).
+  * Emergency siren alarm buzzer with visual strobe animation.
+  * AI Detection toggles: Motion, Human, and Vehicle analytics.
+  * Remote device reboot directly from browser.
+
+* **Pure OLED Black Design (`#000000`) & Mobile First:**
+  * High-contrast interface optimized for AMOLED/OLED displays.
+  * Touch targets $\ge 44\times44\text{px}$ adhering to clean anti-slop ergonomics.
+  * PIN guard keypad lock screen for shared workstation security.
 
 ---
 
-## Dokumentasi Proyek
+## 🚀 Quick Start
 
-Panduan teknis mendalam tersedia di direktori [`docs/`](docs/):
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Arsitektur sistem, diagram alur, dan protokol jaringan.
-- [docs/API.md](docs/API.md) — Spesifikasi lengkap endpoint REST API backend.
-- [docs/NVR_INTEGRATION.md](docs/NVR_INTEGRATION.md) — Panduan integrasi Home Assistant, Frigate, Scrypted, dan VLC.
-- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — Solusi kendala token, P2P handshake, WebRTC, dan audio.
-
----
-
-## Struktur Direktori
-
-```text
-cctv_dashboard/
-├── docs/
-│   ├── ARCHITECTURE.md    # Detail arsitektur & diagram protokol
-│   ├── API.md             # Dokumentasi REST API server.py
-│   ├── NVR_INTEGRATION.md # Panduan integrasi Frigate & Home Assistant
-│   └── TROUBLESHOOTING.md # Solusi masalah umum & tuning performa
-├── public/
-│   ├── index.html         # Antarmuka Dashboard (OLED Black, WebRTC, Controls, DVR UI)
-│   └── video-rtc.js       # WebRTC custom element gateway streaming
-├── server.py              # Server REST API & Layanan Video Stream HTTP 206 (Port 8088)
-├── recorder.py            # Engine Perekam DVR FFmpeg, Retensi Disk & Auto-Cleanup
-├── start.sh               # Skrip inisialisasi & peluncuran 1-klik (auto-download go2rtc)
-├── stop.sh                # Skrip penghentian layanan
-├── requirements.txt       # Dependensi Python (pycryptodome)
-├── .env.example           # Template variabel lingkungan (IP, Token, DID)
-├── go2rtc.example.yaml    # Template konfigurasi gateway streaming P2P
-├── LICENSE                # Lisensi MIT
-└── README.md              # Dokumentasi pengantar proyek
-```
-
----
-
-## Instalasi Cepat
-
-### 1. Prasyarat Sistem
-- **Sistem Operasi:** Linux (Ubuntu, Debian, Raspberry Pi OS, Armbian, dll.)
-- **Python:** Versi 3.8 atau lebih baru
-- **FFmpeg:** Diperlukan untuk perekaman DVR:
+### 1. Prerequisites
+- Linux host (Debian, Ubuntu, Raspberry Pi OS, or any Linux server)
+- Python 3.8+
+- FFmpeg installed:
   ```bash
   sudo apt-get update && sudo apt-get install -y ffmpeg
   ```
 
-### 2. Clone Repositori
+### 2. Clone Repository
 ```bash
-git clone https://github.com/<username>/cctv_dashboard.git
-cd cctv_dashboard
+git clone https://github.com/<your-username>/micam.git
+cd micam
 ```
 
-### 3. Instal Dependensi Python
+### 3. Install Python Dependencies
 ```bash
 pip3 install -r requirements.txt
 ```
 
-### 4. Jalankan Sistem (1-Klik)
+### 4. Launch micam (1-Command)
 ```bash
 chmod +x start.sh stop.sh
 ./start.sh
 ```
-> [!NOTE]
-> Skrip `start.sh` akan secara otomatis mendeteksi arsitektur prosesor (`x86_64`, `arm64`, `armv7l`) dan mengunduh binary resmi `go2rtc` jika belum tersedia di sistem.
+> [!TIP]
+> `start.sh` automatically detects your system CPU architecture (`x86_64`, `arm64`, `armv7l`) and fetches the latest official `go2rtc` binary if not already present.
 
-### 5. Hubungkan CCTV via Web Setup Wizard (Satset)
-Buka browser dan akses:
+### 5. Pair via Web Setup Wizard
+Open your browser at:
 ```text
-http://<IP_SERVER_ANDA>:8088
+http://<SERVER_IP>:8088
 ```
-1. Dashboard otomatis menampilkan dialog **Setup Wizard**.
-2. Scan **QR Code** menggunakan aplikasi **Mi Home** (atau klik *Buka Link Verifikasi*).
-3. Pilih kamera CCTV dari daftar yang terdeteksi di akun Anda.
-4. Klik **Pasang & Aktifkan Kamera Ini** &mdash; sistem otomatis men-generate file konfigurasi dan live stream langsung tayang!
+1. The **Setup Wizard** will appear automatically on first launch.
+2. Scan the on-screen **QR Code** using your **Mi Home** app (or click *Buka Link Verifikasi*).
+3. Select your camera from the detected list.
+4. Click **Pasang & Aktifkan Kamera Ini** &mdash; your live stream starts immediately!
 
-Untuk menghentikan layanan:
+To stop the background services:
 ```bash
 ./stop.sh
 ```
 
 ---
 
-## Integrasi NVR / Pihak Ketiga
+## 📷 Screenshots
 
-Stream video RTSP lokal dapat langsung dihubungkan ke software NVR seperti **Frigate, Home Assistant, Scrypted, Zoneminder, Shinobi, atau VLC Media Player**:
+<div align="center">
+  <p><strong>Desktop Surveillance View (Dual-Lens 2.5K with 2-Pass FSR Super-Resolution)</strong></p>
+  <img src="docs/screenshots/desktop_preview.png" alt="micam Desktop Dashboard" width="90%" style="border-radius: 8px; border: 1px solid #222;" />
+  <br><br>
+  <p><strong>Zero-Config Web Setup Wizard (QR SSO Onboarding) & Mobile Responsive UI</strong></p>
+  <img src="docs/screenshots/wizard_preview.png" alt="micam Setup Wizard" width="45%" style="border-radius: 8px; border: 1px solid #222;" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/mobile_preview.png" alt="micam Mobile View" width="45%" style="border-radius: 8px; border: 1px solid #222;" />
+</div>
 
-| Lensa Kamera | Endpoint RTSP (Lokal) | Endpoint WebRTC / Browser |
+---
+
+## 🔌 Hardware Compatibility
+
+| Model Series | Family Name | Lens Type | Tested & Supported Features |
+| :--- | :--- | :---: | :--- |
+| `chuangmi.camera.075ae1` | Xiaomi Outdoor Camera CW100 Dual | **Dual** | 2.5K WebRTC, Dual Spotlights, Siren, IR, MIIO, FSR |
+| `chuangmi.camera.075a` | Xiaomi Outdoor Camera CW700S Dual | **Dual** | 2.5K WebRTC, PTZ + Fixed Lens, Siren, Spotlights, FSR |
+| `chuangmi.camera.ipc029` | Xiaomi Smart Camera C300 / C400 | **Single** | 2K/3MP WebRTC, Adaptive Single View, DVR, FSR |
+| `mibt.camera.*` | Mi 360° Home Security Camera Series | **Single** | 1080p/2K WebRTC, Adaptive Single View, DVR, FSR |
+| `isafe.camera.*` | Xiaomi Outdoor Camera CW400 / AW300 | **Single** | 2.5K WebRTC, Spotlights, Siren, DVR, FSR |
+
+---
+
+## 🌐 NVR & Third-Party Integration
+
+`micam` exposes standard RTSP streams and WebRTC endpoints locally, allowing seamless integration with **Frigate NVR, Home Assistant, Scrypted, Shinobi, Agent DVR, and VLC**:
+
+| Feed | Local RTSP Stream | WebRTC Web Endpoint |
 | :--- | :--- | :--- |
-| **Lensa 1: Wide Angle (Kiri)** | `rtsp://<IP_SERVER>:8554/cctv_lensa_kiri` | `http://<IP_SERVER>:1984/stream.html?src=cctv_lensa_kiri` |
-| **Lensa 2: Telephoto (Kanan)** | `rtsp://<IP_SERVER>:8554/cctv_lensa_kanan` | `http://<IP_SERVER>:1984/stream.html?src=cctv_lensa_kanan` |
+| **Primary Lens (Left / Wide)** | `rtsp://<SERVER_IP>:8554/cctv_lensa_kiri` | `http://<SERVER_IP>:1984/stream.html?src=cctv_lensa_kiri` |
+| **Secondary Lens (Right / PTZ)** | `rtsp://<SERVER_IP>:8554/cctv_lensa_kanan` | `http://<SERVER_IP>:1984/stream.html?src=cctv_lensa_kanan` |
 
-*Panduan konfigurasi lengkap Frigate dan Home Assistant tersedia di [docs/NVR_INTEGRATION.md](docs/NVR_INTEGRATION.md).*
-
----
-
-## Estimasi Kebutuhan Harddisk (DVR 24/7)
-
-Perekaman resolusi penuh 2.5K / HD dengan kompresi **H.265 (HEVC)** rata-rata memerlukan:
-- **1 Lensa:** ~1.5 Mbps (±16 GB per 24 jam)
-- **Kedua Lensa (Kiri + Kanan):** **±30 s/d 35 GB per 24 jam**
-- **Kapasitas 85 GB:** Menampung ~2.5 hingga 3 hari rekaman nonstop.
-- **Kapasitas 500 GB:** Menampung ~15 hingga 16 hari rekaman nonstop.
-- **Kapasitas 1 TB:** Menampung ~1 bulan penuh (30 hari) rekaman nonstop.
+*For complete Home Assistant and Frigate configuration examples, see [docs/NVR_INTEGRATION.md](docs/NVR_INTEGRATION.md).*
 
 ---
 
-## Kredit & Referensi Proyek
+## 🏗️ Architecture
 
-Proyek ini dibangun menggunakan fondasi dan terinspirasi dari proyek-proyek open-source hebat berikut:
-
-- [go2rtc](https://github.com/AlexxIT/go2rtc) — Gateway streaming WebRTC, MSE, dan relay protokol P2P kamera Xiaomi (MISS / TUTK CS2).
-- [Xiaomi Cloud Tokens Extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor) — Ekstraktor token lokal, Device ID, dan otentikasi akun Xiaomi cloud.
-- [python-miio](https://github.com/rytilahti/python-miio) — Referensi protokol komunikasi UDP 54321 dan enkripsi AES-128-CBC MIIO.
-- [FFmpeg](https://ffmpeg.org) — Framework multimedia untuk engine perekaman DVR *stream-copy* dan pemecah segmen video MP4.
+```text
+               +----------------------------------------+
+               |         Mi Home Mobile App             |
+               +-------------------+--------------------+
+                                   | (QR Scan / Auth)
+                                   v
++-------------------+    +--------------------+    +--------------------+
+|   Xiaomi Camera   |<---|   Xiaomi Cloud     |--->|  xiaomi_wizard.py  |
+| (Local LAN RTSP)  |    | (SSO & Token Ex.)  |    | (Auto-Discovery)   |
++---------+---------+    +--------------------+    +---------+----------+
+          |                                                  |
+          | P2P / RTSP Handshake                             | Auto-Generates
+          v                                                  v
++-------------------+                              +--------------------+
+|   go2rtc Gateway  |<-----------------------------|  .env & go2rtc.yaml|
+| (WebRTC / RTSP)   |                              +--------------------+
++---------+---------+
+          |
+          +-------------------------------+
+          |                               |
+          v                               v
++-------------------+           +--------------------+
+| In-Browser Client |           | FFmpeg DVR Engine  |
+| - 2-Pass WebGL FSR|           | - Zero-CPU Copy    |
+| - Adaptive Layout |           | - Auto-Retention   |
++-------------------+           +--------------------+
+```
 
 ---
 
-## Lisensi
+## 🛠️ Tech Stack & Standards
 
-Didistribusikan di bawah lisensi [MIT License](LICENSE).
+- **Core Server:** Python 3.13 (`http.server` & asynchronous MIIO RPC)
+- **Streaming Core:** `go2rtc` 1.9+ (AlexxIT)
+- **Recording Engine:** FFmpeg 7.1+ (Native stream-copy demuxer)
+- **Shader Pipeline:** WebGL 2.0 / 1.0 (AMD FidelityFX EASU + RCAS GLSL)
+- **Frontend:** Vanilla JavaScript (ES6+), pure CSS3, 0 external runtime libraries
+
+---
+
+## 📂 Documentation Index
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) &mdash; Detailed system architecture and protocol flows.
+- [docs/API.md](docs/API.md) &mdash; Comprehensive REST API documentation for `server.py`.
+- [docs/NVR_INTEGRATION.md](docs/NVR_INTEGRATION.md) &mdash; Frigate, Home Assistant, and Scrypted guides.
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) &mdash; Common error solutions and network tuning.
+
+---
+
+## 🤝 Contributing
+
+Contributions, feature requests, and bug reports are welcome! Please open an issue or pull request on GitHub.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+
+---
+
+<div align="center">
+Built with precision for privacy-first, self-hosted smart home surveillance.
+</div>
