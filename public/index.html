@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="/fsr-upscaler.js?v=20261030_03"></script>
   <script type="module" src="/video-rtc.js"></script>
   <style>
     :root {
@@ -1160,6 +1161,64 @@
     .zoom-clarity-switch input:checked + .zoom-clarity-slider:before {
       transform: translateX(12px);
     }
+    .zoom-engine-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.55rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .zoom-engine-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .zoom-engine-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .zoom-engine-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.3rem 0.4rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .zoom-engine-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .zoom-engine-tab.active {
+      background: var(--accent);
+      color: #000000;
+      font-weight: 700;
+    }
+    .fsr-overlay-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 2;
+      display: none;
+      background: transparent;
+    }
     .video-frame-container iframe,
     .video-frame-container video-rtc,
     .video-frame-container video,
@@ -1887,6 +1946,212 @@
     .keypad-btn:active {
       background: var(--primary);
     }
+
+    /* Setup Wizard Component */
+    .wizard-card {
+      max-width: 540px;
+      padding: 1.5rem;
+    }
+    .wizard-steps-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .wizard-step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      opacity: 0.45;
+      transition: opacity 0.2s ease;
+    }
+    .wizard-step-node.active {
+      opacity: 1;
+    }
+    .wizard-step-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #1e293b;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .wizard-step-node.active .wizard-step-badge {
+      background: var(--accent);
+      color: #000000;
+    }
+    .wizard-step-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .wizard-step-line {
+      flex: 1;
+      height: 2px;
+      background: #1e293b;
+      margin: 0 0.5rem 1rem 0.5rem;
+    }
+    .wizard-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 1rem;
+    }
+    .wizard-qr-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 1rem 0;
+    }
+    .wizard-qr-box {
+      width: 220px;
+      height: 220px;
+      background: #ffffff;
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    .wizard-qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .wizard-qr-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      color: #334155;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .wizard-countdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .wizard-status-pulse {
+      background: #091824;
+      border: 1px solid #1e3a5f;
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.75rem;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .pulse-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+      animation: pulseAnim 1.6s infinite;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .wizard-camera-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      max-height: 240px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      padding-right: 2px;
+    }
+    .camera-card-item {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .camera-card-item:hover {
+      border-color: #444;
+      background: #161b22;
+    }
+    .camera-card-item.selected {
+      border-color: var(--accent);
+      background: #06281e;
+    }
+    .camera-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+    .camera-card-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .badge-lens-dual {
+      background: #064e3b;
+      color: #34d399;
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-lens-single {
+      background: #075985;
+      color: #38bdf8;
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .wizard-scanning-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 1.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+    .wizard-camera-form {
+      background: #000000;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+    }
+    .wizard-success-box {
+      text-align: center;
+      padding: 1.25rem 0.5rem;
+    }
+    .wizard-success-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #064e3b;
+      color: #10b981;
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
   </style>
 </head>
 <body>
@@ -1930,6 +2195,11 @@
         <span class="icon"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></span>
         <span class="btn-label-long">Telegram</span>
         <span class="btn-label-short">TG</span>
+      </button>
+      <button class="btn-nav nav-item-desktop" id="btnOpenWizardModal" onclick="openSetupWizard()" title="Setup Kamera Baru / Onboarding" aria-label="Setup Kamera CCTV">
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+        <span class="btn-label-long">Setup CCTV</span>
+        <span class="btn-label-short">Setup</span>
       </button>
       <button class="btn-nav nav-item-desktop" id="btnOpenAuthModal" aria-label="Kelola Sesi Akun Xiaomi">
         <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
@@ -2028,6 +2298,13 @@
                         <span class="zoom-clarity-slider"></span>
                       </label>
                     </div>
+                    <div class="zoom-engine-row" id="engineRow_camLeft">
+                      <span class="zoom-engine-label">Engine Super-Res:</span>
+                      <div class="zoom-engine-tabs">
+                        <button type="button" class="zoom-engine-tab" id="tabSvg_camLeft" onclick="setClarityMode('camLeft', 'svg')">Standar (SVG)</button>
+                        <button type="button" class="zoom-engine-tab active" id="tabFsr_camLeft" onclick="setClarityMode('camLeft', 'fsr')">2-Pass FSR (Ultra HD)</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <button class="btn-icon" id="btnMicLeft" onclick="toggleTalk()" title="Bicara ke Speaker CCTV (Intercom)" aria-label="Bicara ke Speaker CCTV">
@@ -2046,6 +2323,7 @@
             </div>
             <div class="video-frame-container" id="containerCamLeft">
               <video-rtc id="camLeft" background></video-rtc>
+              <canvas class="fsr-overlay-canvas" id="fsrCanvas_camLeft"></canvas>
               <div class="video-zoom-overlay" id="zoomOverlay_camLeft">
                 <span class="zoom-val" id="zoomVal_camLeft">1.0x</span>
                 <button type="button" class="zoom-reset-btn" onclick="resetZoom('camLeft')" title="Reset Zoom ke Normal (1.0x)">Reset</button>
@@ -2105,6 +2383,13 @@
                         <span class="zoom-clarity-slider"></span>
                       </label>
                     </div>
+                    <div class="zoom-engine-row" id="engineRow_camRight">
+                      <span class="zoom-engine-label">Engine Super-Res:</span>
+                      <div class="zoom-engine-tabs">
+                        <button type="button" class="zoom-engine-tab" id="tabSvg_camRight" onclick="setClarityMode('camRight', 'svg')">Standar (SVG)</button>
+                        <button type="button" class="zoom-engine-tab active" id="tabFsr_camRight" onclick="setClarityMode('camRight', 'fsr')">2-Pass FSR (Ultra HD)</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <button class="btn-icon" id="btnMicRight" onclick="toggleTalk()" title="Bicara ke Speaker CCTV (Intercom)" aria-label="Bicara ke Speaker CCTV">
@@ -2123,6 +2408,7 @@
             </div>
             <div class="video-frame-container" id="containerCamRight">
               <video-rtc id="camRight" background></video-rtc>
+              <canvas class="fsr-overlay-canvas" id="fsrCanvas_camRight"></canvas>
               <div class="video-zoom-overlay" id="zoomOverlay_camRight">
                 <span class="zoom-val" id="zoomVal_camRight">1.0x</span>
                 <button type="button" class="zoom-reset-btn" onclick="resetZoom('camRight')" title="Reset Zoom ke Normal (1.0x)">Reset</button>
@@ -2625,6 +2911,9 @@
       <!-- Quick Actions -->
       <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.85rem;">
         <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Tindakan Cepat (Satset):</div>
+        <button class="btn btn-outline" style="border-color:var(--accent); color:var(--accent);" onclick="document.getElementById('authModal').classList.remove('open'); openSetupWizard();">
+          Buka Setup Wizard CCTV (Scan QR Mi Home)
+        </button>
         <button class="btn btn-solid" id="btnSyncGateway">Sinkronkan Ulang Gateway Stream</button>
 
         <!-- Form Input OTP Jika Diperlukan di Masa Depan -->
@@ -2636,6 +2925,116 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Web Setup Wizard & First-Run Onboarding -->
+  <div class="modal-backdrop" id="setupWizardModal" role="dialog" aria-modal="true" aria-labelledby="wizardHeading">
+    <div class="modal-card wizard-card">
+      <div class="modal-header">
+        <h3 id="wizardHeading" style="display:flex;align-items:center;gap:0.5rem;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--accent);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          Setup Kamera Xiaomi (Zero-Config)
+        </h3>
+        <button class="modal-close" id="btnCloseWizardModal" onclick="closeSetupWizard()" aria-label="Tutup Setup Wizard">&times;</button>
+      </div>
+
+      <!-- Step Indicator -->
+      <div class="wizard-steps-bar">
+        <div class="wizard-step-node active" id="wizNode1">
+          <span class="wizard-step-badge">1</span>
+          <span class="wizard-step-title">Login Mi Home</span>
+        </div>
+        <div class="wizard-step-line" id="wizLine1"></div>
+        <div class="wizard-step-node" id="wizNode2">
+          <span class="wizard-step-badge">2</span>
+          <span class="wizard-step-title">Pilih Kamera</span>
+        </div>
+        <div class="wizard-step-line" id="wizLine2"></div>
+        <div class="wizard-step-node" id="wizNode3">
+          <span class="wizard-step-badge">3</span>
+          <span class="wizard-step-title">Selesai</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Login QR / Link -->
+      <div class="wizard-step-body" id="wizStep1Body">
+        <p class="wizard-desc">
+          Scan QR Code di bawah menggunakan aplikasi <strong>Mi Home</strong> di HP Anda, atau klik tombol <em>Buka Link Verifikasi</em> jika membuka lewat browser HP.
+        </p>
+
+        <div class="wizard-qr-center">
+          <div class="wizard-qr-box" id="wizQrBox">
+            <img id="wizQrImage" alt="QR Code Login Xiaomi" style="display:none;" />
+            <div id="wizQrSpinner" class="wizard-qr-loading">
+              <div class="spinner"></div>
+              <span>Menyiapkan sesi QR...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wizard-countdown-row">
+          <span id="wizTimerText">Waktu aktif: 120s</span>
+          <button type="button" class="btn-action-sm" id="btnRefreshQr" onclick="startWizardQrSession()" style="display:none;">Muat Ulang QR</button>
+        </div>
+
+        <div class="wizard-status-pulse" id="wizStatusMsg">
+          <span class="pulse-indicator"></span> Menunggu scan dari aplikasi Mi Home...
+        </div>
+
+        <div class="wizard-actions-group">
+          <a id="wizDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="text-decoration:none; text-align:center; display:none; width:100%;">
+            Buka Link Verifikasi di Browser &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 2: Camera Discovery & Selection -->
+      <div class="wizard-step-body" id="wizStep2Body" style="display:none;">
+        <p class="wizard-desc">
+          Akun Xiaomi terhubung! Memindai daftar kamera di server Singapore, China, dan Global:
+        </p>
+
+        <div id="wizScanningBox" class="wizard-scanning-state">
+          <div class="spinner"></div>
+          <span id="wizScanningText">Memindai kamera CCTV di akun Anda...</span>
+        </div>
+
+        <div id="wizCameraList" class="wizard-camera-cards" style="display:none;"></div>
+
+        <!-- Selected camera edit form -->
+        <div id="wizCameraDetailForm" class="wizard-camera-form" style="display:none;">
+          <div style="font-size:0.8rem; font-weight:600; margin-bottom:0.5rem; color:#fff;">Kamera Terpilih:</div>
+          <div class="info-kv"><span>Nama</span><strong id="wizCamNameVal">-</strong></div>
+          <div class="info-kv"><span>Model</span><span id="wizCamModelVal">-</span></div>
+          <div class="info-kv"><span>Tipe Lensa</span><span id="wizCamLensVal" style="color:var(--accent);">-</span></div>
+          <div class="info-kv"><span>Device ID (DID)</span><span id="wizCamDidVal" style="font-family:'JetBrains Mono', monospace;">-</span></div>
+          
+          <div style="margin-top:0.75rem;">
+            <label for="wizIpInput" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">IP Lokal Kamera di LAN:</label>
+            <input type="text" id="wizIpInput" class="form-input" placeholder="contoh: 192.168.1.11">
+          </div>
+
+          <button type="button" id="btnApplyCamera" class="btn btn-solid" style="margin-top:1rem; width:100%;" onclick="submitWizardCamera()">
+            Pasang & Aktifkan Kamera Ini
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Success Completion -->
+      <div class="wizard-step-body" id="wizStep3Body" style="display:none;">
+        <div class="wizard-success-box">
+          <div class="wizard-success-icon">&#10003;</div>
+          <h4 style="font-size:1.1rem; color:#fff; margin-bottom:0.5rem;">Kamera Berhasil Dipasang!</h4>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.25rem;">
+            Konfigurasi telah disimpan dan gateway stream WebRTC telah diperbarui. Dashboard siap digunakan untuk pemantauan live.
+          </p>
+          <button type="button" class="btn btn-solid" style="width:100%;" onclick="finishWizard()">
+            Mulai Memantau Live
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2688,6 +3087,17 @@
         <div class="drawer-item-content">
           <div class="drawer-item-title">Notifikasi Telegram</div>
           <div class="drawer-item-sub">Kirim alert snapshot foto ke bot Telegram</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); openSetupWizard();">
+        <div class="drawer-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">Setup CCTV (Wizard)</div>
+          <div class="drawer-item-sub">Scan QR Mi Home untuk sambungkan CCTV baru</div>
         </div>
         <span class="drawer-item-chevron">&rsaquo;</span>
       </button>
@@ -2983,6 +3393,78 @@
       log(`Reset Zoom ${camId === 'camLeft' ? 'Lensa 1' : 'Lensa 2'} ke 0% (1.0x)`);
     }
 
+    // --- Clarity Modes & WebGL FSR 2-Pass Engine State ---
+    const clarityModes = {
+      camLeft: localStorage.getItem('cctv_engine_camLeft') || 'fsr',
+      camRight: localStorage.getItem('cctv_engine_camRight') || 'fsr'
+    };
+    const fsrUpscalers = {
+      camLeft: null,
+      camRight: null
+    };
+
+    function getOrCreateFsrUpscaler(camId) {
+      if (fsrUpscalers[camId]) return fsrUpscalers[camId];
+      if (typeof window.FsrUpscaler !== 'function') return null;
+
+      const camEl = document.getElementById(camId);
+      const canvasEl = document.getElementById(`fsrCanvas_${camId}`);
+      if (!camEl || !canvasEl) return null;
+
+      const videoEl = camEl.video || camEl.querySelector('video');
+      if (!videoEl) return null;
+
+      const upscaler = new window.FsrUpscaler(videoEl, canvasEl, {
+        sharpness: 0.2,
+        onFirstFrame: () => {
+          if (clarityModes[camId] === 'fsr' && zoomPanState[camId]?.clarity !== false) {
+            canvasEl.style.display = 'block';
+            videoEl.style.opacity = '0';
+          }
+        }
+      });
+
+      if (upscaler.init()) {
+        fsrUpscalers[camId] = upscaler;
+        return upscaler;
+      }
+      return null;
+    }
+
+    function setClarityMode(camId, mode) {
+      clarityModes[camId] = mode;
+      try {
+        localStorage.setItem(`cctv_engine_${camId}`, mode);
+      } catch (e) {}
+
+      const tabSvg = document.getElementById(`tabSvg_${camId}`);
+      const tabFsr = document.getElementById(`tabFsr_${camId}`);
+      if (tabSvg && tabFsr) {
+        tabSvg.classList.toggle('active', mode === 'svg');
+        tabFsr.classList.toggle('active', mode === 'fsr');
+      }
+
+      updateZoomTransform(camId, false);
+      const modeName = mode === 'fsr' ? '2-Pass FSR (Ultra HD)' : 'Standar (SVG)';
+      log(`Engine Super-Res ${camId === 'camLeft' ? 'Lensa 1' : 'Lensa 2'} -> ${modeName}`);
+    }
+
+    function applyStandardSvgTransform(camEl, state, rect, animate, isClarityOn) {
+      camEl.style.transition = animate ? 'transform 0.22s cubic-bezier(0.2, 0, 0, 1)' : 'none';
+      camEl.style.transformOrigin = 'center center';
+      camEl.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale(${state.scale})`;
+
+      if (state.scale > 1.0 && isClarityOn) {
+        const factor = Math.min(1.0, (state.scale - 1.0) / 2.0);
+        const contrast = (1.0 + 0.10 * factor).toFixed(3);
+        const brightness = (1.0 + 0.015 * factor).toFixed(3);
+        const saturate = (1.0 + 0.04 * factor).toFixed(3);
+        camEl.style.filter = `url(#cctvSharpen) contrast(${contrast}) brightness(${brightness}) saturate(${saturate})`;
+      } else {
+        camEl.style.filter = 'none';
+      }
+    }
+
     function updateZoomTransform(camId, animate = false) {
       const camEl = document.getElementById(camId);
       if (!camEl) return;
@@ -3004,19 +3486,36 @@
         state.y = Math.min(maxY, Math.max(-maxY, state.y));
       }
 
-      camEl.style.transition = animate ? 'transform 0.22s cubic-bezier(0.2, 0, 0, 1)' : 'none';
-      camEl.style.transformOrigin = 'center center';
-      camEl.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale(${state.scale})`;
+      const mode = clarityModes[camId] || 'svg';
+      const isClarityOn = state.clarity !== false;
+      const canvasEl = document.getElementById(`fsrCanvas_${camId}`);
+      const videoEl = camEl.video || camEl.querySelector('video');
 
-      // Dynamic Edge Sharpening & Micro-contrast curve
-      if (state.scale > 1.0 && state.clarity !== false) {
-        const factor = Math.min(1.0, (state.scale - 1.0) / 2.0); // 0.0 to 1.0
-        const contrast = (1.0 + 0.10 * factor).toFixed(3);
-        const brightness = (1.0 + 0.015 * factor).toFixed(3);
-        const saturate = (1.0 + 0.04 * factor).toFixed(3);
-        camEl.style.filter = `url(#cctvSharpen) contrast(${contrast}) brightness(${brightness}) saturate(${saturate})`;
+      if (mode === 'fsr' && isClarityOn) {
+        const upscaler = getOrCreateFsrUpscaler(camId);
+        if (upscaler) {
+          if (upscaler.hasRenderedFirstFrame) {
+            if (canvasEl) canvasEl.style.display = 'block';
+            if (videoEl) videoEl.style.opacity = '0';
+          }
+          camEl.style.filter = 'none';
+          camEl.style.transform = 'none';
+
+          upscaler.setCrop(state.scale, state.x, state.y, rect.width, rect.height);
+          upscaler.start();
+        } else {
+          applyStandardSvgTransform(camEl, state, rect, animate, isClarityOn);
+          if (canvasEl) canvasEl.style.display = 'none';
+          if (videoEl) videoEl.style.opacity = '1';
+        }
       } else {
-        camEl.style.filter = 'none';
+        if (fsrUpscalers[camId]) {
+          fsrUpscalers[camId].stop();
+        }
+        if (canvasEl) canvasEl.style.display = 'none';
+        if (videoEl) videoEl.style.opacity = '1';
+
+        applyStandardSvgTransform(camEl, state, rect, animate, isClarityOn);
       }
 
       if (state.scale > 1.0) {
@@ -3294,7 +3793,20 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) resumeStreams();
+      if (!document.hidden) {
+        resumeStreams();
+        ['camLeft', 'camRight'].forEach(camId => {
+          if (clarityModes[camId] === 'fsr' && fsrUpscalers[camId]) {
+            fsrUpscalers[camId].start();
+          }
+        });
+      } else {
+        ['camLeft', 'camRight'].forEach(camId => {
+          if (fsrUpscalers[camId]) {
+            fsrUpscalers[camId].stop();
+          }
+        });
+      }
     });
     window.addEventListener('pageshow', resumeStreams);
     window.addEventListener('focus', resumeStreams);
@@ -3302,6 +3814,15 @@
     function reloadFrame(frameId) {
       const el = document.getElementById(frameId);
       if (!el) return;
+      if (fsrUpscalers[frameId]) {
+        fsrUpscalers[frameId].destroy();
+        fsrUpscalers[frameId] = null;
+      }
+      const canvasEl = document.getElementById(`fsrCanvas_${frameId}`);
+      if (canvasEl) canvasEl.style.display = 'none';
+      const videoEl = el.video || el.querySelector('video');
+      if (videoEl) videoEl.style.opacity = '1';
+
       const srcName = (frameId === 'camLeft') ? streamLeftName : streamRightName;
       if (el.ondisconnect) el.ondisconnect();
       setTimeout(() => {
@@ -3453,8 +3974,30 @@
     }
 
     function takeSnapshot(side) {
-      window.open(`/api/snapshot/${side}?enhance=1`, '_blank');
-      log(`Mengambil snapshot HD lensa ${side} dengan penajaman adaptif.`);
+      const camId = (side === 'kiri') ? 'camLeft' : 'camRight';
+      const upscaler = fsrUpscalers[camId];
+      if (clarityModes[camId] === 'fsr' && upscaler && upscaler.hasRenderedFirstFrame) {
+        upscaler.captureSnapshot('image/jpeg', 0.95).then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const timeStr = new Date().toISOString().replace(/[:.]/g, '-');
+          a.href = url;
+          a.download = `snapshot_${side}_2pass_fsr_${timeStr}.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 1000);
+          log(`Snapshot Ultra HD (2-Pass FSR) lensa ${side} berhasil diunduh.`);
+        }).catch(err => {
+          window.open(`/api/snapshot/${side}?enhance=1`, '_blank');
+          log(`Mengambil snapshot HD lensa ${side} dengan penajaman adaptif server.`);
+        });
+      } else {
+        window.open(`/api/snapshot/${side}?enhance=1`, '_blank');
+        log(`Mengambil snapshot HD lensa ${side} dengan penajaman adaptif server.`);
+      }
     }
 
     // --- Emergency Siren ---
@@ -4112,6 +4655,302 @@
       }
     });
 
+    // ==========================================
+    // Setup Wizard & Adaptive Lens Mode
+    // ==========================================
+    let wizardPollInterval = null;
+    let wizardCountdownInterval = null;
+    let wizardCountdownSec = 120;
+    let wizardDiscoveredCameras = [];
+    let wizardSelectedCamera = null;
+
+    function applyLensMode(mode) {
+      const isDual = mode === 'dual';
+      const monBoxRight = document.getElementById('monBoxRight');
+      const monBoxLeft = document.getElementById('monBoxLeft');
+      const viewPills = document.querySelector('.view-pills');
+      const lensTitleLeft = document.querySelector('#monBoxLeft .monitor-title span:last-child');
+
+      if (monBoxRight) {
+        monBoxRight.style.display = isDual ? '' : 'none';
+      }
+      if (monBoxLeft) {
+        if (!isDual) {
+          monBoxLeft.style.gridColumn = '1 / -1';
+          monBoxLeft.style.maxWidth = '100%';
+          if (lensTitleLeft) lensTitleLeft.textContent = 'Kamera CCTV: Tampilan Utama';
+        } else {
+          monBoxLeft.style.gridColumn = '';
+          monBoxLeft.style.maxWidth = '';
+          if (lensTitleLeft) lensTitleLeft.textContent = 'Lensa 1: Wide Angle (Kiri)';
+        }
+      }
+      if (viewPills) {
+        viewPills.style.display = isDual ? 'flex' : 'none';
+      }
+    }
+
+    async function checkFirstRunSetup() {
+      try {
+        const res = await fetch('/api/wizard/check');
+        const data = await res.json();
+        if (data.camera && data.camera.lens_type) {
+          applyLensMode(data.camera.lens_type);
+        }
+        if (!data.configured) {
+          log('Kamera belum terkonfigurasi. Membuka Setup Wizard...');
+          openSetupWizard();
+        }
+      } catch (err) {
+        console.warn('Gagal periksa status setup wizard:', err);
+      }
+    }
+
+    function openSetupWizard() {
+      const wiz = document.getElementById('setupWizardModal');
+      if (!wiz) return;
+      wiz.classList.add('open');
+      setWizardStep(1);
+      startWizardQrSession();
+    }
+
+    function closeSetupWizard() {
+      const wiz = document.getElementById('setupWizardModal');
+      if (wiz) wiz.classList.remove('open');
+      stopWizardPolling();
+    }
+
+    function stopWizardPolling() {
+      if (wizardPollInterval) {
+        clearInterval(wizardPollInterval);
+        wizardPollInterval = null;
+      }
+      if (wizardCountdownInterval) {
+        clearInterval(wizardCountdownInterval);
+        wizardCountdownInterval = null;
+      }
+    }
+
+    function setWizardStep(step) {
+      for (let i = 1; i <= 3; i++) {
+        const node = document.getElementById('wizNode' + i);
+        const body = document.getElementById('wizStep' + i + 'Body');
+        if (node) node.classList.toggle('active', i <= step);
+        if (body) body.style.display = (i === step) ? 'block' : 'none';
+      }
+    }
+
+    async function startWizardQrSession() {
+      stopWizardPolling();
+      const qrImg = document.getElementById('wizQrImage');
+      const spinner = document.getElementById('wizQrSpinner');
+      const directLink = document.getElementById('wizDirectLink');
+      const timerText = document.getElementById('wizTimerText');
+      const refreshBtn = document.getElementById('btnRefreshQr');
+      const statusMsg = document.getElementById('wizStatusMsg');
+
+      if (qrImg) qrImg.style.display = 'none';
+      if (spinner) spinner.style.display = 'flex';
+      if (directLink) directLink.style.display = 'none';
+      if (refreshBtn) refreshBtn.style.display = 'none';
+      if (statusMsg) statusMsg.innerHTML = '<span class="pulse-indicator"></span> Menghubungkan ke auth server Xiaomi...';
+
+      try {
+        const res = await fetch('/api/wizard/start', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          if (spinner) spinner.style.display = 'none';
+          if (qrImg) {
+            qrImg.src = data.qr_url;
+            qrImg.style.display = 'block';
+          }
+          if (directLink) {
+            directLink.href = data.login_url;
+            directLink.style.display = 'inline-block';
+          }
+          if (statusMsg) {
+            statusMsg.innerHTML = '<span class="pulse-indicator"></span> Menunggu scan dari aplikasi Mi Home...';
+          }
+
+          wizardCountdownSec = data.timeout || 120;
+          updateCountdownUi();
+          wizardCountdownInterval = setInterval(() => {
+            wizardCountdownSec--;
+            updateCountdownUi();
+            if (wizardCountdownSec <= 0) {
+              stopWizardPolling();
+              if (statusMsg) statusMsg.innerHTML = '<span style="color:#ef4444;">QR Code kedaluwarsa. Silakan muat ulang.</span>';
+              if (refreshBtn) refreshBtn.style.display = 'inline-block';
+            }
+          }, 1000);
+
+          wizardPollInterval = setInterval(pollWizardQrStatus, 2500);
+        } else {
+          if (statusMsg) statusMsg.innerHTML = `<span style="color:#ef4444;">Gagal membuat QR: ${data.error || 'Server sibuk'}</span>`;
+          if (refreshBtn) refreshBtn.style.display = 'inline-block';
+        }
+      } catch (err) {
+        if (statusMsg) statusMsg.innerHTML = `<span style="color:#ef4444;">Koneksi error: ${err.message}</span>`;
+        if (refreshBtn) refreshBtn.style.display = 'inline-block';
+      }
+    }
+
+    function updateCountdownUi() {
+      const timerText = document.getElementById('wizTimerText');
+      if (timerText) {
+        timerText.textContent = `Waktu aktif: ${wizardCountdownSec}s`;
+      }
+    }
+
+    async function pollWizardQrStatus() {
+      try {
+        const res = await fetch('/api/wizard/status');
+        const data = await res.json();
+        if (data.state === 'authorized') {
+          stopWizardPolling();
+          const statusMsg = document.getElementById('wizStatusMsg');
+          if (statusMsg) statusMsg.innerHTML = '<span style="color:var(--accent); font-weight:600;">Otentikasi Berhasil! Memindai kamera...</span>';
+          setWizardStep(2);
+          fetchWizardDevices();
+        } else if (data.state === 'expired') {
+          stopWizardPolling();
+          const statusMsg = document.getElementById('wizStatusMsg');
+          if (statusMsg) statusMsg.innerHTML = '<span style="color:#ef4444;">Sesi QR kedaluwarsa.</span>';
+          const refreshBtn = document.getElementById('btnRefreshQr');
+          if (refreshBtn) refreshBtn.style.display = 'inline-block';
+        }
+      } catch (err) {
+        console.warn('Polling error:', err);
+      }
+    }
+
+    async function fetchWizardDevices() {
+      const scanBox = document.getElementById('wizScanningBox');
+      const camList = document.getElementById('wizCameraList');
+      const detailForm = document.getElementById('wizCameraDetailForm');
+
+      if (scanBox) scanBox.style.display = 'flex';
+      if (camList) {
+        camList.style.display = 'none';
+        camList.innerHTML = '';
+      }
+      if (detailForm) detailForm.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/wizard/devices');
+        const data = await res.json();
+        if (scanBox) scanBox.style.display = 'none';
+
+        if (data.success && data.cameras && data.cameras.length > 0) {
+          wizardDiscoveredCameras = data.cameras;
+          if (camList) {
+            camList.style.display = 'flex';
+            data.cameras.forEach((cam, idx) => {
+              const card = document.createElement('div');
+              card.className = 'camera-card-item' + (idx === 0 ? ' selected' : '');
+              const isDual = cam.lens_type === 'dual';
+              card.innerHTML = `
+                <div class="camera-card-header">
+                  <strong>${cam.name || 'Xiaomi CCTV'}</strong>
+                  <span class="${isDual ? 'badge-lens-dual' : 'badge-lens-single'}">${isDual ? 'Dual-Lens 2.5K' : 'Single-Lens'}</span>
+                </div>
+                <div class="camera-card-meta">
+                  <span>Model: <code>${cam.model}</code></span> &bull; 
+                  <span>IP: <code>${cam.ip || 'Belum terdeteksi'}</code></span> &bull; 
+                  <span>DID: <code>${cam.did}</code></span>
+                </div>
+              `;
+              card.onclick = () => selectWizardCamera(cam, card);
+              camList.appendChild(card);
+            });
+            selectWizardCamera(data.cameras[0], camList.children[0]);
+          }
+        } else {
+          if (camList) {
+            camList.style.display = 'block';
+            camList.innerHTML = `
+              <div style="padding:1rem; border:1px solid var(--border); border-radius:6px; background:#0d1117; color:var(--text-muted); font-size:0.82rem; text-align:center;">
+                Tidak ditemukan kamera CCTV di akun ini (diperiksa di server sg, cn, global).<br>
+                Pastikan kamera sudah ditambahkan di aplikasi Mi Home di HP Anda.
+              </div>
+            `;
+          }
+        }
+      } catch (err) {
+        if (scanBox) scanBox.style.display = 'none';
+        if (camList) {
+          camList.style.display = 'block';
+          camList.innerHTML = `<div style="color:#ef4444; padding:0.5rem;">Gagal memindai: ${err.message}</div>`;
+        }
+      }
+    }
+
+    function selectWizardCamera(cam, cardEl) {
+      wizardSelectedCamera = cam;
+      document.querySelectorAll('.camera-card-item').forEach(el => el.classList.remove('selected'));
+      if (cardEl) cardEl.classList.add('selected');
+
+      const detailForm = document.getElementById('wizCameraDetailForm');
+      if (detailForm) {
+        detailForm.style.display = 'block';
+        document.getElementById('wizCamNameVal').textContent = cam.name || 'Xiaomi CCTV';
+        document.getElementById('wizCamModelVal').textContent = cam.model;
+        document.getElementById('wizCamLensVal').textContent = cam.lens_type === 'dual' ? 'Dual-Lens (2 Kamera)' : 'Single-Lens (1 Kamera)';
+        document.getElementById('wizCamDidVal').textContent = cam.did;
+        document.getElementById('wizIpInput').value = cam.ip || '';
+      }
+    }
+
+    async function submitWizardCamera() {
+      if (!wizardSelectedCamera) {
+        alert('Silakan pilih salah satu kamera!');
+        return;
+      }
+      const customIp = document.getElementById('wizIpInput').value.trim();
+      const applyBtn = document.getElementById('btnApplyCamera');
+      if (applyBtn) {
+        applyBtn.disabled = true;
+        applyBtn.textContent = 'Menyimpan konfigurasi...';
+      }
+
+      try {
+        const res = await fetch('/api/wizard/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            did: wizardSelectedCamera.did,
+            ip: customIp || wizardSelectedCamera.ip
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setWizardStep(3);
+          if (wizardSelectedCamera.lens_type) {
+            applyLensMode(wizardSelectedCamera.lens_type);
+          }
+        } else {
+          alert('Gagal menyimpan: ' + (data.error || 'Terjadi kesalahan'));
+          if (applyBtn) {
+            applyBtn.disabled = false;
+            applyBtn.textContent = 'Pasang & Aktifkan Kamera Ini';
+          }
+        }
+      } catch (err) {
+        alert('Koneksi gagal: ' + err.message);
+        if (applyBtn) {
+          applyBtn.disabled = false;
+          applyBtn.textContent = 'Pasang & Aktifkan Kamera Ini';
+        }
+      }
+    }
+
+    function finishWizard() {
+      closeSetupWizard();
+      log('Konfigurasi baru diterapkan. Memuat ulang video stream...');
+      reloadFrame('camLeft');
+      reloadFrame('camRight');
+    }
+
     // Initializations
     if (customElements.get('video-rtc')) {
       initStreams();
@@ -4121,7 +4960,36 @@
     } else {
       initStreams();
     }
+
+    // Restore Clarity Engine Selection & Listen for stream start
+    ['camLeft', 'camRight'].forEach(camId => {
+      const mode = clarityModes[camId] || 'fsr';
+      const tabSvg = document.getElementById(`tabSvg_${camId}`);
+      const tabFsr = document.getElementById(`tabFsr_${camId}`);
+      if (tabSvg && tabFsr) {
+        tabSvg.classList.toggle('active', mode === 'svg');
+        tabFsr.classList.toggle('active', mode === 'fsr');
+      }
+
+      const camEl = document.getElementById(camId);
+      if (!camEl) return;
+      const bindEvents = () => {
+        const video = camEl.video || camEl.querySelector('video');
+        if (video) {
+          video.addEventListener('playing', () => {
+            if (clarityModes[camId] === 'fsr') updateZoomTransform(camId, false);
+          });
+          video.addEventListener('loadeddata', () => {
+            if (clarityModes[camId] === 'fsr') updateZoomTransform(camId, false);
+          });
+        } else {
+          setTimeout(bindEvents, 250);
+        }
+      };
+      bindEvents();
+    });
     fetchAuthStatus();
+    checkFirstRunSetup();
     fetchStatus();
     loadRecordings();
     setInterval(fetchStatus, 4000);
