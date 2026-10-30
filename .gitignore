@@ -5,7 +5,12 @@ __pycache__/
 
 # Local environment & secrets
 .env
+*.bak
+*.tmp
 go2rtc.yaml
+
+# Testing & Cache
+.pytest_cache/
 
 # Binaries & external runtime
 go2rtc
