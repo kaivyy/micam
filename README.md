@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📷 micam
+# micam
 ### Ultra-Low-Latency WebRTC Surveillance Dashboard, DVR & Hardware Controller for Xiaomi Smart Cameras
 
 [![Python 3.13](https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
@@ -14,13 +14,13 @@
 
 ---
 
-[Quick Start](#-quick-start) • [Features](#-key-features) • [Hardware Compatibility](#-hardware-compatibility) • [Architecture](#-architecture) • [NVR & RTSP](#-nvr--third-party-integration) • [Docs](docs/)
+[Quick Start](#quick-start) • [Features](#key-features) • [Hardware Compatibility](#hardware-compatibility) • [Architecture](#architecture) • [NVR & RTSP](#nvr--third-party-integration) • [Docs](docs/)
 
 </div>
 
 ---
 
-## ⚡ Key Features
+## Key Features
 
 * **Zero-Config Web Setup Wizard (Satset):**
   * No manual terminal editing of IP addresses, DIDs, or 32-character hex tokens.
@@ -61,7 +61,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Prerequisites
 - Linux host (Debian, Ubuntu, Raspberry Pi OS, or any Linux server)
@@ -107,7 +107,7 @@ To stop the background services:
 
 ---
 
-## 📷 Screenshots
+## Screenshots
 
 <div align="center">
   <p><strong>Desktop Surveillance View (Dual-Lens 2.5K with 2-Pass FSR Super-Resolution)</strong></p>
@@ -121,7 +121,7 @@ To stop the background services:
 
 ---
 
-## 🔌 Hardware Compatibility
+## Hardware Compatibility
 
 | Model Series | Family Name | Lens Type | Tested & Supported Features |
 | :--- | :--- | :---: | :--- |
@@ -133,7 +133,7 @@ To stop the background services:
 
 ---
 
-## 🌐 NVR & Third-Party Integration
+## NVR & Third-Party Integration
 
 `micam` exposes standard RTSP streams and WebRTC endpoints locally, allowing seamless integration with **Frigate NVR, Home Assistant, Scrypted, Shinobi, Agent DVR, and VLC**:
 
@@ -146,7 +146,7 @@ To stop the background services:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```text
                +----------------------------------------+
@@ -178,7 +178,7 @@ To stop the background services:
 
 ---
 
-## 🛠️ Tech Stack & Standards
+## Tech Stack & Standards
 
 - **Core Server:** Python 3.13 (`http.server` & asynchronous MIIO RPC)
 - **Streaming Core:** `go2rtc` 1.9+ (AlexxIT)
@@ -188,7 +188,7 @@ To stop the background services:
 
 ---
 
-## 📂 Documentation Index
+## Documentation Index
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) &mdash; Detailed system architecture and protocol flows.
 - [docs/API.md](docs/API.md) &mdash; Comprehensive REST API documentation for `server.py`.
@@ -197,7 +197,7 @@ To stop the background services:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, feature requests, and bug reports are welcome! Please open an issue or pull request on GitHub.
 
@@ -209,7 +209,7 @@ Contributions, feature requests, and bug reports are welcome! Please open an iss
 
 ---
 
-## 📜 License
+## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
 
