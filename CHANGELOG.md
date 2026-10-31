@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-10-31
+
+### Fixed
+- **Camera "Limit Device" & P2P Hardware Starvation**: Diagnosed and resolved the root cause of the "Limit device" error where suspended or sleeping browser tabs (such as Windows Edge / Chrome background tabs) kept TCP sockets in `ESTABLISHED` with clogged send queues (`Send-Q > 500KB`), backing up into go2rtc CS2 buffers (`pop buffer is full`) and exhausting the Xiaomi CW100 camera's 2-channel P2P SoC capacity.
+- **Client Lifecycle Stream Teardown**: Updated `VideoRTC` WebRTC element (`public/video-rtc.js`) to set `visibilityCheck = true` by default and wired clean teardown listeners on `visibilitychange` (hidden), `pagehide`, `beforeunload`, and Chromium `freeze` events to instantly close client WebSockets and peer connections instead of leaking sockets.
+
+### Added
+- **Automated Kernel Socket & Buffer Watchdog**: Added daemon watchdog loop in `server.py` inspecting active connections on go2rtc ports (`1984` and `1985`) every 10 seconds. Automatically detects stalled sockets (`Send-Q > 250KB`) and flushes go2rtc via `/api/restart`, preventing camera SoC packet buffer lockups.
+- **On-Demand Camera Release Endpoint**: Implemented `POST /api/streams/release` endpoint that instantly terminates active go2rtc camera sessions on demand, freeing all P2P channels for the official Xiaomi Home mobile app.
+- **"Bebaskan Kamera" (Standby Mode) Controls**: Added one-click standby toggle button in the desktop monitor toolbar and mobile drawer menu, along with full-viewport interactive overlays on both lenses allowing users to release camera hardware sessions instantly and resume with a single click.
+- **Configurable Idle Inactivity Watchdog**: Added automatic standby selector in the top toolbar with customizable timeouts (5 minutes, 10 minutes [default], 30 minutes, or 24/7 disabled), listening for user activity (`mousemove`, `mousedown`, `keydown`, `touchstart`, `scroll`) and automatically putting the stream into standby when idle.
+- **Mobile P2P Slot Preservation**: Configured mobile viewports (`< 640px`) to default to single-lens view (`switchLensView('left')`), consuming only 1 P2P channel and leaving 1 channel 100% permanently reserved for the Xiaomi Home mobile app.
+- **End-to-End Verification Suite**: Added Playwright test `tests/test_stream_standby.py` validating desktop standby toggle, overlay resume interaction, idle timeout localStorage persistence, mobile single-lens default, mobile drawer integration, and `POST /api/streams/release`.
+
 ## [0.1.5] - 2026-10-31
 
 ### Added

@@ -9,6 +9,7 @@ import os
 import sys
 import shutil
 import threading
+import subprocess
 import urllib.request
 from urllib.parse import urlparse, parse_qs
 from Crypto.Cipher import AES
@@ -64,6 +65,37 @@ def invalidate_status_cache():
 def invalidate_advanced_cache():
     with _advanced_lock:
         _advanced_cache["timestamp"] = 0
+
+def check_stalled_go2rtc_sockets(threshold_bytes=250000):
+    try:
+        proc = subprocess.run(["ss", "-tn", "( sport = :1984 or sport = :1985 )"], capture_output=True, text=True, timeout=2)
+        if proc.returncode != 0:
+            return False
+        for line in proc.stdout.splitlines()[1:]:
+            parts = line.split()
+            if len(parts) >= 3 and parts[0] == "ESTAB":
+                try:
+                    send_q = int(parts[2])
+                    if send_q > threshold_bytes:
+                        return True
+                except ValueError:
+                    pass
+    except Exception:
+        pass
+    return False
+
+def _stream_watchdog_loop():
+    while True:
+        time.sleep(10)
+        try:
+            if check_stalled_go2rtc_sockets():
+                print("[Stream Watchdog] Stalled consumer socket detected (Send-Q buffer clogged). Flushing go2rtc to release camera P2P slots.", file=sys.stderr)
+                req = urllib.request.Request(f"{GO2RTC_API}/api/restart", data=b"", method="POST")
+                urllib.request.urlopen(req, timeout=3)
+                invalidate_status_cache()
+                invalidate_advanced_cache()
+        except Exception:
+            pass
 
 def refresh_runtime_config():
     global CAMERA_IP, CAMERA_PORT, TOKEN_HEX, TOKEN, DID, CCTV_NAME, XIAOMI_USER_ID, XIAOMI_USER_EMAIL
@@ -564,6 +596,16 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             youtube_streamer.save_config()
             self.send_json({"success": True, "status": youtube_streamer.get_status()})
 
+        elif parsed.path == "/api/streams/release":
+            try:
+                req = urllib.request.Request(f"{GO2RTC_API}/api/restart", data=b"", method="POST")
+                urllib.request.urlopen(req, timeout=3)
+                invalidate_status_cache()
+                invalidate_advanced_cache()
+                self.send_json({"success": True, "message": "Semua sesi streaming kamera berhasil dilepas secara instan."})
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, status=500)
+
         elif parsed.path == "/api/camera/advanced":
             if not is_device_authenticated():
                 self.send_json({"success": False, "authenticated": False, "error": "Autentikasi akun Xiaomi diperlukan"}, status=401)
@@ -822,6 +864,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 if __name__ == "__main__":
     os.makedirs(PUBLIC_DIR, exist_ok=True)
+    threading.Thread(target=_stream_watchdog_loop, daemon=True).start()
     server = ThreadedTCPServer(("", PORT), CCTVHandler)
     print(f"CCTV Dashboard Server listening on http://0.0.0.0:{PORT}")
     try:

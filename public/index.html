@@ -703,6 +703,40 @@
       width: 15px;
       height: 15px;
     }
+    .idle-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      background: #080808;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 0.5rem;
+      min-height: 36px;
+      gap: 0.35rem;
+      color: var(--text-muted);
+    }
+    .idle-select-wrap:hover {
+      border-color: #333333;
+    }
+    .idle-select-wrap .icon svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+    .view-size-select {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      padding: 0.35rem 0.15rem;
+    }
+    .view-size-select option {
+      background: #111111;
+      color: #ffffff;
+    }
     .standby-overlay {
       position: absolute;
       inset: 0;
@@ -2498,6 +2532,15 @@
               <span class="icon" id="iconStandbyState"><svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></span>
               <span id="txtStandbyState">Bebaskan Kamera</span>
             </button>
+            <div class="idle-select-wrap" title="Waktu siaga otomatis untuk membebaskan kuota kamera">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg></span>
+              <select class="view-size-select" id="selectIdleTimeout" onchange="setIdleTimeout(this.value)" aria-label="Waktu Siaga Otomatis">
+                <option value="5">Siaga 5 mnt</option>
+                <option value="10" selected>Siaga 10 mnt</option>
+                <option value="30">Siaga 30 mnt</option>
+                <option value="0">Nonaktif (24/7)</option>
+              </select>
+            </div>
             <button class="view-size-btn" id="btnToggleSize" onclick="toggleVideoSize()" title="Perbesar / Normalisasi Ukuran Video">
               <span class="icon" id="iconSizeState"><svg viewBox="0 0 24 24"><path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z"/></svg></span>
               <span id="txtSizeState">Mode Besar</span>
@@ -3514,6 +3557,17 @@
         <span class="drawer-item-chevron">&rsaquo;</span>
       </button>
 
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); toggleStreamStandby();">
+        <div class="drawer-item-icon" style="color:var(--warning);">
+          <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title" id="drawerTxtStandbyState">Bebaskan Kamera (Standby)</div>
+          <div class="drawer-item-sub">Lepas koneksi kamera agar bebas diakses di aplikasi Xiaomi Home</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
       <button class="drawer-menu-item" onclick="closeMobileDrawer(); triggerSiren();">
         <div class="drawer-item-icon danger-icon">
           <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
@@ -4214,29 +4268,70 @@
 
     let isStreamStandby = false;
 
-    function toggleStreamStandby() {
-      isStreamStandby = !isStreamStandby;
+    function toggleStreamStandby(explicitMode) {
+      if (typeof explicitMode === 'boolean') {
+        isStreamStandby = explicitMode;
+      } else {
+        isStreamStandby = !isStreamStandby;
+      }
       const btn = document.getElementById('btnToggleStandby');
       const txt = document.getElementById('txtStandbyState');
+      const drawerTxt = document.getElementById('drawerTxtStandbyState');
       const overlayLeft = document.getElementById('standbyOverlay_camLeft');
       const overlayRight = document.getElementById('standbyOverlay_camRight');
 
       if (isStreamStandby) {
         disconnectStreams();
+        fetch('/api/streams/release', { method: 'POST' }).catch(() => {});
         if (btn) btn.classList.add('standby-active');
         if (txt) txt.textContent = 'Lanjutkan Live';
+        if (drawerTxt) drawerTxt.textContent = 'Lanjutkan Live Streaming';
         if (overlayLeft) overlayLeft.style.display = 'flex';
         if (overlayRight) overlayRight.style.display = 'flex';
         log('Mode Standby aktif: Kuota kamera bebas untuk aplikasi Xiaomi Home');
       } else {
         if (btn) btn.classList.remove('standby-active');
         if (txt) txt.textContent = 'Bebaskan Kamera';
+        if (drawerTxt) drawerTxt.textContent = 'Bebaskan Kamera (Standby)';
         if (overlayLeft) overlayLeft.style.display = 'none';
         if (overlayRight) overlayRight.style.display = 'none';
         reconnectStreams();
+        resetIdleTimer();
         log('Live streaming dilanjutkan');
       }
     }
+
+    let idleTimeoutMinutes = parseInt(localStorage.getItem('cctv_idle_timeout') || '10', 10);
+    let idleTimer = null;
+
+    function setIdleTimeout(val) {
+      idleTimeoutMinutes = parseInt(val, 10);
+      localStorage.setItem('cctv_idle_timeout', idleTimeoutMinutes);
+      const sel = document.getElementById('selectIdleTimeout');
+      if (sel && sel.value !== String(idleTimeoutMinutes)) {
+        sel.value = String(idleTimeoutMinutes);
+      }
+      resetIdleTimer();
+      log(idleTimeoutMinutes > 0 ? `Waktu siaga otomatis diatur: ${idleTimeoutMinutes} menit` : 'Waktu siaga otomatis dinonaktifkan (24/7)');
+    }
+
+    function resetIdleTimer() {
+      if (idleTimer) clearTimeout(idleTimer);
+      if (idleTimeoutMinutes <= 0 || isStreamStandby) return;
+
+      idleTimer = setTimeout(() => {
+        if (!isStreamStandby && !document.hidden) {
+          log(`Siaga otomatis aktif setelah ${idleTimeoutMinutes} menit tidak ada aktivitas. Kuota kamera dibebaskan.`);
+          toggleStreamStandby(true);
+        }
+      }, idleTimeoutMinutes * 60 * 1000);
+    }
+
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, () => {
+        if (!isStreamStandby) resetIdleTimer();
+      }, { passive: true });
+    });
 
     function disconnectStreams() {
       const camL = document.getElementById('camLeft');
@@ -4274,13 +4369,21 @@
     }
 
     function initStreams() {
+      const selIdle = document.getElementById('selectIdleTimeout');
+      if (selIdle) selIdle.value = String(idleTimeoutMinutes);
+      resetIdleTimer();
+
+      if (window.innerWidth < 640) {
+        switchLensView('left');
+      }
+
       const camL = document.getElementById('camLeft');
       const camR = document.getElementById('camRight');
-      if (camL) {
+      if (camL && (currentLensView === 'both' || currentLensView === 'left')) {
         camL.background = false;
         camL.src = getWsUrl(streamLeftName);
       }
-      if (camR) {
+      if (camR && (currentLensView === 'both' || currentLensView === 'right')) {
         camR.background = false;
         camR.src = getWsUrl(streamRightName);
       }
@@ -4289,7 +4392,10 @@
     }
 
     window.addEventListener('pageshow', () => {
-      if (!isStreamStandby) reconnectStreams();
+      if (!isStreamStandby) {
+        reconnectStreams();
+        resetIdleTimer();
+      }
     });
 
     function reloadFrame(frameId) {
@@ -5824,7 +5930,10 @@
         stopDashboardPolling();
         disconnectStreams();
       } else {
-        reconnectStreams();
+        if (!isStreamStandby) {
+          reconnectStreams();
+          resetIdleTimer();
+        }
         fetchStatus();
         fetchRecordStatus();
         fetchYouTubeStatus();

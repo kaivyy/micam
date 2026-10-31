@@ -62,10 +62,10 @@ export class VideoRTC extends HTMLElement {
 
         /**
          * [config] Run stream only when browser page on the screen.
-         * Default `false` to prevent stream killing on tab/browser switch.
+         * Default `true` to immediately release camera P2P slots on background/tab switch.
          * @type {boolean}
          */
-        this.visibilityCheck = false;
+        this.visibilityCheck = true;
 
         /**
          * [config] WebRTC configuration
@@ -294,11 +294,14 @@ export class VideoRTC extends HTMLElement {
         if ('hidden' in document && this.visibilityCheck) {
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
-                    this.disconnectedCallback();
+                    this.ondisconnect();
                 } else if (this.isConnected) {
                     this.connectedCallback();
                 }
             });
+            window.addEventListener('pagehide', () => this.ondisconnect());
+            window.addEventListener('beforeunload', () => this.ondisconnect());
+            document.addEventListener('freeze', () => this.ondisconnect());
         }
 
         if ('IntersectionObserver' in window && this.visibilityThreshold) {
