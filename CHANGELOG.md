@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated Supervisor & Persistence: Background recovery loop that reconnects streams automatically during transient network interruptions, with optional auto-start on server boot.
 - REST API Suite: Added `GET /api/youtube/status`, `POST /api/youtube/start`, `POST /api/youtube/stop`, and `POST /api/youtube/config`.
 - Automated Verification Suite: Added Playwright test (`tests/test_youtube_stream.py`) covering backend endpoints, modal interactions, accordion expansion, eye toggle visibility, and screenshot capture.
+- RTMPS Secure Ingestion: Upgraded live streaming endpoint from legacy unencrypted RTMP (port 1935) to the modern RTMPS standard (TLS 1.3 over port 443) using YouTube's primary ingestion server (`rtmps://a.rtmps.youtube.com/live2`) with 2-second keyframe GOP alignment (`-g 40` at 20fps).
 
 ### Fixed
 - Setup Wizard redundant QR scan & login link: Automatically hid QR code box, countdown timer, and direct login link in Step 1 when the user is already authenticated with Xiaomi Cloud, displaying their verified account details and a direct "Lanjut ke Pilihan Kamera" action.

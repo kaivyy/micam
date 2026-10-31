@@ -65,7 +65,12 @@ class YouTubeStreamer:
 
     def _build_ffmpeg_cmd(self, stream_key, lens, quality, silent_audio):
         rtsp_url = self._get_stream_rtsp(lens)
-        rtmp_url = f"rtmp://a.rtmp.youtube.com/live2/{stream_key.strip()}"
+        clean_key = stream_key.strip()
+        if clean_key.startswith("rtmp://") or clean_key.startswith("rtmps://"):
+            rtmp_url = clean_key
+        else:
+            # Modern standard: RTMPS (Secure RTMP over TLS port 443)
+            rtmp_url = f"rtmps://a.rtmps.youtube.com/live2/{clean_key}"
 
         cmd = [
             "ffmpeg",
@@ -108,9 +113,11 @@ class YouTubeStreamer:
                 "-threads",
                 "2",
                 "-g",
-                "60",
+                "40",
                 "-keyint_min",
-                "60",
+                "40",
+                "-sc_threshold",
+                "0",
                 "-pix_fmt",
                 "yuv420p",
             ]
@@ -121,7 +128,7 @@ class YouTubeStreamer:
         else:
             cmd.extend(["-map", "0:v:0", "-map", "0:a:0?", "-c:a", "aac", "-b:a", "128k", "-ar", "44100"])
 
-        cmd.extend(["-f", "flv", rtmp_url])
+        cmd.extend(["-f", "flv", "-flvflags", "no_duration_filesize", rtmp_url])
         return cmd
 
     def start(self, stream_key=None, lens=None, quality=None, silent_audio=None, auto_start=None):
