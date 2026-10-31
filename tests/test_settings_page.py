@@ -36,13 +36,12 @@ async def run():
         print(f"[Desktop] Page title: {title}")
         assert "Setelan Hardware Kamera" in title, f"Unexpected title: {title}"
 
-        # Check all 4 cards exist
+        # Check all 3 streamlined cards exist
         card_titles = await page.eval_on_selector_all(".card-title", "els => els.map(e => e.textContent.trim())")
         print(f"[Desktop] Cards detected: {card_titles}")
         assert "Tampilan & Optik Kamera" in card_titles
-        assert "Lampu & Audio Hardware" in card_titles
-        assert "Sensitivitas AI & Keamanan" in card_titles
-        assert "Manajemen Kartu MicroSD Fisik" in card_titles
+        assert "Perangkat Fisik Kamera" in card_titles
+        assert "Status Kartu MicroSD Fisik" in card_titles
 
         # Check real SD card status
         sd_status = await page.text_content("#sdStatusText")
@@ -52,18 +51,18 @@ async def run():
         assert sd_status in ["Normal", "Tidak Terdeteksi", "Penyimpanan Penuh"]
 
         # Test toggle change and toast notification
-        print("[Desktop] Testing toggle change (distortion correction)...")
-        toggle_checked_before = await page.is_checked("#prop_distortion_correction")
-        await page.click("label:has(#prop_distortion_correction)")
+        print("[Desktop] Testing toggle change (time watermark)...")
+        toggle_checked_before = await page.is_checked("#prop_time_watermark")
+        await page.click("label:has(#prop_time_watermark)")
         await page.wait_for_timeout(600)
 
         # Check toast
         toast_text = await page.text_content(".toast")
         print(f"[Desktop] Toast notification received: '{toast_text}'")
-        assert "distortion correction" in toast_text.lower() or "berhasil" in toast_text.lower()
+        assert "time watermark" in toast_text.lower() or "berhasil" in toast_text.lower()
 
         # Revert toggle
-        await page.click("label:has(#prop_distortion_correction)")
+        await page.click("label:has(#prop_time_watermark)")
         await page.wait_for_timeout(600)
 
         # Capture Desktop Screenshot

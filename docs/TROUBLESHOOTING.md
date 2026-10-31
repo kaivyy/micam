@@ -99,3 +99,14 @@ This guide covers common setup issues, network edge cases, and performance tunin
   ```bash
   df -h
   ```
+
+---
+
+## 6. Device Limit / "Device Telah Maksimum" in Xiaomi Mi Home App
+
+### Symptom: Mi Home mobile app displays "Device limit reached" or "Perangkat telah maksimum"
+- **Root Cause:** Xiaomi smart camera hardware (such as CW100 dual-lens) enforces an internal limit of approximately 2 concurrent P2P client streaming sessions in firmware. In unpatched gateways, opening separate connections for Lens 1 and Lens 2 consumes both slots, locking out the mobile app.
+- **Solution (Built-in since v0.1.7):**
+  1. **P2P Shared-Session Multiplexing (`&shared=1`)**: The patched `go2rtc` gateway multiplexes both lens channels over a single P2P connection to the physical camera, leaving 1 P2P slot permanently available for the official Mi Home app.
+  2. **Non-blocking Buffer Isolation**: Camera socket read loops are decoupled from slow web clients, preventing `pop buffer is full` buffer overflows and reconnection storms.
+  3. **Instant Standby ("Bebaskan Kamera")**: If needed, tap the **Bebaskan Kamera** button in the dashboard toolbar or mobile drawer to immediately suspend all web streams and release camera P2P sessions with a single click.

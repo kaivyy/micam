@@ -98,6 +98,7 @@ def generate_go2rtc_yaml(camera: dict) -> str:
     region = camera.get("region") or "sg"
     user_id = str(camera.get("user_id") or "")
     pass_token = camera.get("pass_token") or ""
+    shared = "&shared=1" if lens_type == "dual" else ""
 
     lines = [
         'api:',
@@ -120,8 +121,7 @@ def generate_go2rtc_yaml(camera: dict) -> str:
         'streams:',
         '  # Lensa Kiri (Primary / Wide Angle - Native 2.5K Ultra HD)',
         '  cctv_lensa_kiri:',
-        f'    - xiaomi://{user_id}:{region}@{ip}?did={did}&model={model}&subtype=3',
-        '    - ffmpeg:cctv_lensa_kiri#video=h264',
+        f'    - xiaomi://{user_id}:{region}@{ip}?did={did}&model={model}{shared}&subtype=3',
         '  cctv_garasi_kiri:',
         '    - cctv_lensa_kiri',
         '  cctv_garasi_left:',
@@ -133,8 +133,7 @@ def generate_go2rtc_yaml(camera: dict) -> str:
         lines.extend([
             '  # Lensa Kanan (Secondary / PTZ Lens - Native 2.5K Ultra HD)',
             '  cctv_lensa_kanan:',
-            f'    - xiaomi://{user_id}:{region}@{ip}?did={did}&model={model}&channel=2&subtype=3',
-            '    - ffmpeg:cctv_lensa_kanan#video=h264',
+            f'    - xiaomi://{user_id}:{region}@{ip}?did={did}&model={model}&channel=2{shared}&subtype=3',
             '  cctv_garasi_kanan:',
             '    - cctv_lensa_kanan',
             '  cctv_garasi_right:',

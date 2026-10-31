@@ -37,7 +37,7 @@ load_env(os.path.join(BASE_DIR, ".env"))
 
 from recorder import recorder
 from xiaomi_wizard import wizard_session
-from youtube_streamer import youtube_streamer
+from youtube_streamer import youtube_streamer, normalize_layout_options
 
 CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.100")
 CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
@@ -66,36 +66,8 @@ def invalidate_advanced_cache():
     with _advanced_lock:
         _advanced_cache["timestamp"] = 0
 
-def check_stalled_go2rtc_sockets(threshold_bytes=250000):
-    try:
-        proc = subprocess.run(["ss", "-tn", "( sport = :1984 or sport = :1985 )"], capture_output=True, text=True, timeout=2)
-        if proc.returncode != 0:
-            return False
-        for line in proc.stdout.splitlines()[1:]:
-            parts = line.split()
-            if len(parts) >= 3 and parts[0] == "ESTAB":
-                try:
-                    send_q = int(parts[2])
-                    if send_q > threshold_bytes:
-                        return True
-                except ValueError:
-                    pass
-    except Exception:
-        pass
-    return False
-
-def _stream_watchdog_loop():
-    while True:
-        time.sleep(10)
-        try:
-            if check_stalled_go2rtc_sockets():
-                print("[Stream Watchdog] Stalled consumer socket detected (Send-Q buffer clogged). Flushing go2rtc to release camera P2P slots.", file=sys.stderr)
-                req = urllib.request.Request(f"{GO2RTC_API}/api/restart", data=b"", method="POST")
-                urllib.request.urlopen(req, timeout=3)
-                invalidate_status_cache()
-                invalidate_advanced_cache()
-        except Exception:
-            pass
+_global_standby = False
+_global_standby_lock = threading.Lock()
 
 def refresh_runtime_config():
     global CAMERA_IP, CAMERA_PORT, TOKEN_HEX, TOKEN, DID, CCTV_NAME, XIAOMI_USER_ID, XIAOMI_USER_EMAIL
@@ -127,33 +99,15 @@ def get_wizard_configuration_status():
     }
 
 ADVANCED_PROP_MAP = {
-    # Tampilan & Optik
+    # Tampilan & Optik Kamera
     "image_flip": {"siid": 2, "piid": 4, "type": int},
     "time_watermark": {"siid": 2, "piid": 5, "type": bool},
     "wdr_mode": {"siid": 2, "piid": 6, "type": bool},
     "glimmer_color": {"siid": 2, "piid": 7, "type": bool},
-    "distortion_correction": {"siid": 2, "piid": 14, "type": bool},
-    "ai_frame": {"siid": 2, "piid": 17, "type": bool},
 
-    # Lampu & Audio Hardware
+    # Perangkat Fisik Kamera
     "status_led": {"siid": 4, "piid": 1, "type": bool},
-    "spotlight_on": {"siid": 16, "piid": 1, "type": bool},
-    "spotlight_brightness": {"siid": 16, "piid": 2, "type": int},
     "speaker_volume": {"siid": 6, "piid": 1, "type": int},
-    "speaker_mute": {"siid": 6, "piid": 2, "type": bool},
-    "warning_light_switch": {"siid": 20, "piid": 3, "type": bool},
-    "warning_audio_switch": {"siid": 20, "piid": 4, "type": bool},
-    "warning_light_mode": {"siid": 20, "piid": 6, "type": int},
-
-    # AI & Sensitivitas
-    "motion_switch": {"siid": 5, "piid": 1, "type": bool},
-    "motion_sensitivity": {"siid": 5, "piid": 3, "type": int},
-    "human_detection": {"siid": 8, "piid": 6, "type": bool},
-    "car_detection": {"siid": 8, "piid": 21, "type": bool},
-    "ai_sensitivity": {"siid": 8, "piid": 28, "type": int},
-
-    # SD Card Rekaman Mode
-    "sd_recording_mode": {"siid": 2, "piid": 11, "type": int},
 }
 
 def is_device_authenticated():
@@ -171,22 +125,8 @@ def get_advanced_camera_status():
         {"key": "time_watermark", "siid": 2, "piid": 5},
         {"key": "wdr_mode", "siid": 2, "piid": 6},
         {"key": "glimmer_color", "siid": 2, "piid": 7},
-        {"key": "distortion_correction", "siid": 2, "piid": 14},
-        {"key": "ai_frame", "siid": 2, "piid": 17},
-        {"key": "sd_recording_mode", "siid": 2, "piid": 11},
         {"key": "status_led", "siid": 4, "piid": 1},
-        {"key": "motion_switch", "siid": 5, "piid": 1},
-        {"key": "motion_sensitivity", "siid": 5, "piid": 3},
         {"key": "speaker_volume", "siid": 6, "piid": 1},
-        {"key": "speaker_mute", "siid": 6, "piid": 2},
-        {"key": "human_detection", "siid": 8, "piid": 6},
-        {"key": "car_detection", "siid": 8, "piid": 21},
-        {"key": "ai_sensitivity", "siid": 8, "piid": 28},
-        {"key": "spotlight_on", "siid": 16, "piid": 1},
-        {"key": "spotlight_brightness", "siid": 16, "piid": 2},
-        {"key": "warning_light_switch", "siid": 20, "piid": 3},
-        {"key": "warning_audio_switch", "siid": 20, "piid": 4},
-        {"key": "warning_light_mode", "siid": 20, "piid": 6},
         {"key": "sd_status", "siid": 3, "piid": 1},
         {"key": "sd_total", "siid": 3, "piid": 2},
         {"key": "sd_free", "siid": 3, "piid": 3},
@@ -194,7 +134,7 @@ def get_advanced_camera_status():
     ]
 
     out = {}
-    chunk_size = 4
+    chunk_size = 5
     for i in range(0, len(prop_queries), chunk_size):
         chunk = prop_queries[i:i+chunk_size]
         req = [{"did": DID, "siid": p["siid"], "piid": p["piid"]} for p in chunk]
@@ -205,7 +145,7 @@ def get_advanced_camera_status():
                     out[p["key"]] = item.get("value")
         except Exception:
             pass
-        time.sleep(0.04)
+        time.sleep(0.03)
 
     sd_status = out.get("sd_status")
     sd_status_map = {
@@ -218,11 +158,6 @@ def get_advanced_camera_status():
         6: "Sedang Diperbaiki",
         8: "Belum Diinisialisasi"
     }
-    sd_rec_map = {
-        0: "Jangan Rekam",
-        1: "Rekam Saat Gerakan",
-        2: "Rekam Terus-Menerus"
-    }
     total_kb = out.get("sd_total") or 0
     free_kb = out.get("sd_free") or 0
     used_kb = out.get("sd_used") or (total_kb - free_kb if total_kb >= free_kb else 0)
@@ -232,29 +167,14 @@ def get_advanced_camera_status():
         "time_watermark": bool(out.get("time_watermark", True)),
         "wdr_mode": bool(out.get("wdr_mode", True)),
         "glimmer_color": bool(out.get("glimmer_color", True)),
-        "distortion_correction": bool(out.get("distortion_correction", True)),
-        "ai_frame": bool(out.get("ai_frame", False)),
         "status_led": bool(out.get("status_led", True)),
-        "spotlight_on": bool(out.get("spotlight_on", False)),
-        "spotlight_brightness": int(out.get("spotlight_brightness", 100)),
         "speaker_volume": int(out.get("speaker_volume", 100)),
-        "speaker_mute": bool(out.get("speaker_mute", False)),
-        "warning_light_switch": bool(out.get("warning_light_switch", True)),
-        "warning_audio_switch": bool(out.get("warning_audio_switch", False)),
-        "warning_light_mode": int(out.get("warning_light_mode", 3)),
-        "motion_switch": bool(out.get("motion_switch", True)),
-        "motion_sensitivity": int(out.get("motion_sensitivity", 1)),
-        "human_detection": bool(out.get("human_detection", True)),
-        "car_detection": bool(out.get("car_detection", False)),
-        "ai_sensitivity": int(out.get("ai_sensitivity", 1)),
         "sdcard": {
             "status": sd_status if sd_status is not None else 1,
             "status_text": sd_status_map.get(sd_status, "Tidak Diketahui"),
             "total_mb": round(total_kb / 1024, 1),
             "free_mb": round(free_kb / 1024, 1),
             "used_mb": round(used_kb / 1024, 1),
-            "recording_mode": out.get("sd_recording_mode", 0),
-            "recording_mode_text": sd_rec_map.get(out.get("sd_recording_mode", 0), "Jangan Rekam")
         }
     }
     with _advanced_lock:
@@ -301,6 +221,8 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/api/status":
             self.handle_api_status()
+        elif parsed.path == "/api/streams/standby":
+            self.send_json({"standby": _global_standby})
         elif parsed.path == "/api/wizard/check":
             self.send_json(get_wizard_configuration_status())
         elif parsed.path == "/api/wizard/status":
@@ -377,6 +299,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(404, "Endpoint not found")
 
     def do_POST(self):
+        global _global_standby
         parsed = urlparse(self.path)
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length) if length > 0 else b"{}"
@@ -569,12 +492,14 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             quality = data.get("quality")
             silent_audio = data.get("silent_audio")
             auto_start = data.get("auto_start")
+            layout_options = {k: data[k] for k in ("layout", "swap", "fit", "pip_corner", "pip_size") if k in data}
             success, msg = youtube_streamer.start(
                 stream_key=stream_key,
                 lens=lens,
                 quality=quality,
                 silent_audio=silent_audio,
-                auto_start=auto_start
+                auto_start=auto_start,
+                layout_options=layout_options
             )
             self.send_json({"success": success, "message": msg, "status": youtube_streamer.get_status()})
 
@@ -585,8 +510,11 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/youtube/config":
             if "stream_key" in data and data["stream_key"]:
                 youtube_streamer.config["stream_key"] = data["stream_key"].strip()
-            if "lens" in data:
+            if data.get("lens") in ("left", "right", "both"):
                 youtube_streamer.config["lens"] = data["lens"]
+            layout_options = {k: data[k] for k in ("layout", "swap", "fit", "pip_corner", "pip_size") if k in data}
+            if layout_options:
+                youtube_streamer.config.update(normalize_layout_options({**youtube_streamer.config, **layout_options}))
             if "quality" in data:
                 youtube_streamer.config["quality"] = data["quality"]
             if "silent_audio" in data:
@@ -596,13 +524,36 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             youtube_streamer.save_config()
             self.send_json({"success": True, "status": youtube_streamer.get_status()})
 
+        elif parsed.path == "/api/streams/standby":
+            target_standby = bool(data.get("standby", not _global_standby))
+            with _global_standby_lock:
+                _global_standby = target_standby
+            invalidate_status_cache()
+
+            if _global_standby:
+                if hasattr(youtube_streamer, "pause_for_standby"):
+                    youtube_streamer.pause_for_standby()
+                try:
+                    req = urllib.request.Request(f"{GO2RTC_API}/api/restart", data=b"", method="POST")
+                    urllib.request.urlopen(req, timeout=3)
+                except Exception:
+                    pass
+            else:
+                if hasattr(youtube_streamer, "resume_from_standby"):
+                    youtube_streamer.resume_from_standby()
+
+            self.send_json({"success": True, "standby": _global_standby})
+
         elif parsed.path == "/api/streams/release":
+            with _global_standby_lock:
+                _global_standby = True
+            invalidate_status_cache()
+            if hasattr(youtube_streamer, "pause_for_standby"):
+                youtube_streamer.pause_for_standby()
             try:
                 req = urllib.request.Request(f"{GO2RTC_API}/api/restart", data=b"", method="POST")
                 urllib.request.urlopen(req, timeout=3)
-                invalidate_status_cache()
-                invalidate_advanced_cache()
-                self.send_json({"success": True, "message": "Semua sesi streaming kamera berhasil dilepas secara instan."})
+                self.send_json({"success": True, "standby": True, "message": "Semua sesi streaming kamera berhasil dilepas secara instan."})
             except Exception as e:
                 self.send_json({"success": False, "error": str(e)}, status=500)
 
@@ -639,28 +590,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             })
 
         elif parsed.path == "/api/camera/sdcard":
-            if not is_device_authenticated():
-                self.send_json({"success": False, "authenticated": False, "error": "Autentikasi akun Xiaomi diperlukan"}, status=401)
-                return
-            action = str(data.get("action", "")).strip()
-            if action == "format":
-                res = send_miio_rpc("action", {"did": DID, "siid": 3, "aiid": 1, "in": []})
-                invalidate_advanced_cache()
-                self.send_json({"success": True, "authenticated": True, "action": "format", "result": res})
-            elif action == "eject":
-                res = send_miio_rpc("action", {"did": DID, "siid": 3, "aiid": 2, "in": []})
-                invalidate_advanced_cache()
-                self.send_json({"success": True, "authenticated": True, "action": "eject", "result": res})
-            elif action == "set_mode":
-                try:
-                    mode = int(data.get("mode", 0))
-                except:
-                    mode = 0
-                res = send_miio_rpc("set_properties", [{"did": DID, "siid": 2, "piid": 11, "value": mode}])
-                invalidate_advanced_cache()
-                self.send_json({"success": True, "authenticated": True, "action": "set_mode", "mode": mode, "result": res})
-            else:
-                self.send_json({"success": False, "authenticated": True, "error": f"Aksi MicroSD tidak valid: {action}"}, status=400)
+            self.send_json({"success": False, "authenticated": True, "error": "Fitur manipulasi MicroSD dinonaktifkan demi stabilitas kamera dan kompatibilitas aplikasi Mi Home."}, status=400)
 
         else:
             self.send_error(404, "Endpoint not found")
@@ -748,7 +678,9 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         now = time.time()
         with _status_lock:
             if _status_cache["data"] is not None and (now - _status_cache["timestamp"]) < 4.0:
-                self.send_json(_status_cache["data"])
+                cached = dict(_status_cache["data"])
+                cached["standby"] = _global_standby
+                self.send_json(cached)
                 return
 
         try:
@@ -767,6 +699,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 "online": True,
                 "info": info.get("result", {}),
                 "properties": props.get("result", []),
+                "standby": _global_standby,
                 "timestamp": now
             }
             with _status_lock:
@@ -774,7 +707,7 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 _status_cache["timestamp"] = now
             self.send_json(payload)
         except Exception as e:
-            self.send_json({"online": False, "error": str(e)}, status=500)
+            self.send_json({"online": False, "standby": _global_standby, "error": str(e)}, status=500)
 
     def handle_api_ping(self):
         start = time.time()
@@ -864,7 +797,6 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 if __name__ == "__main__":
     os.makedirs(PUBLIC_DIR, exist_ok=True)
-    threading.Thread(target=_stream_watchdog_loop, daemon=True).start()
     server = ThreadedTCPServer(("", PORT), CCTVHandler)
     print(f"CCTV Dashboard Server listening on http://0.0.0.0:{PORT}")
     try:

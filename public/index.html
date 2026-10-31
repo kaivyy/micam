@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="/fsr-upscaler.js?v=20261030_05"></script>
-  <script type="module" src="/video-rtc.js?v=20261031_02"></script>
+  <script type="module" src="/video-rtc.js?v=20261031_08"></script>
   <style>
     :root {
       --bg: #000000;
@@ -375,19 +375,72 @@
         min-height: 360px;
       }
 
+      .btn-text-desktop { display: none; }
+      .btn-text-mobile { display: inline; }
+
       .viewports-control-bar {
-        padding: 0 0.15rem;
-        gap: 0.4rem;
+        padding: 0;
+        gap: 0.45rem;
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      .view-pill {
-        padding: 0.35rem 0.55rem;
-        font-size: 0.72rem;
+      .lens-switcher-group {
+        width: 100%;
+        display: flex;
+        box-sizing: border-box;
       }
 
-      .view-size-btn {
-        padding: 0.35rem 0.6rem;
+      .lens-switcher-group .view-pill {
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center;
+        white-space: nowrap;
         font-size: 0.72rem;
+        padding: 0.35rem 0.2rem;
+        min-height: 34px;
+        height: 34px;
+      }
+
+      .lens-switcher-group .view-pill .icon svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .view-size-group {
+        width: 100%;
+        display: flex;
+        align-items: stretch;
+        gap: 0.35rem;
+        box-sizing: border-box;
+      }
+
+      .view-size-group .view-size-btn,
+      .view-size-group .idle-select-wrap {
+        flex: 1 1 0;
+        min-width: 0;
+        height: 34px;
+        min-height: 34px;
+        max-height: 34px;
+        padding: 0 0.35rem;
+        font-size: 0.72rem;
+        white-space: nowrap;
+        justify-content: center;
+        box-sizing: border-box;
+        align-items: center;
+      }
+
+      .view-size-group .view-size-btn .icon svg,
+      .view-size-group .idle-select-wrap .icon svg {
+        width: 13px;
+        height: 13px;
+        min-width: 13px;
+      }
+
+      .view-size-group .view-size-select {
+        font-size: 0.72rem;
+        padding: 0;
+        min-width: 0;
       }
     }
 
@@ -662,6 +715,8 @@
       width: 14px;
       height: 14px;
     }
+    .btn-text-desktop { display: inline; }
+    .btn-text-mobile { display: none; }
     .view-size-group {
       display: inline-flex;
       align-items: center;
@@ -2530,20 +2585,22 @@
           <div class="view-size-group">
             <button class="view-size-btn" id="btnToggleStandby" onclick="toggleStreamStandby()" title="Jeda Streaming (Bebaskan Slot Kamera untuk Aplikasi Xiaomi Home)">
               <span class="icon" id="iconStandbyState"><svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></span>
-              <span id="txtStandbyState">Bebaskan Kamera</span>
+              <span class="btn-text-desktop" id="txtStandbyState">Bebaskan Kamera</span>
+              <span class="btn-text-mobile" id="txtStandbyStateMobile">Siaga</span>
             </button>
             <div class="idle-select-wrap" title="Waktu siaga otomatis untuk membebaskan kuota kamera">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg></span>
               <select class="view-size-select" id="selectIdleTimeout" onchange="setIdleTimeout(this.value)" aria-label="Waktu Siaga Otomatis">
-                <option value="5">Siaga 5 mnt</option>
-                <option value="10" selected>Siaga 10 mnt</option>
-                <option value="30">Siaga 30 mnt</option>
-                <option value="0">Nonaktif (24/7)</option>
+                <option value="5">Siaga 5m</option>
+                <option value="10" selected>Siaga 10m</option>
+                <option value="30">Siaga 30m</option>
+                <option value="0">Nonaktif</option>
               </select>
             </div>
             <button class="view-size-btn" id="btnToggleSize" onclick="toggleVideoSize()" title="Perbesar / Normalisasi Ukuran Video">
               <span class="icon" id="iconSizeState"><svg viewBox="0 0 24 24"><path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z"/></svg></span>
-              <span id="txtSizeState">Mode Besar</span>
+              <span class="btn-text-desktop" id="txtSizeState">Mode Besar</span>
+              <span class="btn-text-mobile" id="txtSizeStateMobile">Besar</span>
             </button>
           </div>
         </div>
@@ -3212,6 +3269,7 @@
           <select class="form-select" id="ytLensSelect" aria-label="Pilihan Kamera atau Lensa">
             <option value="left">Lensa 1: Wide Angle (Kiri)</option>
             <option value="right">Lensa 2: Telephoto (Kanan)</option>
+            <option value="both">Kedua Lensa dalam 1 Layar</option>
           </select>
         </div>
         <div class="form-group" style="margin: 0;">
@@ -3222,6 +3280,52 @@
             <option value="720p">HD 720p (Hemat Kuota)</option>
           </select>
         </div>
+      </div>
+
+      <div id="ytLayoutBox" style="display: none; margin-top: 0.85rem;">
+        <div class="yt-options-grid">
+          <div class="form-group" style="margin: 0;">
+            <label for="ytLayoutSelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Tata Letak</label>
+            <select class="form-select" id="ytLayoutSelect" aria-label="Tata letak dua lensa">
+              <option value="side">Berdampingan (kiri - kanan)</option>
+              <option value="stack">Atas dan Bawah</option>
+              <option value="pip">Gambar dalam Gambar</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label for="ytSwapSelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Urutan Lensa</label>
+            <select class="form-select" id="ytSwapSelect" aria-label="Urutan lensa">
+              <option value="0">Lensa 1 (Kiri) sebagai utama</option>
+              <option value="1">Lensa 2 (Kanan) sebagai utama</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label for="ytFitSelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Bentuk Gambar</label>
+            <select class="form-select" id="ytFitSelect" aria-label="Bentuk gambar">
+              <option value="contain">Utuh (ada pita hitam)</option>
+              <option value="cover">Penuh (sisi terpotong)</option>
+            </select>
+          </div>
+          <div class="form-group" id="ytPipCornerGroup" style="margin: 0; display: none;">
+            <label for="ytPipCornerSelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Posisi Lensa Kecil</label>
+            <select class="form-select" id="ytPipCornerSelect" aria-label="Posisi lensa kecil">
+              <option value="br">Kanan bawah</option>
+              <option value="bl">Kiri bawah</option>
+              <option value="tr">Kanan atas</option>
+              <option value="tl">Kiri atas</option>
+            </select>
+          </div>
+          <div class="form-group" id="ytPipSizeGroup" style="margin: 0; display: none;">
+            <label for="ytPipSizeSelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Ukuran Lensa Kecil</label>
+            <select class="form-select" id="ytPipSizeSelect" aria-label="Ukuran lensa kecil">
+              <option value="20">Kecil (20%)</option>
+              <option value="30">Sedang (30%)</option>
+              <option value="40">Besar (40%)</option>
+              <option value="50">Sangat besar (50%)</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; margin-top: 0.4rem;">Mode ini menggabungkan dua lensa di server dan memakai CPU lebih besar. Resolusi dibatasi maksimal Full HD.</div>
       </div>
 
       <div style="margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
@@ -3718,22 +3822,34 @@
         if (leftBox) { leftBox.style.display = ''; leftBox.classList.remove('is-single-lens'); }
         if (rightBox) { rightBox.style.display = ''; rightBox.classList.remove('is-single-lens'); }
         if (!isStreamStandby) {
-          if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
-          if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+          if (camLeft) {
+            if (!camLeft.src || camLeft.wsState === WebSocket.CLOSED) camLeft.src = getWsUrl(streamLeftName);
+            else if (typeof camLeft.onconnect === 'function') camLeft.onconnect();
+          }
+          if (camRight) {
+            if (!camRight.src || camRight.wsState === WebSocket.CLOSED) camRight.src = getWsUrl(streamRightName);
+            else if (typeof camRight.onconnect === 'function') camRight.onconnect();
+          }
         }
       } else if (mode === 'left') {
         if (leftBox) { leftBox.style.display = ''; leftBox.classList.add('is-single-lens'); }
         if (rightBox) { rightBox.style.display = 'none'; rightBox.classList.remove('is-single-lens'); }
         if (camRight && typeof camRight.ondisconnect === 'function') camRight.ondisconnect();
         if (!isStreamStandby) {
-          if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
+          if (camLeft) {
+            if (!camLeft.src || camLeft.wsState === WebSocket.CLOSED) camLeft.src = getWsUrl(streamLeftName);
+            else if (typeof camLeft.onconnect === 'function') camLeft.onconnect();
+          }
         }
       } else if (mode === 'right') {
         if (leftBox) { leftBox.style.display = 'none'; leftBox.classList.remove('is-single-lens'); }
         if (rightBox) { rightBox.style.display = ''; rightBox.classList.add('is-single-lens'); }
         if (camLeft && typeof camLeft.ondisconnect === 'function') camLeft.ondisconnect();
         if (!isStreamStandby) {
-          if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+          if (camRight) {
+            if (!camRight.src || camRight.wsState === WebSocket.CLOSED) camRight.src = getWsUrl(streamRightName);
+            else if (typeof camRight.onconnect === 'function') camRight.onconnect();
+          }
         }
       }
       log(`Tampilan lensa diubah ke: ${mode === 'both' ? 'Kedua Lensa' : (mode === 'left' ? 'Lensa Kiri' : 'Lensa Kanan')}`);
@@ -3744,10 +3860,12 @@
       const grid = document.querySelector('.viewports-grid');
       const btn = document.getElementById('btnToggleSize');
       const txt = document.getElementById('txtSizeState');
+      const txtMobile = document.getElementById('txtSizeStateMobile');
 
       if (grid) grid.classList.toggle('size-expanded', isExpandedSize);
       if (btn) btn.classList.toggle('active', isExpandedSize);
       if (txt) txt.textContent = isExpandedSize ? 'Mode Standar' : 'Mode Besar';
+      if (txtMobile) txtMobile.textContent = isExpandedSize ? 'Standar' : 'Besar';
       log(`Ukuran video diubah ke: ${isExpandedSize ? 'Mode Besar' : 'Mode Standar'}`);
     }
 
@@ -4269,22 +4387,30 @@
     let isStreamStandby = false;
 
     function toggleStreamStandby(explicitMode) {
-      if (typeof explicitMode === 'boolean') {
-        isStreamStandby = explicitMode;
-      } else {
-        isStreamStandby = !isStreamStandby;
-      }
+      const targetState = (typeof explicitMode === 'boolean') ? explicitMode : !isStreamStandby;
+      applyStandbyState(targetState);
+      fetch('/api/streams/standby', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ standby: targetState })
+      }).catch(() => {});
+    }
+
+    function applyStandbyState(active) {
+      if (isStreamStandby === active) return;
+      isStreamStandby = Boolean(active);
       const btn = document.getElementById('btnToggleStandby');
       const txt = document.getElementById('txtStandbyState');
+      const txtMobile = document.getElementById('txtStandbyStateMobile');
       const drawerTxt = document.getElementById('drawerTxtStandbyState');
       const overlayLeft = document.getElementById('standbyOverlay_camLeft');
       const overlayRight = document.getElementById('standbyOverlay_camRight');
 
       if (isStreamStandby) {
         disconnectStreams();
-        fetch('/api/streams/release', { method: 'POST' }).catch(() => {});
         if (btn) btn.classList.add('standby-active');
         if (txt) txt.textContent = 'Lanjutkan Live';
+        if (txtMobile) txtMobile.textContent = 'Lanjut';
         if (drawerTxt) drawerTxt.textContent = 'Lanjutkan Live Streaming';
         if (overlayLeft) overlayLeft.style.display = 'flex';
         if (overlayRight) overlayRight.style.display = 'flex';
@@ -4292,6 +4418,7 @@
       } else {
         if (btn) btn.classList.remove('standby-active');
         if (txt) txt.textContent = 'Bebaskan Kamera';
+        if (txtMobile) txtMobile.textContent = 'Siaga';
         if (drawerTxt) drawerTxt.textContent = 'Bebaskan Kamera (Standby)';
         if (overlayLeft) overlayLeft.style.display = 'none';
         if (overlayRight) overlayRight.style.display = 'none';
@@ -4350,7 +4477,7 @@
 
       if (currentLensView === 'both' || currentLensView === 'left') {
         if (camL) {
-          if (!camL.src) camL.src = getWsUrl(streamLeftName);
+          if (!camL.src || camL.wsState === WebSocket.CLOSED) camL.src = getWsUrl(streamLeftName);
           else if (typeof camL.onconnect === 'function') camL.onconnect();
         }
         if (clarityModes['camLeft'] === 'fsr' && fsrUpscalers['camLeft']) {
@@ -4359,7 +4486,7 @@
       }
       if (currentLensView === 'both' || currentLensView === 'right') {
         if (camR) {
-          if (!camR.src) camR.src = getWsUrl(streamRightName);
+          if (!camR.src || camR.wsState === WebSocket.CLOSED) camR.src = getWsUrl(streamRightName);
           else if (typeof camR.onconnect === 'function') camR.onconnect();
         }
         if (clarityModes['camRight'] === 'fsr' && fsrUpscalers['camRight']) {
@@ -4373,18 +4500,25 @@
       if (selIdle) selIdle.value = String(idleTimeoutMinutes);
       resetIdleTimer();
 
-      if (window.innerWidth < 640) {
-        switchLensView('left');
-      }
+      fetch('/api/streams/standby').then(r => r.json()).then(d => {
+        if (d && typeof d.standby === 'boolean' && d.standby) {
+          applyStandbyState(true);
+        }
+      }).catch(() => {});
 
       const camL = document.getElementById('camLeft');
       const camR = document.getElementById('camRight');
+      const forcedMode = new URLSearchParams(window.location.search).get('mode');
+      if (forcedMode && /^[a-z,]+$/.test(forcedMode)) {
+        if (camL) camL.mode = forcedMode;
+        if (camR) camR.mode = forcedMode;
+      }
       if (camL && (currentLensView === 'both' || currentLensView === 'left')) {
-        camL.background = false;
+        camL.background = true;
         camL.src = getWsUrl(streamLeftName);
       }
       if (camR && (currentLensView === 'both' || currentLensView === 'right')) {
-        camR.background = false;
+        camR.background = true;
         camR.src = getWsUrl(streamRightName);
       }
       setupZoomPan('camLeft');
@@ -4743,6 +4877,29 @@
       }
     }
 
+    function ytLayoutPayload() {
+      return {
+        layout: document.getElementById('ytLayoutSelect').value,
+        swap: document.getElementById('ytSwapSelect').value === '1',
+        fit: document.getElementById('ytFitSelect').value,
+        pip_corner: document.getElementById('ytPipCornerSelect').value,
+        pip_size: parseInt(document.getElementById('ytPipSizeSelect').value, 10)
+      };
+    }
+
+    function syncYouTubeLayoutUI() {
+      const both = document.getElementById('ytLensSelect').value === 'both';
+      const pip = document.getElementById('ytLayoutSelect').value === 'pip';
+      document.getElementById('ytLayoutBox').style.display = both ? 'block' : 'none';
+      document.getElementById('ytPipCornerGroup').style.display = (both && pip) ? 'block' : 'none';
+      document.getElementById('ytPipSizeGroup').style.display = (both && pip) ? 'block' : 'none';
+    }
+
+    ['ytLensSelect', 'ytLayoutSelect'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', syncYouTubeLayoutUI);
+    });
+
     async function openYouTubeModal() {
       const modal = document.getElementById('youtubeModal');
       if (modal) modal.classList.add('open');
@@ -4754,6 +4911,12 @@
         const autoStart = document.getElementById('ytAutoStart');
         if (lensSelect && status.lens) lensSelect.value = status.lens;
         if (qualitySelect && status.quality) qualitySelect.value = status.quality;
+        if (status.layout) document.getElementById('ytLayoutSelect').value = status.layout;
+        document.getElementById('ytSwapSelect').value = status.swap ? '1' : '0';
+        if (status.fit) document.getElementById('ytFitSelect').value = status.fit;
+        if (status.pip_corner) document.getElementById('ytPipCornerSelect').value = status.pip_corner;
+        if (status.pip_size) document.getElementById('ytPipSizeSelect').value = String(status.pip_size);
+        syncYouTubeLayoutUI();
         if (silentAudio) silentAudio.checked = (status.silent_audio !== false);
         if (autoStart) autoStart.checked = Boolean(status.auto_start);
       }
@@ -4810,7 +4973,7 @@
 
         if (btn) btn.textContent = 'Menghubungkan ke YouTube...';
         try {
-          const payload = { lens, quality, silent_audio: silentAudio, auto_start: autoStart };
+          const payload = { lens, quality, silent_audio: silentAudio, auto_start: autoStart, ...ytLayoutPayload() };
           if (streamKey) payload.stream_key = streamKey;
 
           const res = await fetch('/api/youtube/start', {
@@ -4843,7 +5006,7 @@
       const streamKey = keyInput ? keyInput.value.trim() : '';
 
       try {
-        const payload = { lens, quality, silent_audio: silentAudio, auto_start: autoStart };
+        const payload = { lens, quality, silent_audio: silentAudio, auto_start: autoStart, ...ytLayoutPayload() };
         if (streamKey) payload.stream_key = streamKey;
 
         const res = await fetch('/api/youtube/config', {
@@ -5392,6 +5555,11 @@
       try {
         const res = await fetch('/api/status');
         const data = await res.json();
+        if (data && typeof data.standby === 'boolean') {
+          if (data.standby !== isStreamStandby) {
+            applyStandbyState(data.standby);
+          }
+        }
         if (data.online) {
           if (data.info) {
             if (data.info.ap && data.info.ap.rssi) {

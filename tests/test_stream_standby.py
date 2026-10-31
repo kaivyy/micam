@@ -22,6 +22,11 @@ def test_stream_release_api():
         assert data.get("success") is True, f"Expected success=True, got {data}"
         print(f"[API] Success: {data.get('message')}")
 
+    # Reset standby to False so next tests start cleanly
+    req_reset = urllib.request.Request("http://127.0.0.1:8088/api/streams/standby", data=b'{"standby": false}', headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(req_reset, timeout=5) as res:
+        assert res.status == 200
+
 def test_frontend_standby_and_idle():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -83,16 +88,16 @@ def test_frontend_standby_and_idle():
         page_mobile = context_mobile.new_page()
         page_mobile.goto("http://127.0.0.1:8088", wait_until="networkidle")
 
-        # Check that on mobile it defaults to single lens (left) to conserve camera slots
+        # Check that on mobile it defaults to kedua lensa (both)
         current_lens = page_mobile.evaluate("() => currentLensView")
         print(f"[Mobile] Auto-detected lens view mode: '{current_lens}'")
-        assert current_lens == "left", f"Expected mobile default 'left', got '{current_lens}'"
+        assert current_lens == "both", f"Expected mobile default 'both', got '{current_lens}'"
 
         mon_left = page_mobile.locator("#monBoxLeft")
         mon_right = page_mobile.locator("#monBoxRight")
         assert mon_left.is_visible(), "Lensa Kiri must be visible on mobile"
-        assert not mon_right.is_visible(), "Lensa Kanan must be hidden on mobile default single-lens"
-        print("[Mobile] Single lens confirmed active (conserves 1 P2P channel).")
+        assert mon_right.is_visible(), "Lensa Kanan must be visible on mobile default dual-lens"
+        print("[Mobile] Dual lens confirmed active by default.")
 
         # Check mobile drawer has 'Bebaskan Kamera'
         print("[Mobile] Opening mobile drawer menu...")

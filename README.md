@@ -75,6 +75,7 @@ To stop the background services:
 * **Adaptive Camera Layout (Single-Lens & Dual-Lens):**
   * **Dual-Lens Mode** (CW100 / CW700S): Synchronized dual-stream playback with independent zoom and audio focus.
   * **Single-Lens Mode** (C200 / C300 / C400): Automatically adjusts to a full-width single monitor without empty or offline secondary frames.
+  * **P2P Shared-Session Multiplexing (`&shared=1`)**: Multiplexes both dual-lens feeds over a single hardware P2P session to the camera, eliminating device limit lockouts and allowing simultaneous viewing in Mi Home and multiple web dashboards.
 
 * **Ultra-Low Latency Live Streaming (~200ms):**
   * Direct peer-to-peer WebRTC & MSE streaming via integrated `go2rtc` gateway.
@@ -101,9 +102,11 @@ To stop the background services:
 
 * **YouTube Live Streaming Relay (Alternative Cloud DVR):**
   * Stream camera feeds directly to YouTube Live in native 2.5K, 1080p, or 720p.
+  * **Dual-Lens Unified Live Broadcast**: Broadcast both lenses simultaneously into a single live stream with customizable layouts (**Side-by-Side**, **Vertical Stack**, or **Picture-in-Picture** with custom corner placement, scaling, and lens swap).
   * In-browser setup modal with step-by-step guidance button for acquiring YouTube Stream Key.
   * Built-in silent audio generator option to safeguard private residential live broadcasts from automated Content ID copyright takedowns.
   * Resilient background supervisor process with automated reconnection during network hiccups.
+  * 100% internal loopback: Ingests from local RTSP endpoints (`rtsp://127.0.0.1:8554`), consuming zero additional camera hardware P2P slots.
   * Zero command-line configuration required &mdash; managed entirely from the dashboard UI.
 
 * **Pure OLED Black Design (`#000000`) & Mobile First:**

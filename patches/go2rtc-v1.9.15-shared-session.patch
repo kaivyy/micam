@@ -1,0 +1,291 @@
+diff --git a/pkg/xiaomi/miss/client.go b/pkg/xiaomi/miss/client.go
+index 3113632..b0b9ed4 100644
+--- a/pkg/xiaomi/miss/client.go
++++ b/pkg/xiaomi/miss/client.go
+@@ -185,6 +185,8 @@ func (c *Client) StartMedia(channel, quality, audio string) error {
+ 
+ 	data := binary.BigEndian.AppendUint32(nil, cmdVideoStart)
+ 	switch channel {
++	case "both":
++		data = fmt.Appendf(data, `{"videoquality":%s,"videoquality2":%s,"enableaudio":%s}`, quality, quality, audio)
+ 	case "", "0":
+ 		data = fmt.Appendf(data, `{"videoquality":%s,"enableaudio":%s}`, quality, audio)
+ 	default:
+diff --git a/pkg/xiaomi/miss/producer.go b/pkg/xiaomi/miss/producer.go
+index dcea284..4fce75e 100644
+--- a/pkg/xiaomi/miss/producer.go
++++ b/pkg/xiaomi/miss/producer.go
+@@ -15,9 +15,14 @@ import (
+ type Producer struct {
+ 	core.Connection
+ 	client *Client
++	shared *sub
+ }
+ 
+ func Dial(rawURL string) (core.Producer, error) {
++	if u, err := url.Parse(rawURL); err == nil && u.Query().Get("shared") == "1" {
++		return dialShared(rawURL)
++	}
++
+ 	client, err := NewClient(rawURL)
+ 	if err != nil {
+ 		return nil, err
+@@ -32,7 +37,7 @@ func Dial(rawURL string) (core.Producer, error) {
+ 		return nil, err
+ 	}
+ 
+-	medias, err := probe(client, query.Get("audio") != "0")
++	medias, err := probe(client.ReadPacket, client.SetDeadline, query.Get("audio") != "0")
+ 	if err != nil {
+ 		_ = client.Close()
+ 		return nil, err
+@@ -52,13 +57,13 @@ func Dial(rawURL string) (core.Producer, error) {
+ 	}, nil
+ }
+ 
+-func probe(client *Client, audio bool) ([]*core.Media, error) {
+-	_ = client.SetDeadline(time.Now().Add(15 * time.Second))
++func probe(read func() (*Packet, error), setDeadline func(time.Time) error, audio bool) ([]*core.Media, error) {
++	_ = setDeadline(time.Now().Add(15 * time.Second))
+ 
+ 	var vcodec, acodec *core.Codec
+ 
+ 	for {
+-		pkt, err := client.ReadPacket()
++		pkt, err := read()
+ 		if err != nil {
+ 			if vcodec != nil {
+ 				err = fmt.Errorf("no audio")
+@@ -98,7 +103,7 @@ func probe(client *Client, audio bool) ([]*core.Media, error) {
+ 		}
+ 	}
+ 
+-	_ = client.SetDeadline(time.Time{})
++	_ = setDeadline(time.Time{})
+ 
+ 	medias := []*core.Media{
+ 		{
+@@ -131,8 +136,14 @@ func (p *Producer) Start() error {
+ 	var audioTS uint32
+ 
+ 	for {
+-		_ = p.client.SetDeadline(time.Now().Add(10 * time.Second))
+-		pkt, err := p.client.ReadPacket()
++		var pkt *Packet
++		var err error
++		if p.shared != nil {
++			pkt, err = p.shared.read(10 * time.Second)
++		} else {
++			_ = p.client.SetDeadline(time.Now().Add(10 * time.Second))
++			pkt, err = p.client.ReadPacket()
++		}
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -194,7 +205,9 @@ func (p *Producer) Start() error {
+ }
+ 
+ func (p *Producer) Stop() error {
+-	_ = p.client.StopMedia()
++	if p.shared == nil {
++		_ = p.client.StopMedia()
++	}
+ 	return p.Connection.Stop()
+ }
+ 
+diff --git a/pkg/xiaomi/miss/shared.go b/pkg/xiaomi/miss/shared.go
+new file mode 100644
+index 0000000..f32d618
+--- /dev/null
++++ b/pkg/xiaomi/miss/shared.go
+@@ -0,0 +1,190 @@
++package miss
++
++import (
++	"errors"
++	"net/url"
++	"sync"
++	"time"
++
++	"github.com/AlexxIT/go2rtc/pkg/core"
++)
++
++// Dual-lens cameras carry both lenses in one miss session. The second lens
++// is marked by this bit in the packet flags.
++const lens2Flag = 0x1400000
++
++// subBuffer is the per-lens queue size. A slow consumer drops packets
++// instead of stalling the camera reader.
++const subBuffer = 512
++
++type hub struct {
++	key    string
++	client *Client
++	mu     sync.Mutex
++	subs   map[*sub]struct{}
++	closed bool
++}
++
++type sub struct {
++	hub  *hub
++	lens int
++	ch   chan *Packet
++	once sync.Once
++}
++
++var (
++	hubsMu sync.Mutex
++	hubs   = map[string]*hub{}
++)
++
++func lensOf(pkt *Packet) int {
++	if pkt.Flags&lens2Flag != 0 {
++		return 2
++	}
++	return 1
++}
++
++func dialShared(rawURL string) (core.Producer, error) {
++	u, err := url.Parse(rawURL)
++	if err != nil {
++		return nil, err
++	}
++	query := u.Query()
++
++	lens := 1
++	if ch := query.Get("channel"); ch != "" && ch != "0" && ch != "1" {
++		lens = 2
++	}
++
++	s, err := acquire(rawURL, query.Get("did"), query.Get("subtype"), query.Get("audio"), lens)
++	if err != nil {
++		return nil, err
++	}
++
++	medias, err := probe(
++		func() (*Packet, error) { return s.read(15 * time.Second) },
++		func(time.Time) error { return nil },
++		query.Get("audio") != "0",
++	)
++	if err != nil {
++		_ = s.Close()
++		return nil, err
++	}
++
++	client := s.hub.client
++	return &Producer{
++		Connection: core.Connection{
++			ID:         core.NewID(),
++			FormatName: "xiaomi/miss",
++			Protocol:   client.Protocol(),
++			RemoteAddr: client.RemoteAddr().String(),
++			UserAgent:  client.Version(),
++			Medias:     medias,
++			Transport:  s,
++		},
++		client: client,
++		shared: s,
++	}, nil
++}
++
++func acquire(rawURL, did, quality, audio string, lens int) (*sub, error) {
++	hubsMu.Lock()
++	defer hubsMu.Unlock()
++
++	h := hubs[did]
++	if h == nil {
++		client, err := NewClient(rawURL)
++		if err != nil {
++			return nil, err
++		}
++		if err = client.StartMedia("both", quality, audio); err != nil {
++			_ = client.Close()
++			return nil, err
++		}
++		h = &hub{key: did, client: client, subs: map[*sub]struct{}{}}
++		hubs[did] = h
++		go h.run()
++	}
++
++	s := &sub{hub: h, lens: lens, ch: make(chan *Packet, subBuffer)}
++	h.mu.Lock()
++	h.subs[s] = struct{}{}
++	h.mu.Unlock()
++	return s, nil
++}
++
++func (h *hub) run() {
++	for {
++		_ = h.client.SetDeadline(time.Now().Add(10 * time.Second))
++		pkt, err := h.client.ReadPacket()
++		if err != nil {
++			h.shutdown()
++			return
++		}
++
++		video := pkt.CodecID == codecH264 || pkt.CodecID == codecH265
++		lens := 0
++		if video {
++			lens = lensOf(pkt)
++		}
++
++		h.mu.Lock()
++		for s := range h.subs {
++			if video && s.lens != lens {
++				continue
++			}
++			select {
++			case s.ch <- pkt:
++			default:
++			}
++		}
++		h.mu.Unlock()
++	}
++}
++
++func (h *hub) shutdown() {
++	hubsMu.Lock()
++	if hubs[h.key] == h {
++		delete(hubs, h.key)
++	}
++	hubsMu.Unlock()
++
++	h.mu.Lock()
++	h.closed = true
++	for s := range h.subs {
++		s.once.Do(func() { close(s.ch) })
++	}
++	h.subs = map[*sub]struct{}{}
++	h.mu.Unlock()
++
++	_ = h.client.Close()
++}
++
++func (s *sub) read(timeout time.Duration) (*Packet, error) {
++	select {
++	case pkt, ok := <-s.ch:
++		if !ok {
++			return nil, errors.New("miss: shared session closed")
++		}
++		return pkt, nil
++	case <-time.After(timeout):
++		return nil, errors.New("miss: shared read timeout")
++	}
++}
++
++// Close releases this lens. The last lens stops the camera session.
++func (s *sub) Close() error {
++	h := s.hub
++	h.mu.Lock()
++	delete(h.subs, s)
++	empty := len(h.subs) == 0 && !h.closed
++	h.mu.Unlock()
++
++	s.once.Do(func() { close(s.ch) })
++
++	if empty {
++		_ = h.client.StopMedia()
++		h.shutdown()
++	}
++	return nil
++}

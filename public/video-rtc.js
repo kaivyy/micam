@@ -27,7 +27,10 @@ export class VideoRTC extends HTMLElement {
             'avc1.640033',      // H.264 high 5.1
             'hvc1.1.6.L153.B0', // H.265 main 5.1
             'hev1.1.6.L153.B0', // H.265 alternative identifier
+            'hvc1.1.6.L120.B0', // H.265 main 4.0
+            'hev1.1.6.L120.B0', // H.265 main 4.0 hev1
             'hvc1.1.6.L93.B0',  // H.265 main 3.1
+            'hev1.1.6.L93.B0',  // H.265 main 3.1 hev1
             'mp4a.40.2',        // AAC LC
             'mp4a.40.5',        // AAC HE
             'flac',             // FLAC
@@ -62,10 +65,10 @@ export class VideoRTC extends HTMLElement {
 
         /**
          * [config] Run stream only when browser page on the screen.
-         * Default `true` to immediately release camera P2P slots on background/tab switch.
+         * Default `false` to prevent stream killing on tab/browser switch.
          * @type {boolean}
          */
-        this.visibilityCheck = true;
+        this.visibilityCheck = false;
 
         /**
          * [config] WebRTC configuration
@@ -143,6 +146,14 @@ export class VideoRTC extends HTMLElement {
          * @type {Object.<string,Function>}
          */
         this.onmessage = null;
+    }
+
+    /**
+     * Get video source (WebSocket URL).
+     * @return {string}
+     */
+    get src() {
+        return this.wsURL;
     }
 
     /**
@@ -294,14 +305,11 @@ export class VideoRTC extends HTMLElement {
         if ('hidden' in document && this.visibilityCheck) {
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
-                    this.ondisconnect();
+                    this.disconnectedCallback();
                 } else if (this.isConnected) {
                     this.connectedCallback();
                 }
             });
-            window.addEventListener('pagehide', () => this.ondisconnect());
-            window.addEventListener('beforeunload', () => this.ondisconnect());
-            document.addEventListener('freeze', () => this.ondisconnect());
         }
 
         if ('IntersectionObserver' in window && this.visibilityThreshold) {
@@ -393,19 +401,12 @@ export class VideoRTC extends HTMLElement {
         const modes = [];
         const hasMediaSource = ('MediaSource' in window || 'ManagedMediaSource' in window);
 
-        if (this.mode.includes('webrtc') && 'RTCPeerConnection' in window) {
-            modes.push('webrtc');
-            this.onwebrtc();
-            if (this.mode.includes('mse') && hasMediaSource) {
-                this.onmessage['webrtc_fallback'] = msg => {
-                    if (msg.type === 'error' && msg.value && msg.value.includes('webrtc') && this.pcState === WebSocket.CLOSED) {
-                        this.onmse();
-                    }
-                };
-            }
-        } else if (this.mode.includes('mse') && hasMediaSource) {
+        if (this.mode.includes('mse') && hasMediaSource) {
             modes.push('mse');
             this.onmse();
+        } else if (this.mode.includes('webrtc') && 'RTCPeerConnection' in window) {
+            modes.push('webrtc');
+            this.onwebrtc();
         } else if (this.mode.includes('hls') && this.video.canPlayType('application/vnd.apple.mpegurl')) {
             modes.push('hls');
             this.onhls();
@@ -531,14 +532,17 @@ export class VideoRTC extends HTMLElement {
             this.ondata = data => {
                 if (sb.updating || bufLen > 0) {
                     const b = new Uint8Array(data);
-                    buf.set(b, bufLen);
-                    bufLen += b.byteLength;
-                    // console.debug('VideoRTC.buffer', b.byteLength, bufLen);
+                    if (bufLen + b.byteLength > buf.byteLength) {
+                        bufLen = 0;
+                    } else {
+                        buf.set(b, bufLen);
+                        bufLen += b.byteLength;
+                    }
                 } else {
                     try {
                         sb.appendBuffer(data);
                     } catch (e) {
-                        // console.debug(e);
+                        // SourceBuffer busy or resetting
                     }
                 }
             };
@@ -565,11 +569,12 @@ export class VideoRTC extends HTMLElement {
                 video2.addEventListener('loadeddata', () => this.onpcvideo(video2), {once: true});
                 video2.srcObject = new MediaStream(tracks);
             } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-                pc.close(); // stop next events
+                if (pc.signalingState !== 'closed') {
+                    pc.close();
+                }
 
                 this.pcState = WebSocket.CLOSED;
                 this.pc = null;
-
                 this.onconnect();
             }
         });
@@ -577,20 +582,23 @@ export class VideoRTC extends HTMLElement {
         this.onmessage['webrtc'] = msg => {
             switch (msg.type) {
                 case 'webrtc/candidate':
+                    if (!pc || pc.signalingState === 'closed') return;
                     if (this.mode.includes('webrtc/tcp') && msg.value.includes(' udp ')) return;
 
-                    pc.addIceCandidate({candidate: msg.value, sdpMid: '0'}).catch(er => {
-                        console.warn(er);
-                    });
+                    pc.addIceCandidate({candidate: msg.value, sdpMid: '0'}).catch(() => {});
                     break;
                 case 'webrtc/answer':
-                    pc.setRemoteDescription({type: 'answer', sdp: msg.value}).catch(er => {
-                        console.warn(er);
-                    });
+                    if (!pc || pc.signalingState === 'closed') return;
+                    pc.setRemoteDescription({type: 'answer', sdp: msg.value}).catch(() => {});
                     break;
                 case 'error':
                     if (!msg.value.includes('webrtc/offer')) return;
-                    pc.close();
+                    if (pc && pc.signalingState !== 'closed') {
+                        pc.close();
+                    }
+                    this.pcState = WebSocket.CLOSED;
+                    this.pc = null;
+                    break;
             }
         };
 
@@ -651,7 +659,7 @@ export class VideoRTC extends HTMLElement {
                 // do not let WebRTC hijack the player over MSE or video streams.
                 this.pcState = WebSocket.CLOSED;
                 if (this.pc) {
-                    this.pc.close();
+                    if (this.pc.signalingState !== 'closed') this.pc.close();
                     this.pc = null;
                 }
                 return;

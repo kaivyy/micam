@@ -252,12 +252,18 @@ Returns current YouTube streaming status and configuration. Stream key is masked
 ```json
 {
   "active": false,
+  "paused_by_standby": false,
   "stream_key_set": true,
   "masked_key": "abcd••••5678",
-  "lens": "left",
+  "lens": "both",
   "quality": "native",
   "silent_audio": true,
   "auto_start": false,
+  "layout": "side",
+  "swap": false,
+  "fit": "contain",
+  "pip_corner": "br",
+  "pip_size": 30,
   "started_at": null,
   "uptime_sec": 0,
   "last_error": null
@@ -265,7 +271,7 @@ Returns current YouTube streaming status and configuration. Stream key is masked
 ```
 
 ### `POST /api/youtube/start`
-Starts broadcasting the selected camera stream to YouTube Live using FFmpeg RTMP relay.
+Starts broadcasting the selected camera stream to YouTube Live using FFmpeg RTMP/RTMPS relay.
 - **Payload:** Optional JSON configuration updates (see `POST /api/youtube/config`).
 - **Response:** `{"success": true, "status": {...}}`
 
@@ -279,10 +285,57 @@ Persists YouTube streaming configuration parameters to disk (`youtube_config.jso
 ```json
 {
   "stream_key": "live_12345678_abcdefghijk",
-  "lens": "left",
+  "lens": "both",
   "quality": "native",
   "silent_audio": true,
-  "auto_start": false
+  "auto_start": false,
+  "layout": "side",
+  "swap": false,
+  "fit": "contain",
+  "pip_corner": "br",
+  "pip_size": 30
 }
 ```
+- Parameters:
+  - `lens`: `"left"` (Wide-angle), `"right"` (Telephoto), or `"both"` (Unified dual-lens broadcast).
+  - `quality`: `"native"` (2.5K / 1080p unified), `"1080p"`, or `"720p"`.
+  - `layout`: `"side"` (Side-by-Side), `"stack"` (Vertical Stack), or `"pip"` (Picture-in-Picture).
+  - `swap`: `false` (Lens 1 primary) or `true` (Lens 2 primary).
+  - `fit`: `"contain"` (Preserve aspect ratio with letterboxing) or `"cover"` (Fill frame with edge crop).
+  - `pip_corner`: `"br"` (Bottom Right), `"bl"` (Bottom Left), `"tr"` (Top Right), or `"tl"` (Top Left).
+  - `pip_size`: Secondary lens scale percentage (`15` to `50`, default `30`).
 - **Response:** `{"success": true, "status": {...}}`
+
+---
+
+## 7. Camera Hardware Stream Standby & Session Release
+
+### `GET /api/streams/standby`
+Returns global standby state.
+- **Response (200 OK):**
+```json
+{
+  "standby": false
+}
+```
+
+### `POST /api/streams/standby`
+Toggles or sets the global stream standby mode, suspending web streams and releasing camera P2P hardware sessions.
+- **Payload:**
+```json
+{
+  "standby": true
+}
+```
+- **Response:** `{"success": true, "standby": true}`
+
+### `POST /api/streams/release`
+Instantly terminates active go2rtc camera sessions on demand, freeing all P2P channels for the official Xiaomi Home mobile app.
+- **Response:**
+```json
+{
+  "success": true,
+  "standby": true,
+  "message": "Semua sesi streaming kamera berhasil dilepas secara instan."
+}
+```
