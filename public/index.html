@@ -2212,6 +2212,114 @@
       justify-content: center;
       margin: 0 auto 1rem;
     }
+    .yt-header-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      display: inline-block;
+      margin-left: 2px;
+      animation: pulse-red 1.5s infinite;
+    }
+    @keyframes pulse-red {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .yt-status-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1e293b;
+      color: #94a3b8;
+    }
+    .yt-status-tag.is-live {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .yt-active-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      margin-bottom: 0.85rem;
+    }
+    .yt-pulse-live {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulse-red 1.5s infinite;
+    }
+    .yt-guide-card {
+      background: #000000;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+    }
+    .yt-guide-toggle {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      background: none;
+      border: none;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78rem;
+      text-align: left;
+    }
+    .yt-guide-toggle:hover {
+      background: #111111;
+      color: #fff;
+    }
+    .yt-chevron {
+      font-size: 1.1rem;
+      transition: transform 0.2s ease;
+      color: var(--text-muted);
+    }
+    .yt-chevron.open {
+      transform: rotate(90deg);
+    }
+    .yt-guide-body {
+      padding: 0.75rem 0.85rem 0.85rem;
+      border-top: 1px solid var(--border);
+      background: #050505;
+    }
+    .input-with-eye {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-with-eye .form-input {
+      padding-right: 2.5rem;
+      width: 100%;
+    }
+    .btn-icon-eye {
+      position: absolute;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon-eye:hover {
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -2265,6 +2373,12 @@
         <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
         <span class="btn-label-long">Akun Xiaomi</span>
         <span class="btn-label-short">Akun</span>
+      </button>
+      <button class="btn-nav nav-item-desktop" id="btnOpenYouTubeModal" onclick="openYouTubeModal()" title="Siaran Langsung ke YouTube (Cloud DVR)" aria-label="Siaran Langsung YouTube">
+        <span class="icon" style="color:#ef4444;"><svg viewBox="0 0 24 24"><path d="M21.58 7.19c-.23-.86-.91-1.54-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42c-.86.23-1.54.91-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.91 1.54 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42c.86-.23 1.54-.91 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z"/></svg></span>
+        <span class="btn-label-long">YouTube Live</span>
+        <span class="btn-label-short">YT</span>
+        <span class="yt-header-dot" id="ytHeaderDot" style="display:none;" title="Streaming YouTube Aktif"></span>
       </button>
 
       <!-- PIN Guard Lock Button -->
@@ -2909,6 +3023,110 @@
     </div>
   </div>
 
+  <!-- Modal: YouTube Live Streaming (Cloud DVR) -->
+  <div class="modal-backdrop" id="youtubeModal" role="dialog" aria-modal="true" aria-labelledby="ytHeading">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="color: #ef4444; display: flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M21.58 7.19c-.23-.86-.91-1.54-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42c-.86.23-1.54.91-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.91 1.54 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42c.86-.23 1.54-.91 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z" fill="currentColor"/></svg>
+          </span>
+          <h3 id="ytHeading" style="margin: 0; font-size: 1.05rem;">YouTube Live Stream</h3>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="yt-status-tag" id="ytStatusBadge">OFFLINE</span>
+          <button class="modal-close" onclick="closeYouTubeModal()" aria-label="Tutup Dialog">&times;</button>
+        </div>
+      </div>
+
+      <!-- Live Uptime & Info Banner (Visible when active) -->
+      <div class="yt-active-banner" id="ytActiveBanner" style="display: none;">
+        <div class="yt-pulse-live"></div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600; font-size: 0.85rem; color: #f87171;">Sedang Mengudara di YouTube</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Durasi: <span id="ytUptimeVal" style="color: #fff; font-family: monospace;">00:00:00</span></div>
+        </div>
+        <a href="https://studio.youtube.com/channel/live_streaming" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 0.72rem; padding: 0.25rem 0.5rem;">Buka Studio &nearr;</a>
+      </div>
+
+      <!-- Guide Accordion Button -->
+      <div class="yt-guide-card">
+        <button type="button" class="yt-guide-toggle" id="btnToggleYtGuide" onclick="toggleYouTubeGuide()">
+          <span style="display: flex; align-items: center; gap: 0.4rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+            <strong>Panduan: Cara Mendapatkan Stream Key YouTube</strong>
+          </span>
+          <span class="yt-chevron" id="ytGuideChevron">&rsaquo;</span>
+        </button>
+        <div class="yt-guide-body" id="ytGuideBody" style="display: none;">
+          <ol style="margin: 0; padding-left: 1.2rem; font-size: 0.78rem; color: #cbd5e1; line-height: 1.6;">
+            <li>Buka <a href="https://studio.youtube.com/channel/live_streaming" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">YouTube Studio Live Streaming</a> di browser Anda.</li>
+            <li>Di bilah kiri, klik menu <strong>Stream</strong>.</li>
+            <li>Cari bagian <strong>Kunci Streaming (Stream Key)</strong> lalu klik tombol <strong>Salin (Copy)</strong>.</li>
+            <li><em>Tips Keamanan:</em> Ubah setelan Privasi menjadi <strong>Tidak Publik (Unlisted)</strong> atau <strong>Pribadi (Private)</strong> agar video rumah Anda tidak bisa ditonton publik.</li>
+            <li>Tempelkan kuncinya ke kolom input di bawah ini, lalu klik <strong>Mulai Siaran</strong>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Settings Form -->
+      <div class="form-group" style="margin-top: 0.75rem;">
+        <label for="ytStreamKey" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Kunci Streaming (Stream Key) YouTube</span>
+          <span id="ytKeySavedBadge" style="font-size: 0.7rem; color: var(--accent); display: none;">Tersimpan</span>
+        </label>
+        <div class="input-with-eye">
+          <input type="password" class="form-input" id="ytStreamKey" placeholder="Tempelkan Stream Key (contoh: abcd-1234-efgh-5678)" autocomplete="off">
+          <button type="button" class="btn-icon-eye" id="btnToggleYtKeyEye" onclick="toggleYtKeyVisibility()" title="Lihat/Sembunyikan Kunci" aria-label="Toggle Kunci Streaming">
+            <svg id="eyeYtShow" viewBox="0 0 24 24" width="16" height="16"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/></svg>
+            <svg id="eyeYtHide" viewBox="0 0 24 24" width="16" height="16" style="display: none;"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+        <div class="form-group" style="margin: 0;">
+          <label for="ytLensSelect">Pilihan Kamera / Lensa</label>
+          <select class="form-select" id="ytLensSelect">
+            <option value="left">Lensa 1: Wide Angle (Kiri)</option>
+            <option value="right">Lensa 2: Telephoto (Kanan)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label for="ytQualitySelect">Kualitas Video</label>
+          <select class="form-select" id="ytQualitySelect">
+            <option value="native">Asli 2.5K (2304x1296)</option>
+            <option value="1080p">Full HD 1080p</option>
+            <option value="720p">HD 720p (Hemat Kuota)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+        <label class="checkbox-label" style="font-size: 0.8rem; display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="ytSilentAudio" checked style="margin-top: 0.2rem;">
+          <div>
+            <strong>Audio Hening (Rekomendasi Aman Copyright)</strong>
+            <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">Mencegah pemblokiran otomatis YouTube bila ada musik terdengar di sekitar kamera.</div>
+          </div>
+        </label>
+        <label class="checkbox-label" style="font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="ytAutoStart">
+          <span>Mulai Otomatis saat Server Nyala (24/7)</span>
+        </label>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 1.25rem; display: flex; gap: 0.5rem;">
+        <button type="button" class="btn" id="btnToggleYtStream" onclick="toggleYouTubeStreaming()" style="flex: 1; background: #dc2626; border-color: #dc2626; color: #fff; font-weight: 600;">
+          Mulai Siaran YouTube
+        </button>
+        <button type="button" class="btn btn-outline" onclick="saveYouTubeConfig()" style="width: auto;">
+          Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Telegram Bot Integration -->
   <div class="modal-backdrop" id="telegramModal" role="dialog" aria-modal="true" aria-labelledby="tgHeading">
     <div class="modal-card">
@@ -3219,6 +3437,17 @@
         <div class="drawer-item-content">
           <div class="drawer-item-title">Lampu & Mode Malam</div>
           <div class="drawer-item-sub">Lampu sorot LED ganda & Infrared Nightshot</div>
+        </div>
+        <span class="drawer-item-chevron">&rsaquo;</span>
+      </button>
+
+      <button class="drawer-menu-item" onclick="closeMobileDrawer(); openYouTubeModal();">
+        <div class="drawer-item-icon" style="color: #ef4444;">
+          <svg viewBox="0 0 24 24"><path d="M21.58 7.19c-.23-.86-.91-1.54-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42c-.86.23-1.54.91-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.91 1.54 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42c.86-.23 1.54-.91 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z"/></svg>
+        </div>
+        <div class="drawer-item-content">
+          <div class="drawer-item-title">YouTube Live Stream</div>
+          <div class="drawer-item-sub">Siarkan ke YouTube Live untuk cloud DVR 24/7</div>
         </div>
         <span class="drawer-item-chevron">&rsaquo;</span>
       </button>
@@ -4188,6 +4417,225 @@
         }
       } catch (e) {
         log(`Gagal membuat timelapse: ${e}`);
+      }
+    }
+
+    // --- YouTube Live Streaming Controller ---
+    let currentYtStatus = { active: false, stream_key_set: false };
+    let ytModalPollTimer = null;
+    let ytUptimeSec = 0;
+    let ytUptimeInterval = null;
+
+    function formatDuration(sec) {
+      const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+      const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function toggleYouTubeGuide() {
+      const body = document.getElementById('ytGuideBody');
+      const chevron = document.getElementById('ytGuideChevron');
+      if (!body || !chevron) return;
+      const isHidden = (body.style.display === 'none');
+      body.style.display = isHidden ? 'block' : 'none';
+      chevron.classList.toggle('open', isHidden);
+    }
+
+    function toggleYtKeyVisibility() {
+      const input = document.getElementById('ytStreamKey');
+      const eyeShow = document.getElementById('eyeYtShow');
+      const eyeHide = document.getElementById('eyeYtHide');
+      if (!input || !eyeShow || !eyeHide) return;
+      const isPass = (input.type === 'password');
+      input.type = isPass ? 'text' : 'password';
+      eyeShow.style.display = isPass ? 'none' : 'block';
+      eyeHide.style.display = isPass ? 'block' : 'none';
+    }
+
+    function updateYouTubeUI(status) {
+      currentYtStatus = status;
+      const badge = document.getElementById('ytStatusBadge');
+      const headerDot = document.getElementById('ytHeaderDot');
+      const banner = document.getElementById('ytActiveBanner');
+      const uptimeVal = document.getElementById('ytUptimeVal');
+      const btnStream = document.getElementById('btnToggleYtStream');
+      const keySavedBadge = document.getElementById('ytKeySavedBadge');
+
+      if (headerDot) headerDot.style.display = status.active ? 'inline-block' : 'none';
+
+      if (badge) {
+        badge.textContent = status.active ? 'LIVE' : 'OFFLINE';
+        badge.classList.toggle('is-live', status.active);
+      }
+
+      if (banner) banner.style.display = status.active ? 'flex' : 'none';
+
+      if (status.active) {
+        ytUptimeSec = status.uptime_sec || 0;
+        if (uptimeVal) uptimeVal.textContent = formatDuration(ytUptimeSec);
+        if (!ytUptimeInterval) {
+          ytUptimeInterval = setInterval(() => {
+            ytUptimeSec++;
+            if (uptimeVal) uptimeVal.textContent = formatDuration(ytUptimeSec);
+          }, 1000);
+        }
+      } else {
+        if (ytUptimeInterval) {
+          clearInterval(ytUptimeInterval);
+          ytUptimeInterval = null;
+        }
+      }
+
+      if (btnStream) {
+        btnStream.disabled = false;
+        if (status.active) {
+          btnStream.textContent = 'Hentikan Siaran YouTube';
+          btnStream.style.background = '#334155';
+          btnStream.style.borderColor = '#475569';
+        } else {
+          btnStream.textContent = 'Mulai Siaran YouTube';
+          btnStream.style.background = '#dc2626';
+          btnStream.style.borderColor = '#dc2626';
+        }
+      }
+
+      if (keySavedBadge) {
+        keySavedBadge.style.display = status.stream_key_set ? 'inline' : 'none';
+      }
+      if (status.stream_key_set && !document.getElementById('ytStreamKey').value) {
+        document.getElementById('ytStreamKey').placeholder = status.masked_key || '••••••••••••';
+      }
+    }
+
+    async function fetchYouTubeStatus() {
+      try {
+        const res = await fetch('/api/youtube/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        updateYouTubeUI(data);
+        return data;
+      } catch (e) {
+        // Network offline
+      }
+    }
+
+    async function openYouTubeModal() {
+      const modal = document.getElementById('youtubeModal');
+      if (modal) modal.classList.add('open');
+      const status = await fetchYouTubeStatus();
+      if (status) {
+        const lensSelect = document.getElementById('ytLensSelect');
+        const qualitySelect = document.getElementById('ytQualitySelect');
+        const silentAudio = document.getElementById('ytSilentAudio');
+        const autoStart = document.getElementById('ytAutoStart');
+        if (lensSelect && status.lens) lensSelect.value = status.lens;
+        if (qualitySelect && status.quality) qualitySelect.value = status.quality;
+        if (silentAudio) silentAudio.checked = (status.silent_audio !== false);
+        if (autoStart) autoStart.checked = Boolean(status.auto_start);
+      }
+      if (!ytModalPollTimer) {
+        ytModalPollTimer = setInterval(fetchYouTubeStatus, 4000);
+      }
+    }
+
+    function closeYouTubeModal() {
+      const modal = document.getElementById('youtubeModal');
+      if (modal) modal.classList.remove('open');
+      if (ytModalPollTimer) {
+        clearInterval(ytModalPollTimer);
+        ytModalPollTimer = null;
+      }
+    }
+
+    const ytModalEl = document.getElementById('youtubeModal');
+    if (ytModalEl) {
+      ytModalEl.addEventListener('click', (e) => {
+        if (e.target === ytModalEl) closeYouTubeModal();
+      });
+    }
+
+    async function toggleYouTubeStreaming() {
+      const btn = document.getElementById('btnToggleYtStream');
+      const keyInput = document.getElementById('ytStreamKey');
+      const lens = document.getElementById('ytLensSelect').value;
+      const quality = document.getElementById('ytQualitySelect').value;
+      const silentAudio = document.getElementById('ytSilentAudio').checked;
+      const autoStart = document.getElementById('ytAutoStart').checked;
+
+      if (btn) btn.disabled = true;
+
+      if (currentYtStatus.active) {
+        if (btn) btn.textContent = 'Menghentikan Siaran...';
+        try {
+          const res = await fetch('/api/youtube/stop', { method: 'POST' });
+          const data = await res.json();
+          if (data.status) updateYouTubeUI(data.status);
+          log('Siaran langsung ke YouTube Live telah dihentikan.');
+        } catch (e) {
+          alert('Gagal menghentikan siaran: ' + e);
+          if (btn) btn.disabled = false;
+        }
+      } else {
+        const streamKey = keyInput ? keyInput.value.trim() : '';
+        if (!streamKey && !currentYtStatus.stream_key_set) {
+          alert('Harap masukkan Stream Key YouTube terlebih dahulu.');
+          if (btn) btn.disabled = false;
+          if (keyInput) keyInput.focus();
+          return;
+        }
+
+        if (btn) btn.textContent = 'Menghubungkan ke YouTube...';
+        try {
+          const payload = { lens, quality, silent_audio: silentAudio, auto_start: autoStart };
+          if (streamKey) payload.stream_key = streamKey;
+
+          const res = await fetch('/api/youtube/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            if (data.status) updateYouTubeUI(data.status);
+            if (keyInput) keyInput.value = '';
+            log('Siaran langsung ke YouTube Live berhasil dimulai.');
+          } else {
+            alert('Gagal memulai siaran: ' + (data.message || 'Error tidak diketahui'));
+            fetchYouTubeStatus();
+          }
+        } catch (e) {
+          alert('Gagal menghubungi server: ' + e);
+          fetchYouTubeStatus();
+        }
+      }
+    }
+
+    async function saveYouTubeConfig() {
+      const keyInput = document.getElementById('ytStreamKey');
+      const lens = document.getElementById('ytLensSelect').value;
+      const quality = document.getElementById('ytQualitySelect').value;
+      const silentAudio = document.getElementById('ytSilentAudio').checked;
+      const autoStart = document.getElementById('ytAutoStart').checked;
+      const streamKey = keyInput ? keyInput.value.trim() : '';
+
+      try {
+        const payload = { lens, quality, silent_audio: silentAudio, auto_start: autoStart };
+        if (streamKey) payload.stream_key = streamKey;
+
+        const res = await fetch('/api/youtube/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (data.status) updateYouTubeUI(data.status);
+          if (keyInput) keyInput.value = '';
+          alert('Pengaturan YouTube berhasil disimpan.');
+        }
+      } catch (e) {
+        alert('Gagal menyimpan pengaturan: ' + e);
       }
     }
 
@@ -5173,11 +5621,13 @@
     fetchStatus();
     loadRecordings();
     fetchRecordStatus();
+    fetchYouTubeStatus();
 
     let statusPollInterval = null;
     let dvrPollInterval = null;
     let pingPollInterval = null;
     let localRecTickerInterval = null;
+    let ytStatusPollInterval = null;
 
     function startDashboardPolling() {
       stopDashboardPolling();
@@ -5185,6 +5635,7 @@
       dvrPollInterval = setInterval(fetchRecordStatus, 8000);
       pingPollInterval = setInterval(pingLoop, 3000);
       localRecTickerInterval = setInterval(tickLocalRecordingTimer, 1000);
+      ytStatusPollInterval = setInterval(fetchYouTubeStatus, 8000);
     }
 
     function stopDashboardPolling() {
@@ -5192,10 +5643,12 @@
       if (dvrPollInterval) clearInterval(dvrPollInterval);
       if (pingPollInterval) clearInterval(pingPollInterval);
       if (localRecTickerInterval) clearInterval(localRecTickerInterval);
+      if (ytStatusPollInterval) clearInterval(ytStatusPollInterval);
       statusPollInterval = null;
       dvrPollInterval = null;
       pingPollInterval = null;
       localRecTickerInterval = null;
+      ytStatusPollInterval = null;
     }
 
     startDashboardPolling();
@@ -5208,6 +5661,7 @@
         reconnectStreams();
         fetchStatus();
         fetchRecordStatus();
+        fetchYouTubeStatus();
         pingLoop();
         startDashboardPolling();
       }

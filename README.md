@@ -99,6 +99,13 @@ To stop the background services:
   * AI Detection toggles: Motion, Human, and Vehicle analytics.
   * Remote device reboot directly from browser.
 
+* **YouTube Live Streaming Relay (Alternative Cloud DVR):**
+  * Stream camera feeds directly to YouTube Live in native 2.5K, 1080p, or 720p.
+  * In-browser setup modal with step-by-step guidance button for acquiring YouTube Stream Key.
+  * Built-in silent audio generator option to safeguard private residential live broadcasts from automated Content ID copyright takedowns.
+  * Resilient background supervisor process with automated reconnection during network hiccups.
+  * Zero command-line configuration required &mdash; managed entirely from the dashboard UI.
+
 * **Pure OLED Black Design (`#000000`) & Mobile First:**
   * High-contrast interface optimized for AMOLED/OLED displays.
   * Touch targets $\ge 44\times44\text{px}$ adhering to clean anti-slop ergonomics.

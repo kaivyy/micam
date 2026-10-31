@@ -36,6 +36,7 @@ load_env(os.path.join(BASE_DIR, ".env"))
 
 from recorder import recorder
 from xiaomi_wizard import wizard_session
+from youtube_streamer import youtube_streamer
 
 CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.100")
 CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
@@ -139,6 +140,8 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_snapshot(parsed.path)
         elif parsed.path == "/api/record/status":
             self.send_json(recorder.get_status())
+        elif parsed.path == "/api/youtube/status":
+            self.send_json(youtube_streamer.get_status())
         elif parsed.path == "/api/recordings":
             self.send_json({
                 "recordings": recorder.list_recordings(),
@@ -358,6 +361,39 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json({"success": True, "streams": data})
             except Exception as e:
                 self.send_json({"success": False, "error": str(e)})
+
+        elif parsed.path == "/api/youtube/start":
+            stream_key = data.get("stream_key")
+            lens = data.get("lens")
+            quality = data.get("quality")
+            silent_audio = data.get("silent_audio")
+            auto_start = data.get("auto_start")
+            success, msg = youtube_streamer.start(
+                stream_key=stream_key,
+                lens=lens,
+                quality=quality,
+                silent_audio=silent_audio,
+                auto_start=auto_start
+            )
+            self.send_json({"success": success, "message": msg, "status": youtube_streamer.get_status()})
+
+        elif parsed.path == "/api/youtube/stop":
+            success, msg = youtube_streamer.stop()
+            self.send_json({"success": success, "message": msg, "status": youtube_streamer.get_status()})
+
+        elif parsed.path == "/api/youtube/config":
+            if "stream_key" in data and data["stream_key"]:
+                youtube_streamer.config["stream_key"] = data["stream_key"].strip()
+            if "lens" in data:
+                youtube_streamer.config["lens"] = data["lens"]
+            if "quality" in data:
+                youtube_streamer.config["quality"] = data["quality"]
+            if "silent_audio" in data:
+                youtube_streamer.config["silent_audio"] = bool(data["silent_audio"])
+            if "auto_start" in data:
+                youtube_streamer.config["auto_start"] = bool(data["auto_start"])
+            youtube_streamer.save_config()
+            self.send_json({"success": True, "status": youtube_streamer.get_status()})
 
         else:
             self.send_error(404, "Endpoint not found")

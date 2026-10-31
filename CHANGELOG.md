@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-10-31
+
+### Added
+- YouTube Live Streaming Relay: Built-in in-browser streaming module (`youtube_streamer.py`) enabling 24/7 or on-demand live streaming from Xiaomi cameras directly to YouTube Live.
+- Interactive Setup Guide Button: In-app guidance accordion ("Panduan: Cara Mendapatkan Stream Key YouTube") providing step-by-step instructions to copy the stream key from YouTube Studio Live and configure Unlisted / Private privacy settings.
+- Copyright-Safe Audio Option: Integrated synthetic silent audio track (`anullsrc`) satisfying YouTube RTMP ingestion requirements while preventing automated Content ID copyright takedowns from ambient background noise or music.
+- Stream Key Credential Masking: Secured stream key storage and API responses (`masked_key`) with password eye toggle for easy viewing and editing without exposing raw credentials in plaintext.
+- Automated Supervisor & Persistence: Background recovery loop that reconnects streams automatically during transient network interruptions, with optional auto-start on server boot.
+- REST API Suite: Added `GET /api/youtube/status`, `POST /api/youtube/start`, `POST /api/youtube/stop`, and `POST /api/youtube/config`.
+- Automated Verification Suite: Added Playwright test (`tests/test_youtube_stream.py`) covering backend endpoints, modal interactions, accordion expansion, eye toggle visibility, and screenshot capture.
+
 ## [0.1.3] - 2026-10-31
 
 ### Added

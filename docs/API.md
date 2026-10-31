@@ -240,3 +240,49 @@ Submits 2FA one-time verification code when prompted by Xiaomi security checks.
 ### `GET /api/auth/reload_streams`
 Triggers go2rtc to reload live streams from configuration.
 - **Response:** `{"success": true, "streams": {...}}`
+
+---
+
+## 6. YouTube Live Streaming Relay
+
+### `GET /api/youtube/status`
+Returns current YouTube streaming status and configuration. Stream key is masked for privacy.
+
+**Response (200 OK):**
+```json
+{
+  "active": false,
+  "stream_key_set": true,
+  "masked_key": "abcd••••5678",
+  "lens": "left",
+  "quality": "native",
+  "silent_audio": true,
+  "auto_start": false,
+  "started_at": null,
+  "uptime_sec": 0,
+  "last_error": null
+}
+```
+
+### `POST /api/youtube/start`
+Starts broadcasting the selected camera stream to YouTube Live using FFmpeg RTMP relay.
+- **Payload:** Optional JSON configuration updates (see `POST /api/youtube/config`).
+- **Response:** `{"success": true, "status": {...}}`
+
+### `POST /api/youtube/stop`
+Terminates active YouTube Live broadcasting process.
+- **Response:** `{"success": true, "status": {...}}`
+
+### `POST /api/youtube/config`
+Persists YouTube streaming configuration parameters to disk (`youtube_config.json`).
+- **Payload:**
+```json
+{
+  "stream_key": "live_12345678_abcdefghijk",
+  "lens": "left",
+  "quality": "native",
+  "silent_audio": true,
+  "auto_start": false
+}
+```
+- **Response:** `{"success": true, "status": {...}}`

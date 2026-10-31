@@ -88,10 +88,13 @@ async def run():
         print(f"[7] Final SSID before screenshot: '{final_ssid}'")
         assert final_ssid == "••••••••", "SSID must be masked before screenshot!"
 
-        # Ensure wizard modal is not blocking
+        # Ensure wizard modal is not blocking and video is blurred for privacy
         await page.evaluate("""() => {
             const w = document.getElementById('setupWizardModal');
             if (w) w.style.display = 'none';
+            document.querySelectorAll('video, canvas, .video-player-wrapper').forEach(el => {
+                el.style.filter = 'blur(16px)';
+            });
         }""")
 
         screenshot_path = "/root/cctv_dashboard/docs/screenshots/desktop_preview.png"

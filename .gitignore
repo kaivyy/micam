@@ -8,6 +8,7 @@ __pycache__/
 *.bak
 *.tmp
 go2rtc.yaml
+youtube_config.json
 
 # Testing & Cache
 .pytest_cache/
