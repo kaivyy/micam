@@ -18,7 +18,7 @@ export class VideoRTC extends HTMLElement {
     constructor() {
         super();
 
-        this.DISCONNECT_TIMEOUT = 60000;
+        this.DISCONNECT_TIMEOUT = 2000;
         this.RECONNECT_TIMEOUT = 1000;
 
         this.CODECS = [
@@ -336,6 +336,15 @@ export class VideoRTC extends HTMLElement {
     }
 
     ondisconnect() {
+        if (this.reconnectTID) {
+            clearTimeout(this.reconnectTID);
+            this.reconnectTID = 0;
+        }
+        if (this.disconnectTID) {
+            clearTimeout(this.disconnectTID);
+            this.disconnectTID = 0;
+        }
+
         this.wsState = WebSocket.CLOSED;
         if (this.ws) {
             this.ws.close();
@@ -351,8 +360,10 @@ export class VideoRTC extends HTMLElement {
             this.pc = null;
         }
 
-        this.video.removeAttribute('src');
-        this.video.srcObject = null;
+        if (this.video) {
+            this.video.removeAttribute('src');
+            this.video.srcObject = null;
+        }
     }
 
     /**

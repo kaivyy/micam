@@ -27,7 +27,6 @@ streams:
   # Lensa 1 (Primary / Wide Angle - Native 2.5K Ultra HD)
   cctv_lensa_kiri:
     - xiaomi://YOUR_XIAOMI_USER_ID:sg@YOUR_CAMERA_IP?did=YOUR_CAMERA_DID&model=chuangmi.camera.075ae1&subtype=3
-    - ffmpeg:cctv_lensa_kiri#video=h264
   cctv_garasi_kiri:
     - cctv_lensa_kiri
   cctv_garasi_left:
@@ -36,7 +35,6 @@ streams:
   # Lensa 2 (Secondary / PTZ Lens - Native 2.5K Ultra HD)
   cctv_lensa_kanan:
     - xiaomi://YOUR_XIAOMI_USER_ID:sg@YOUR_CAMERA_IP?did=YOUR_CAMERA_DID&model=chuangmi.camera.075ae1&channel=2&subtype=3
-    - ffmpeg:cctv_lensa_kanan#video=h264
   cctv_garasi_kanan:
     - cctv_lensa_kanan
   cctv_garasi_right:

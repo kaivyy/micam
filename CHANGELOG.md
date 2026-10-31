@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-10-31
+
+### Added
+- Multi-device WebRTC fan-out: Supported unlimited concurrent web clients (PC, laptop, smartphone, tablet) streaming from go2rtc without opening multiple P2P connections to the physical camera.
+- Instant Camera Standby toggle ("Bebaskan Kamera"): Added a header action button and responsive overlay to immediately suspend web streams and release camera P2P slots for the Xiaomi / Mi Home mobile app with a single click.
+
+### Fixed
+- Camera device limit lockout: Removed circular FFmpeg transcoding consumer in `go2rtc.yaml` that held P2P channels open 24/7 even when no clients were viewing.
+- Rapid socket teardown: Added browser `beforeunload` and `pagehide` teardown handlers and configured aggressive Linux TCP keepalive (60s timeout, 10s interval) to eliminate orphaned socket keepalives.
+- Stream disconnect latency: Reduced `video-rtc` unmount timeout from 60 seconds to 2 seconds, and cleared pending reconnection timers on explicit disconnect.
+- Client background stream override: Removed hardcoded `background = true` in JavaScript initialization, enabling proper visibility-based stream suspension.
+
 ## [0.1.2] - 2026-10-31
 
 ### Fixed

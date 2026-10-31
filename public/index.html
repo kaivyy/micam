@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="/fsr-upscaler.js?v=20261030_05"></script>
-  <script type="module" src="/video-rtc.js?v=20261031_01"></script>
+  <script type="module" src="/video-rtc.js?v=20261031_02"></script>
   <style>
     :root {
       --bg: #000000;
@@ -665,6 +665,7 @@
     .view-size-group {
       display: inline-flex;
       align-items: center;
+      gap: 0.5rem;
     }
     .view-size-btn {
       background: #080808;
@@ -693,9 +694,61 @@
       border-color: rgba(16, 185, 129, 0.4);
       background: rgba(16, 185, 129, 0.08);
     }
+    .view-size-btn.standby-active {
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.12);
+    }
     .view-size-btn .icon svg {
       width: 15px;
       height: 15px;
+    }
+    .standby-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 5, 5, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+      padding: 1.25rem;
+    }
+    .standby-card {
+      text-align: center;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .standby-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f59e0b;
+      margin-bottom: 0.25rem;
+    }
+    .standby-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+    .standby-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .standby-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
     }
 
     /* Single Lens Focus View */
@@ -2248,6 +2301,10 @@
           </div>
 
           <div class="view-size-group">
+            <button class="view-size-btn" id="btnToggleStandby" onclick="toggleStreamStandby()" title="Jeda Streaming (Bebaskan Slot Kamera untuk Aplikasi Xiaomi Home)">
+              <span class="icon" id="iconStandbyState"><svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></span>
+              <span id="txtStandbyState">Bebaskan Kamera</span>
+            </button>
             <button class="view-size-btn" id="btnToggleSize" onclick="toggleVideoSize()" title="Perbesar / Normalisasi Ukuran Video">
               <span class="icon" id="iconSizeState"><svg viewBox="0 0 24 24"><path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z"/></svg></span>
               <span id="txtSizeState">Mode Besar</span>
@@ -2329,6 +2386,16 @@
                 <span class="zoom-val" id="zoomVal_camLeft">1.0x</span>
                 <button type="button" class="zoom-reset-btn" onclick="resetZoom('camLeft')" title="Reset Zoom ke Normal (1.0x)">Reset</button>
               </div>
+              <div class="standby-overlay" id="standbyOverlay_camLeft" style="display:none;">
+                <div class="standby-card">
+                  <div class="standby-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="currentColor"/></svg>
+                  </div>
+                  <div class="standby-title">Mode Standby Aktif</div>
+                  <div class="standby-desc">Koneksi kamera dilepas. Aplikasi Xiaomi Home di HP bebas diakses tanpa limit.</div>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="toggleStreamStandby()">Lanjutkan Live</button>
+                </div>
+              </div>
             </div>
             <div class="monitor-footer">
               <span>Resolusi: 2304x1296 (2.5K)</span>
@@ -2407,6 +2474,16 @@
               <div class="video-zoom-overlay" id="zoomOverlay_camRight">
                 <span class="zoom-val" id="zoomVal_camRight">1.0x</span>
                 <button type="button" class="zoom-reset-btn" onclick="resetZoom('camRight')" title="Reset Zoom ke Normal (1.0x)">Reset</button>
+              </div>
+              <div class="standby-overlay" id="standbyOverlay_camRight" style="display:none;">
+                <div class="standby-card">
+                  <div class="standby-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="currentColor"/></svg>
+                  </div>
+                  <div class="standby-title">Mode Standby Aktif</div>
+                  <div class="standby-desc">Koneksi kamera dilepas. Aplikasi Xiaomi Home di HP bebas diakses tanpa limit.</div>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="toggleStreamStandby()">Lanjutkan Live</button>
+                </div>
               </div>
             </div>
             <div class="monitor-footer">
@@ -3240,18 +3317,24 @@
       if (mode === 'both') {
         if (leftBox) { leftBox.style.display = ''; leftBox.classList.remove('is-single-lens'); }
         if (rightBox) { rightBox.style.display = ''; rightBox.classList.remove('is-single-lens'); }
-        if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
-        if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+        if (!isStreamStandby) {
+          if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
+          if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+        }
       } else if (mode === 'left') {
         if (leftBox) { leftBox.style.display = ''; leftBox.classList.add('is-single-lens'); }
         if (rightBox) { rightBox.style.display = 'none'; rightBox.classList.remove('is-single-lens'); }
-        if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
         if (camRight && typeof camRight.ondisconnect === 'function') camRight.ondisconnect();
+        if (!isStreamStandby) {
+          if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
+        }
       } else if (mode === 'right') {
         if (leftBox) { leftBox.style.display = 'none'; leftBox.classList.remove('is-single-lens'); }
         if (rightBox) { rightBox.style.display = ''; rightBox.classList.add('is-single-lens'); }
         if (camLeft && typeof camLeft.ondisconnect === 'function') camLeft.ondisconnect();
-        if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+        if (!isStreamStandby) {
+          if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+        }
       }
       log(`Tampilan lensa diubah ke: ${mode === 'both' ? 'Kedua Lensa' : (mode === 'left' ? 'Lensa Kiri' : 'Lensa Kanan')}`);
     }
@@ -3783,56 +3866,85 @@
       return `${wsProto}//${host}:${port}/api/ws?src=${srcName}`;
     }
 
+    let isStreamStandby = false;
+
+    function toggleStreamStandby() {
+      isStreamStandby = !isStreamStandby;
+      const btn = document.getElementById('btnToggleStandby');
+      const txt = document.getElementById('txtStandbyState');
+      const overlayLeft = document.getElementById('standbyOverlay_camLeft');
+      const overlayRight = document.getElementById('standbyOverlay_camRight');
+
+      if (isStreamStandby) {
+        disconnectStreams();
+        if (btn) btn.classList.add('standby-active');
+        if (txt) txt.textContent = 'Lanjutkan Live';
+        if (overlayLeft) overlayLeft.style.display = 'flex';
+        if (overlayRight) overlayRight.style.display = 'flex';
+        log('Mode Standby aktif: Kuota kamera bebas untuk aplikasi Xiaomi Home');
+      } else {
+        if (btn) btn.classList.remove('standby-active');
+        if (txt) txt.textContent = 'Bebaskan Kamera';
+        if (overlayLeft) overlayLeft.style.display = 'none';
+        if (overlayRight) overlayRight.style.display = 'none';
+        reconnectStreams();
+        log('Live streaming dilanjutkan');
+      }
+    }
+
+    function disconnectStreams() {
+      const camL = document.getElementById('camLeft');
+      const camR = document.getElementById('camRight');
+      if (camL && typeof camL.ondisconnect === 'function') camL.ondisconnect();
+      if (camR && typeof camR.ondisconnect === 'function') camR.ondisconnect();
+      ['camLeft', 'camRight'].forEach(camId => {
+        if (fsrUpscalers[camId]) fsrUpscalers[camId].stop();
+      });
+    }
+
+    function reconnectStreams() {
+      if (isStreamStandby) return;
+      const camL = document.getElementById('camLeft');
+      const camR = document.getElementById('camRight');
+
+      if (currentLensView === 'both' || currentLensView === 'left') {
+        if (camL) {
+          if (!camL.src) camL.src = getWsUrl(streamLeftName);
+          else if (typeof camL.onconnect === 'function') camL.onconnect();
+        }
+        if (clarityModes['camLeft'] === 'fsr' && fsrUpscalers['camLeft']) {
+          fsrUpscalers['camLeft'].start();
+        }
+      }
+      if (currentLensView === 'both' || currentLensView === 'right') {
+        if (camR) {
+          if (!camR.src) camR.src = getWsUrl(streamRightName);
+          else if (typeof camR.onconnect === 'function') camR.onconnect();
+        }
+        if (clarityModes['camRight'] === 'fsr' && fsrUpscalers['camRight']) {
+          fsrUpscalers['camRight'].start();
+        }
+      }
+    }
+
     function initStreams() {
       const camL = document.getElementById('camLeft');
       const camR = document.getElementById('camRight');
       if (camL) {
-        camL.background = true;
-        camL.visibilityCheck = false;
+        camL.background = false;
         camL.src = getWsUrl(streamLeftName);
       }
       if (camR) {
-        camR.background = true;
-        camR.visibilityCheck = false;
+        camR.background = false;
         camR.src = getWsUrl(streamRightName);
       }
       setupZoomPan('camLeft');
       setupZoomPan('camRight');
     }
 
-    function resumeStreams() {
-      ['camLeft', 'camRight'].forEach(camId => {
-        const el = document.getElementById(camId);
-        if (!el) return;
-        const video = el.querySelector('video') || el.video;
-        if (video && video.paused) {
-          video.play().catch(() => {});
-        }
-        // Auto-recover jika koneksi benar-benar terputus akibat OS/sinyal
-        if (el.pc && (el.pc.connectionState === 'failed' || el.pc.connectionState === 'disconnected')) {
-          if (el.onconnect) el.onconnect();
-        }
-      });
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        resumeStreams();
-        ['camLeft', 'camRight'].forEach(camId => {
-          if (clarityModes[camId] === 'fsr' && fsrUpscalers[camId]) {
-            fsrUpscalers[camId].start();
-          }
-        });
-      } else {
-        ['camLeft', 'camRight'].forEach(camId => {
-          if (fsrUpscalers[camId]) {
-            fsrUpscalers[camId].stop();
-          }
-        });
-      }
+    window.addEventListener('pageshow', () => {
+      if (!isStreamStandby) reconnectStreams();
     });
-    window.addEventListener('pageshow', resumeStreams);
-    window.addEventListener('focus', resumeStreams);
 
     function reloadFrame(frameId) {
       const el = document.getElementById(frameId);
@@ -5089,27 +5201,26 @@
     startDashboardPolling();
 
     document.addEventListener('visibilitychange', () => {
-      const camLeft = document.getElementById('camLeft');
-      const camRight = document.getElementById('camRight');
-
       if (document.hidden) {
         stopDashboardPolling();
-        // Immediately disconnect live streams to free camera hardware P2P sessions for Xiaomi mobile app
-        if (camLeft && typeof camLeft.ondisconnect === 'function') camLeft.ondisconnect();
-        if (camRight && typeof camRight.ondisconnect === 'function') camRight.ondisconnect();
+        disconnectStreams();
       } else {
-        // Reconnect active streams
-        if (currentLensView === 'both' || currentLensView === 'left') {
-          if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
-        }
-        if (currentLensView === 'both' || currentLensView === 'right') {
-          if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
-        }
+        reconnectStreams();
         fetchStatus();
         fetchRecordStatus();
         pingLoop();
         startDashboardPolling();
       }
+    });
+
+    window.addEventListener('pagehide', () => {
+      stopDashboardPolling();
+      disconnectStreams();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      stopDashboardPolling();
+      disconnectStreams();
     });
 
     // Highlight active bottom nav item on scroll
