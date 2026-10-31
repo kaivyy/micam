@@ -54,9 +54,16 @@ STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
 _status_cache = {"data": None, "timestamp": 0}
 _status_lock = threading.Lock()
 
+_advanced_cache = {"data": None, "timestamp": 0}
+_advanced_lock = threading.Lock()
+
 def invalidate_status_cache():
     with _status_lock:
         _status_cache["timestamp"] = 0
+
+def invalidate_advanced_cache():
+    with _advanced_lock:
+        _advanced_cache["timestamp"] = 0
 
 def refresh_runtime_config():
     global CAMERA_IP, CAMERA_PORT, TOKEN_HEX, TOKEN, DID, CCTV_NAME, XIAOMI_USER_ID, XIAOMI_USER_EMAIL
@@ -86,6 +93,142 @@ def get_wizard_configuration_status():
             "region": os.environ.get("XIAOMI_REGION", "sg")
         }
     }
+
+ADVANCED_PROP_MAP = {
+    # Tampilan & Optik
+    "image_flip": {"siid": 2, "piid": 4, "type": int},
+    "time_watermark": {"siid": 2, "piid": 5, "type": bool},
+    "wdr_mode": {"siid": 2, "piid": 6, "type": bool},
+    "glimmer_color": {"siid": 2, "piid": 7, "type": bool},
+    "distortion_correction": {"siid": 2, "piid": 14, "type": bool},
+    "ai_frame": {"siid": 2, "piid": 17, "type": bool},
+
+    # Lampu & Audio Hardware
+    "status_led": {"siid": 4, "piid": 1, "type": bool},
+    "spotlight_on": {"siid": 16, "piid": 1, "type": bool},
+    "spotlight_brightness": {"siid": 16, "piid": 2, "type": int},
+    "speaker_volume": {"siid": 6, "piid": 1, "type": int},
+    "speaker_mute": {"siid": 6, "piid": 2, "type": bool},
+    "warning_light_switch": {"siid": 20, "piid": 3, "type": bool},
+    "warning_audio_switch": {"siid": 20, "piid": 4, "type": bool},
+    "warning_light_mode": {"siid": 20, "piid": 6, "type": int},
+
+    # AI & Sensitivitas
+    "motion_switch": {"siid": 5, "piid": 1, "type": bool},
+    "motion_sensitivity": {"siid": 5, "piid": 3, "type": int},
+    "human_detection": {"siid": 8, "piid": 6, "type": bool},
+    "car_detection": {"siid": 8, "piid": 21, "type": bool},
+    "ai_sensitivity": {"siid": 8, "piid": 28, "type": int},
+
+    # SD Card Rekaman Mode
+    "sd_recording_mode": {"siid": 2, "piid": 11, "type": int},
+}
+
+def is_device_authenticated():
+    status = get_wizard_configuration_status()
+    return bool(status.get("configured", False) and TOKEN_HEX and TOKEN_HEX != "0" * 32)
+
+def get_advanced_camera_status():
+    now = time.time()
+    with _advanced_lock:
+        if _advanced_cache["data"] is not None and (now - _advanced_cache["timestamp"]) < 4.0:
+            return _advanced_cache["data"]
+
+    prop_queries = [
+        {"key": "image_flip", "siid": 2, "piid": 4},
+        {"key": "time_watermark", "siid": 2, "piid": 5},
+        {"key": "wdr_mode", "siid": 2, "piid": 6},
+        {"key": "glimmer_color", "siid": 2, "piid": 7},
+        {"key": "distortion_correction", "siid": 2, "piid": 14},
+        {"key": "ai_frame", "siid": 2, "piid": 17},
+        {"key": "sd_recording_mode", "siid": 2, "piid": 11},
+        {"key": "status_led", "siid": 4, "piid": 1},
+        {"key": "motion_switch", "siid": 5, "piid": 1},
+        {"key": "motion_sensitivity", "siid": 5, "piid": 3},
+        {"key": "speaker_volume", "siid": 6, "piid": 1},
+        {"key": "speaker_mute", "siid": 6, "piid": 2},
+        {"key": "human_detection", "siid": 8, "piid": 6},
+        {"key": "car_detection", "siid": 8, "piid": 21},
+        {"key": "ai_sensitivity", "siid": 8, "piid": 28},
+        {"key": "spotlight_on", "siid": 16, "piid": 1},
+        {"key": "spotlight_brightness", "siid": 16, "piid": 2},
+        {"key": "warning_light_switch", "siid": 20, "piid": 3},
+        {"key": "warning_audio_switch", "siid": 20, "piid": 4},
+        {"key": "warning_light_mode", "siid": 20, "piid": 6},
+        {"key": "sd_status", "siid": 3, "piid": 1},
+        {"key": "sd_total", "siid": 3, "piid": 2},
+        {"key": "sd_free", "siid": 3, "piid": 3},
+        {"key": "sd_used", "siid": 3, "piid": 4},
+    ]
+
+    out = {}
+    chunk_size = 4
+    for i in range(0, len(prop_queries), chunk_size):
+        chunk = prop_queries[i:i+chunk_size]
+        req = [{"did": DID, "siid": p["siid"], "piid": p["piid"]} for p in chunk]
+        try:
+            res = send_miio_rpc("get_properties", req, timeout=2.0)
+            for p, item in zip(chunk, res.get("result", [])):
+                if item.get("code") == 0:
+                    out[p["key"]] = item.get("value")
+        except Exception:
+            pass
+        time.sleep(0.04)
+
+    sd_status = out.get("sd_status")
+    sd_status_map = {
+        0: "Normal",
+        1: "Tidak Terdeteksi",
+        2: "Penyimpanan Penuh",
+        3: "Rusak / Error",
+        4: "Sedang Diformat",
+        5: "Dikeluarkan (Ejected)",
+        6: "Sedang Diperbaiki",
+        8: "Belum Diinisialisasi"
+    }
+    sd_rec_map = {
+        0: "Jangan Rekam",
+        1: "Rekam Saat Gerakan",
+        2: "Rekam Terus-Menerus"
+    }
+    total_kb = out.get("sd_total") or 0
+    free_kb = out.get("sd_free") or 0
+    used_kb = out.get("sd_used") or (total_kb - free_kb if total_kb >= free_kb else 0)
+
+    data = {
+        "image_flip": out.get("image_flip", 0),
+        "time_watermark": bool(out.get("time_watermark", True)),
+        "wdr_mode": bool(out.get("wdr_mode", True)),
+        "glimmer_color": bool(out.get("glimmer_color", True)),
+        "distortion_correction": bool(out.get("distortion_correction", True)),
+        "ai_frame": bool(out.get("ai_frame", False)),
+        "status_led": bool(out.get("status_led", True)),
+        "spotlight_on": bool(out.get("spotlight_on", False)),
+        "spotlight_brightness": int(out.get("spotlight_brightness", 100)),
+        "speaker_volume": int(out.get("speaker_volume", 100)),
+        "speaker_mute": bool(out.get("speaker_mute", False)),
+        "warning_light_switch": bool(out.get("warning_light_switch", True)),
+        "warning_audio_switch": bool(out.get("warning_audio_switch", False)),
+        "warning_light_mode": int(out.get("warning_light_mode", 3)),
+        "motion_switch": bool(out.get("motion_switch", True)),
+        "motion_sensitivity": int(out.get("motion_sensitivity", 1)),
+        "human_detection": bool(out.get("human_detection", True)),
+        "car_detection": bool(out.get("car_detection", False)),
+        "ai_sensitivity": int(out.get("ai_sensitivity", 1)),
+        "sdcard": {
+            "status": sd_status if sd_status is not None else 1,
+            "status_text": sd_status_map.get(sd_status, "Tidak Diketahui"),
+            "total_mb": round(total_kb / 1024, 1),
+            "free_mb": round(free_kb / 1024, 1),
+            "used_mb": round(used_kb / 1024, 1),
+            "recording_mode": out.get("sd_recording_mode", 0),
+            "recording_mode_text": sd_rec_map.get(out.get("sd_recording_mode", 0), "Jangan Rekam")
+        }
+    }
+    with _advanced_lock:
+        _advanced_cache["data"] = data
+        _advanced_cache["timestamp"] = now
+    return data
 
 def send_miio_rpc(method, params, timeout=2.5):
     hello = bytes.fromhex("21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
@@ -155,6 +298,15 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_auth_status()
         elif parsed.path.startswith("/api/snapshot/"):
             self.handle_snapshot(parsed.path)
+        elif parsed.path in ("/settings", "/settings/"):
+            self.path = "/settings.html"
+            super().do_GET()
+        elif parsed.path == "/api/camera/advanced":
+            if not is_device_authenticated():
+                self.send_json({"success": False, "authenticated": False, "error": "Autentikasi akun Xiaomi diperlukan"}, status=401)
+                return
+            adv_data = get_advanced_camera_status()
+            self.send_json({"success": True, "authenticated": True, "data": adv_data})
         elif parsed.path == "/api/record/status":
             self.send_json(recorder.get_status())
         elif parsed.path == "/api/youtube/status":
@@ -411,6 +563,62 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
                 youtube_streamer.config["auto_start"] = bool(data["auto_start"])
             youtube_streamer.save_config()
             self.send_json({"success": True, "status": youtube_streamer.get_status()})
+
+        elif parsed.path == "/api/camera/advanced":
+            if not is_device_authenticated():
+                self.send_json({"success": False, "authenticated": False, "error": "Autentikasi akun Xiaomi diperlukan"}, status=401)
+                return
+            prop_name = str(data.get("property", "")).strip()
+            if prop_name not in ADVANCED_PROP_MAP:
+                self.send_json({"success": False, "error": f"Properti tidak dikenal: {prop_name}"}, status=400)
+                return
+            prop_info = ADVANCED_PROP_MAP[prop_name]
+            raw_val = data.get("value")
+            try:
+                target_val = bool(raw_val) if prop_info["type"] is bool else int(raw_val)
+            except Exception as e:
+                self.send_json({"success": False, "error": f"Nilai tidak valid: {e}"}, status=400)
+                return
+
+            res = send_miio_rpc("set_properties", [{
+                "did": DID,
+                "siid": prop_info["siid"],
+                "piid": prop_info["piid"],
+                "value": target_val
+            }])
+            invalidate_advanced_cache()
+            invalidate_status_cache()
+            self.send_json({
+                "success": True,
+                "authenticated": True,
+                "property": prop_name,
+                "value": target_val,
+                "result": res
+            })
+
+        elif parsed.path == "/api/camera/sdcard":
+            if not is_device_authenticated():
+                self.send_json({"success": False, "authenticated": False, "error": "Autentikasi akun Xiaomi diperlukan"}, status=401)
+                return
+            action = str(data.get("action", "")).strip()
+            if action == "format":
+                res = send_miio_rpc("action", {"did": DID, "siid": 3, "aiid": 1, "in": []})
+                invalidate_advanced_cache()
+                self.send_json({"success": True, "authenticated": True, "action": "format", "result": res})
+            elif action == "eject":
+                res = send_miio_rpc("action", {"did": DID, "siid": 3, "aiid": 2, "in": []})
+                invalidate_advanced_cache()
+                self.send_json({"success": True, "authenticated": True, "action": "eject", "result": res})
+            elif action == "set_mode":
+                try:
+                    mode = int(data.get("mode", 0))
+                except:
+                    mode = 0
+                res = send_miio_rpc("set_properties", [{"did": DID, "siid": 2, "piid": 11, "value": mode}])
+                invalidate_advanced_cache()
+                self.send_json({"success": True, "authenticated": True, "action": "set_mode", "mode": mode, "result": res})
+            else:
+                self.send_json({"success": False, "authenticated": True, "error": f"Aksi MicroSD tidak valid: {action}"}, status=400)
 
         else:
             self.send_error(404, "Endpoint not found")

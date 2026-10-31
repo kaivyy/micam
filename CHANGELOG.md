@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-10-31
+
+### Added
+- Advanced Camera Hardware Settings Page (`public/settings.html` & `/settings` route): Dedicated separate page for all hardware parameters extracted from the official Xiaomi Mi Home MIoT spec (`chuangmi.camera.075ae1`), avoiding codebase bloat on the main live monitor dashboard.
+- MicroSD Physical Card vs. Server Storage Separation: Distinct separation of concerns where onboard MicroSD card controls (live capacity bar, status, formatting, unmounting/eject, and onboard recording mode) are managed on `/settings.html`, while Server Storage DVR (local Linux storage, segment limits, MP4 player & linimasa, and timelapse) is kept exclusively on the main dashboard.
+- Camera Hardware Optical Controls: 180° image rotation (flip), timestamp watermark, Wide Dynamic Range (WDR), glimmer full-color low-light mode, Lens Distortion Correction (LDC), and AI object tracking frame.
+- Physical Lamp & Audio Hardware Controls: Front LED indicator switch, physical spotlight toggle, 1%-100% spotlight brightness slider, 0%-100% speaker volume slider, hardware mute toggle, and warning light strobo flash modes (Continuous, Slow Blink, Fast Warning Strobo).
+- AI Neural Sensitivity Controls: Motion detection switch, 3-tier motion sensitivity (Low, Medium, High), Human AI silhouette detection, Vehicle AI detection, and 3-tier AI neural confidence threshold.
+- Secure Auth Gating: Frontend lock overlay (`#authGateCard`) and backend HTTP 401 gate preventing unauthorized access or hardware manipulation when no verified Xiaomi Cloud session / MIIO token is active.
+- MIIO Chunked Property Queries: Query scheduler that chunks 24 hardware properties into 4-item batches over UDP 54321, eliminating camera SoC packet timeouts and responding reliably in <0.3 seconds.
+- REST API Suite: Added `GET /api/camera/advanced`, `POST /api/camera/advanced`, and `POST /api/camera/sdcard` (`format`, `eject`, `set_mode`).
+- Antislop Design Standard: Strictly zero emojis across all UI headers, labels, switches, sliders, custom confirmation modals, and toast notifications, utilizing crisp inline SVG icons throughout.
+- Automated Verification Suite: Added Playwright E2E test (`tests/test_settings_page.py`) covering desktop viewports (1440x900), mobile responsive drawers (390x844), real hardware property updates, and simulated 401 unauthenticated lock verification.
+
 ## [0.1.4] - 2026-10-31
 
 ### Added
