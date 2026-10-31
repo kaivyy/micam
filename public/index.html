@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="/fsr-upscaler.js?v=20261030_05"></script>
-  <script type="module" src="/video-rtc.js?v=20261030_06"></script>
+  <script type="module" src="/video-rtc.js?v=20261031_01"></script>
   <style>
     :root {
       --bg: #000000;
@@ -2323,7 +2323,7 @@
               </div>
             </div>
             <div class="video-frame-container" id="containerCamLeft">
-              <video-rtc id="camLeft" background></video-rtc>
+              <video-rtc id="camLeft"></video-rtc>
               <canvas class="fsr-overlay-canvas" id="fsrCanvas_camLeft"></canvas>
               <div class="video-zoom-overlay" id="zoomOverlay_camLeft">
                 <span class="zoom-val" id="zoomVal_camLeft">1.0x</span>
@@ -2402,7 +2402,7 @@
               </div>
             </div>
             <div class="video-frame-container" id="containerCamRight">
-              <video-rtc id="camRight" background></video-rtc>
+              <video-rtc id="camRight"></video-rtc>
               <canvas class="fsr-overlay-canvas" id="fsrCanvas_camRight"></canvas>
               <div class="video-zoom-overlay" id="zoomOverlay_camRight">
                 <span class="zoom-val" id="zoomVal_camRight">1.0x</span>
@@ -3230,6 +3230,8 @@
       const btnBoth = document.getElementById('btnViewBoth');
       const btnLeft = document.getElementById('btnViewLeft');
       const btnRight = document.getElementById('btnViewRight');
+      const camLeft = document.getElementById('camLeft');
+      const camRight = document.getElementById('camRight');
 
       if (btnBoth) btnBoth.classList.toggle('active', mode === 'both');
       if (btnLeft) btnLeft.classList.toggle('active', mode === 'left');
@@ -3238,12 +3240,18 @@
       if (mode === 'both') {
         if (leftBox) { leftBox.style.display = ''; leftBox.classList.remove('is-single-lens'); }
         if (rightBox) { rightBox.style.display = ''; rightBox.classList.remove('is-single-lens'); }
+        if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
+        if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
       } else if (mode === 'left') {
         if (leftBox) { leftBox.style.display = ''; leftBox.classList.add('is-single-lens'); }
         if (rightBox) { rightBox.style.display = 'none'; rightBox.classList.remove('is-single-lens'); }
+        if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
+        if (camRight && typeof camRight.ondisconnect === 'function') camRight.ondisconnect();
       } else if (mode === 'right') {
         if (leftBox) { leftBox.style.display = 'none'; leftBox.classList.remove('is-single-lens'); }
         if (rightBox) { rightBox.style.display = ''; rightBox.classList.add('is-single-lens'); }
+        if (camLeft && typeof camLeft.ondisconnect === 'function') camLeft.ondisconnect();
+        if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
       }
       log(`Tampilan lensa diubah ke: ${mode === 'both' ? 'Kedua Lensa' : (mode === 'left' ? 'Lensa Kiri' : 'Lensa Kanan')}`);
     }
@@ -5081,9 +5089,22 @@
     startDashboardPolling();
 
     document.addEventListener('visibilitychange', () => {
+      const camLeft = document.getElementById('camLeft');
+      const camRight = document.getElementById('camRight');
+
       if (document.hidden) {
         stopDashboardPolling();
+        // Immediately disconnect live streams to free camera hardware P2P sessions for Xiaomi mobile app
+        if (camLeft && typeof camLeft.ondisconnect === 'function') camLeft.ondisconnect();
+        if (camRight && typeof camRight.ondisconnect === 'function') camRight.ondisconnect();
       } else {
+        // Reconnect active streams
+        if (currentLensView === 'both' || currentLensView === 'left') {
+          if (camLeft && typeof camLeft.onconnect === 'function') camLeft.onconnect();
+        }
+        if (currentLensView === 'both' || currentLensView === 'right') {
+          if (camRight && typeof camRight.onconnect === 'function') camRight.onconnect();
+        }
         fetchStatus();
         fetchRecordStatus();
         pingLoop();

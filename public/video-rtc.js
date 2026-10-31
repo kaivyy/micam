@@ -378,28 +378,17 @@ export class VideoRTC extends HTMLElement {
 
         const modes = [];
         const hasMediaSource = ('MediaSource' in window || 'ManagedMediaSource' in window);
-        const MS = window.MediaSource || window.ManagedMediaSource;
-        const supportsH265Mse = Boolean(hasMediaSource && MS && (
-            (typeof MS.isTypeSupported === 'function') && (
-                MS.isTypeSupported('video/mp4; codecs="hvc1.1.6.L153.B0"') ||
-                MS.isTypeSupported('video/mp4; codecs="hev1.1.6.L153.B0"') ||
-                MS.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.B0"')
-            )
-        ));
 
-        const preferH265Mse = supportsH265Mse && this.mode.includes('mse');
-
-        if (preferH265Mse) {
-            modes.push('mse');
-            this.onmse();
-            this.onmessage['mse_fallback'] = msg => {
-                if (msg.type === 'error' && this.mode.includes('webrtc') && 'RTCPeerConnection' in window && this.pcState === WebSocket.CLOSED) {
-                    this.onwebrtc();
-                }
-            };
-        } else if (this.mode.includes('webrtc') && 'RTCPeerConnection' in window) {
+        if (this.mode.includes('webrtc') && 'RTCPeerConnection' in window) {
             modes.push('webrtc');
             this.onwebrtc();
+            if (this.mode.includes('mse') && hasMediaSource) {
+                this.onmessage['webrtc_fallback'] = msg => {
+                    if (msg.type === 'error' && msg.value && msg.value.includes('webrtc') && this.pcState === WebSocket.CLOSED) {
+                        this.onmse();
+                    }
+                };
+            }
         } else if (this.mode.includes('mse') && hasMediaSource) {
             modes.push('mse');
             this.onmse();
@@ -507,7 +496,14 @@ export class VideoRTC extends HTMLElement {
                             this.video.currentTime = start;
                         }
                         const gap = end - this.video.currentTime;
-                        this.video.playbackRate = gap > 0.1 ? gap : 0.1;
+                        if (gap > 2.0) {
+                            this.video.currentTime = end - 0.1;
+                            this.video.playbackRate = 1.0;
+                        } else if (gap > 0.4) {
+                            this.video.playbackRate = 1.15;
+                        } else {
+                            this.video.playbackRate = 1.0;
+                        }
                         // console.debug('VideoRTC.buffered', gap, this.video.playbackRate, this.video.readyState);
                     }
                 } catch (e) {

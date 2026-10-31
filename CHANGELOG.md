@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-10-31
+
+### Fixed
+- Streaming stability on MS Edge and Windows browsers: Restored WebRTC as primary transport, eliminating the MSE slow-motion rubber-banding playback loop (`playbackRate < 1.0`).
+- MSE buffer synchronization: Replaced flawed fractional playback rate with stable 1.0x real-time playback and discrete live-edge jump for low-latency catch-up.
+- Xiaomi Mi Home app concurrent device limit: Automatically disconnect camera streams when browser tabs are hidden, minimized, or in background, releasing hardware P2P sessions so the mobile Mi Home app can connect without hitting device concurrency caps.
+- Dynamic single-lens session freeing: Disconnected inactive camera channels when switching between single-lens and dual-lens views to minimize active camera sessions.
+- Screenshot privacy: Applied smooth visual blur to camera video frames in documentation screenshot (`desktop_preview.png`) to protect residential privacy while keeping the UI razor sharp.
+
 ## [0.1.1] - 2026-10-30
 
 ### Changed
