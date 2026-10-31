@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - REST API Suite: Added `GET /api/youtube/status`, `POST /api/youtube/start`, `POST /api/youtube/stop`, and `POST /api/youtube/config`.
 - Automated Verification Suite: Added Playwright test (`tests/test_youtube_stream.py`) covering backend endpoints, modal interactions, accordion expansion, eye toggle visibility, and screenshot capture.
 
+### Fixed
+- Setup Wizard redundant QR scan & login link: Automatically hid QR code box, countdown timer, and direct login link in Step 1 when the user is already authenticated with Xiaomi Cloud, displaying their verified account details and a direct "Lanjut ke Pilihan Kamera" action.
+- Device discovery fallback: Added server-side fallback in `/api/wizard/devices` to return the currently configured camera from `.env` when the in-memory wizard session is idle, preventing "Not authenticated" errors.
+- YouTube modal dropdown layout & responsiveness: Styled custom dark-mode `.form-select` with subtle borders, background chevron indicator, and 42px touch-friendly height; refactored grid to stack into a single column (`.yt-options-grid`) on mobile screens (≤520px) to prevent text truncation.
+
 ## [0.1.3] - 2026-10-31
 
 ### Added

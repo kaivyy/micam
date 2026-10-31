@@ -2320,6 +2320,80 @@
     .btn-icon-eye:hover {
       color: #fff;
     }
+    .form-select {
+      width: 100%;
+      background-color: #0d1117;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 16px;
+      border: 1px solid var(--border);
+      color: #f0f6fc;
+      padding: 0.6rem 2.2rem 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-family: inherit;
+      outline: none;
+      min-height: 42px;
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .form-select:hover {
+      border-color: #4b5563;
+    }
+    .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+    .form-select option {
+      background-color: #161b22;
+      color: #f0f6fc;
+      padding: 0.5rem;
+    }
+    .yt-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.65rem;
+    }
+    @media (max-width: 520px) {
+      .yt-options-grid {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+      }
+    }
+    .wiz-auth-card {
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .wiz-auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .wiz-auth-note {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
   </style>
 </head>
 <body>
@@ -3084,17 +3158,17 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+      <div class="yt-options-grid">
         <div class="form-group" style="margin: 0;">
-          <label for="ytLensSelect">Pilihan Kamera / Lensa</label>
-          <select class="form-select" id="ytLensSelect">
+          <label for="ytLensSelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Pilihan Kamera / Lensa</label>
+          <select class="form-select" id="ytLensSelect" aria-label="Pilihan Kamera atau Lensa">
             <option value="left">Lensa 1: Wide Angle (Kiri)</option>
             <option value="right">Lensa 2: Telephoto (Kanan)</option>
           </select>
         </div>
         <div class="form-group" style="margin: 0;">
-          <label for="ytQualitySelect">Kualitas Video</label>
-          <select class="form-select" id="ytQualitySelect">
+          <label for="ytQualitySelect" style="display: block; font-size: 0.78rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.35rem;">Kualitas Video</label>
+          <select class="form-select" id="ytQualitySelect" aria-label="Kualitas Video Live YouTube">
             <option value="native">Asli 2.5K (2304x1296)</option>
             <option value="1080p">Full HD 1080p</option>
             <option value="720p">HD 720p (Hemat Kuota)</option>
@@ -3207,7 +3281,7 @@
       <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.85rem;">
         <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Tindakan Cepat (Satset):</div>
         <button class="btn btn-outline" style="border-color:var(--accent); color:var(--accent);" onclick="document.getElementById('authModal').classList.remove('open'); openSetupWizard();">
-          Buka Setup Wizard CCTV (Scan QR Mi Home)
+          Pengaturan Kamera CCTV (Setup Wizard)
         </button>
         <button class="btn btn-solid" id="btnSyncGateway">Sinkronkan Ulang Gateway Stream</button>
 
@@ -3254,33 +3328,60 @@
 
       <!-- Step 1: Login QR / Link -->
       <div class="wizard-step-body" id="wizStep1Body">
-        <p class="wizard-desc">
-          Scan QR Code di bawah menggunakan aplikasi <strong>Mi Home</strong> di HP Anda, atau klik tombol <em>Buka Link Verifikasi</em> jika membuka lewat browser HP.
-        </p>
-
-        <div class="wizard-qr-center">
-          <div class="wizard-qr-box" id="wizQrBox">
-            <img id="wizQrImage" alt="QR Code Login Xiaomi" style="display:none;" />
-            <div id="wizQrSpinner" class="wizard-qr-loading">
-              <div class="spinner"></div>
-              <span>Menyiapkan sesi QR...</span>
+        <!-- Sub-view 1: Ditampilkan ketika akun sudah login -->
+        <div id="wizStep1LoggedIn" style="display:none;">
+          <div class="wiz-auth-card">
+            <div class="wiz-auth-badge">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span>Akun Xiaomi Terhubung</span>
             </div>
+            <div style="font-size: 0.92rem; font-weight: 600; color: #fff; margin-top: 0.5rem;" id="wizLoggedInEmailVal">-</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">User ID: <span id="wizLoggedInUidVal" style="font-family: monospace; color: #cbd5e1;">-</span> &bull; Region: <span id="wizLoggedInRegionVal">Singapore (sg)</span></div>
+            <div class="wiz-auth-note">
+              Akun Xiaomi Anda telah aktif dan terverifikasi. Tidak perlu memindai QR code atau membuka tautan login lagi.
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <button type="button" class="btn btn-solid" style="width: 100%;" onclick="proceedToCameraSelection()">
+              Lanjut ke Pilihan Kamera &rarr;
+            </button>
+            <button type="button" class="btn btn-outline" style="width: 100%; font-size: 0.78rem; border-color: #333;" onclick="reloginWithNewQr()">
+              Ganti Akun Lain (Scan QR Baru)
+            </button>
           </div>
         </div>
 
-        <div class="wizard-countdown-row">
-          <span id="wizTimerText">Waktu aktif: 120s</span>
-          <button type="button" class="btn-action-sm" id="btnRefreshQr" onclick="startWizardQrSession()" style="display:none;">Muat Ulang QR</button>
-        </div>
+        <!-- Sub-view 2: Ditampilkan jika belum login atau saat minta ganti akun -->
+        <div id="wizStep1Unauthenticated">
+          <p class="wizard-desc">
+            Scan QR Code di bawah menggunakan aplikasi <strong>Mi Home</strong> di HP Anda, atau klik tombol <em>Buka Link Verifikasi</em> jika membuka lewat browser HP.
+          </p>
 
-        <div class="wizard-status-pulse" id="wizStatusMsg">
-          <span class="pulse-indicator"></span> Menunggu scan dari aplikasi Mi Home...
-        </div>
+          <div class="wizard-qr-center">
+            <div class="wizard-qr-box" id="wizQrBox">
+              <img id="wizQrImage" alt="QR Code Login Xiaomi" style="display:none;" />
+              <div id="wizQrSpinner" class="wizard-qr-loading">
+                <div class="spinner"></div>
+                <span>Menyiapkan sesi QR...</span>
+              </div>
+            </div>
+          </div>
 
-        <div class="wizard-actions-group">
-          <a id="wizDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="text-decoration:none; text-align:center; display:none; width:100%;">
-            Buka Link Verifikasi di Browser &rarr;
-          </a>
+          <div class="wizard-countdown-row">
+            <span id="wizTimerText">Waktu aktif: 120s</span>
+            <button type="button" class="btn-action-sm" id="btnRefreshQr" onclick="startWizardQrSession()" style="display:none;">Muat Ulang QR</button>
+          </div>
+
+          <div class="wizard-status-pulse" id="wizStatusMsg">
+            <span class="pulse-indicator"></span> Menunggu scan dari aplikasi Mi Home...
+          </div>
+
+          <div class="wizard-actions-group">
+            <a id="wizDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="text-decoration:none; text-align:center; display:none; width:100%;">
+              Buka Link Verifikasi di Browser &rarr;
+            </a>
+          </div>
         </div>
       </div>
 
@@ -3392,7 +3493,7 @@
         </div>
         <div class="drawer-item-content">
           <div class="drawer-item-title">Setup CCTV (Wizard)</div>
-          <div class="drawer-item-sub">Scan QR Mi Home untuk sambungkan CCTV baru</div>
+          <div class="drawer-item-sub">Pengaturan kamera, IP & lensa CCTV</div>
         </div>
         <span class="drawer-item-chevron">&rsaquo;</span>
       </button>
@@ -5106,10 +5207,13 @@
     }
 
     // --- Status and Hardware Polling ---
+    let userAuthCache = null;
+
     async function fetchAuthStatus() {
       try {
         const res = await fetch('/api/auth/status');
         const data = await res.json();
+        userAuthCache = data;
         if (data.email) {
           const el = document.getElementById('authEmailVal');
           if (el) el.textContent = data.email;
@@ -5126,9 +5230,11 @@
           if (data.streams.kiri) streamLeftName = data.streams.kiri;
           if (data.streams.kanan) streamRightName = data.streams.kanan;
         }
+        return data;
       } catch (e) {
         // Non-critical background fetch
       }
+      return null;
     }
 
     let realSsid = '';
@@ -5334,12 +5440,56 @@
       }
     }
 
-    function openSetupWizard() {
+    async function openSetupWizard() {
       const wiz = document.getElementById('setupWizardModal');
       if (!wiz) return;
       wiz.classList.add('open');
       setWizardStep(1);
+
+      let auth = userAuthCache;
+      if (!auth) {
+        auth = await fetchAuthStatus();
+      }
+
+      if (auth && auth.authenticated) {
+        showWizardLoggedInState(auth);
+      } else {
+        showWizardUnauthenticatedState();
+      }
+    }
+
+    function showWizardLoggedInState(auth) {
+      stopWizardPolling();
+      const loggedInView = document.getElementById('wizStep1LoggedIn');
+      const unauthView = document.getElementById('wizStep1Unauthenticated');
+      const emailEl = document.getElementById('wizLoggedInEmailVal');
+      const uidEl = document.getElementById('wizLoggedInUidVal');
+      const regEl = document.getElementById('wizLoggedInRegionVal');
+
+      if (emailEl) emailEl.textContent = auth.email || 'Akun Xiaomi Terhubung';
+      if (uidEl) uidEl.textContent = auth.user_id || '-';
+      if (regEl) regEl.textContent = (auth.region === 'sg') ? 'Singapore (sg)' : (auth.region || 'Singapore (sg)');
+
+      if (loggedInView) loggedInView.style.display = 'block';
+      if (unauthView) unauthView.style.display = 'none';
+    }
+
+    function showWizardUnauthenticatedState() {
+      const loggedInView = document.getElementById('wizStep1LoggedIn');
+      const unauthView = document.getElementById('wizStep1Unauthenticated');
+
+      if (loggedInView) loggedInView.style.display = 'none';
+      if (unauthView) unauthView.style.display = 'block';
       startWizardQrSession();
+    }
+
+    function proceedToCameraSelection() {
+      setWizardStep(2);
+      fetchWizardDevices();
+    }
+
+    function reloginWithNewQr() {
+      showWizardUnauthenticatedState();
     }
 
     function closeSetupWizard() {

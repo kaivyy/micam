@@ -131,7 +131,24 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/wizard/status":
             self.send_json(wizard_session.poll_qr_status())
         elif parsed.path == "/api/wizard/devices":
-            self.send_json(wizard_session.discover_cameras())
+            devices = wizard_session.discover_cameras()
+            if not devices.get("cameras"):
+                status = get_wizard_configuration_status()
+                if status.get("configured") and status.get("camera"):
+                    cam = status["camera"]
+                    devices = {
+                        "success": True,
+                        "cameras": [{
+                            "name": CCTV_NAME or "Xiaomi CCTV",
+                            "did": str(DID),
+                            "model": cam.get("model", "chuangmi.camera.075ae1"),
+                            "ip": CAMERA_IP,
+                            "token": TOKEN_HEX,
+                            "lens_type": cam.get("lens_type", "dual"),
+                            "region": os.environ.get("XIAOMI_REGION", "sg")
+                        }]
+                    }
+            self.send_json(devices)
         elif parsed.path == "/api/ping":
             self.handle_api_ping()
         elif parsed.path == "/api/auth/status":
