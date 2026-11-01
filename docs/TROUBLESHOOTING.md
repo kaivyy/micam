@@ -77,6 +77,7 @@ This guide covers common setup issues, network edge cases, and performance tunin
   1. The `<video-rtc background>` attribute keeps WebRTC peers resilient.
   2. A `visibilitychange` and `pageshow` listener automatically recovers frozen video elements upon re-entering the tab without requiring a manual page refresh.
   3. If video freeze persists due to network handoff (e.g. WiFi to 5G), tap the reload button in the lens header.
+  4. Short tab switches (under 30 seconds) keep the stream connected. After 30 seconds hidden, the camera session is released and the last frame stays on screen (dimmed, labelled "Menyambung ulang...") until the stream resumes, which can take a few seconds while the camera sends its next keyframe.
 
 ---
 

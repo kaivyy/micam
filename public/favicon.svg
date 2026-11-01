@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#24272c"/>
+      <stop offset="100%" stop-color="#0e1013"/>
+    </linearGradient>
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#555d68"/>
+      <stop offset="50%" stop-color="#2a2e35"/>
+      <stop offset="100%" stop-color="#14171a"/>
+    </linearGradient>
+    <linearGradient id="capsuleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1a1d21"/>
+      <stop offset="50%" stop-color="#22262c"/>
+      <stop offset="100%" stop-color="#15171b"/>
+    </linearGradient>
+    <radialGradient id="emeraldLens" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="45%" stop-color="#059669"/>
+      <stop offset="85%" stop-color="#022c22"/>
+      <stop offset="100%" stop-color="#011812"/>
+    </radialGradient>
+    <radialGradient id="cyanLens" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="45%" stop-color="#0284c7"/>
+      <stop offset="85%" stop-color="#082f49"/>
+      <stop offset="100%" stop-color="#021627"/>
+    </radialGradient>
+    <linearGradient id="bezelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#717a87"/>
+      <stop offset="50%" stop-color="#2d333b"/>
+      <stop offset="100%" stop-color="#555d69"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Squircle Body -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bodyGrad)" stroke="url(#rimGrad)" stroke-width="1.5"/>
+
+  <!-- Inner Capsule Island -->
+  <rect x="19" y="9" width="26" height="46" rx="13" fill="url(#capsuleGrad)" stroke="url(#bezelGrad)" stroke-width="1.2"/>
+
+  <!-- Top Lens (Emerald CW100 Fixed Lens) -->
+  <circle cx="32" cy="22" r="9.5" fill="#0b0e11" stroke="#3b424d" stroke-width="1"/>
+  <circle cx="32" cy="22" r="7.5" fill="url(#emeraldLens)"/>
+  <circle cx="32" cy="22" r="3.2" fill="#021f18" stroke="#10b981" stroke-width="0.8"/>
+  <circle cx="33.5" cy="20.5" r="1.2" fill="#a7f3d0" opacity="0.8"/>
+
+  <!-- Bottom Lens (Cyan CW100 PTZ Lens) -->
+  <circle cx="32" cy="42" r="9.5" fill="#0b0e11" stroke="#3b424d" stroke-width="1"/>
+  <circle cx="32" cy="42" r="7.5" fill="url(#cyanLens)"/>
+  <circle cx="32" cy="42" r="3.2" fill="#031d33" stroke="#0284c7" stroke-width="0.8"/>
+  <circle cx="30.5" cy="40.5" r="1.2" fill="#bae6fd" opacity="0.85"/>
+</svg>

@@ -109,8 +109,11 @@ To stop the background services:
   * 100% internal loopback: Ingests from local RTSP endpoints (`rtsp://127.0.0.1:8554`), consuming zero additional camera hardware P2P slots.
   * Zero command-line configuration required &mdash; managed entirely from the dashboard UI.
 
-* **Pure OLED Black Design (`#000000`) & Mobile First:**
+* **Pure OLED Black Design (`#000000`) & Progressive Web App (PWA):**
   * High-contrast interface optimized for AMOLED/OLED displays.
+  * Modern titanium squircle app icon & branding with full PWA asset suite (`manifest.json`, `apple-touch-icon.png`, `favicon.svg`).
+  * Seamless iOS Safari / Android "Add to Home Screen" standalone app experience.
+  * Resilient background tab handling with 30-second grace window and last-frame poster hold to eliminate jarring black screen reloads.
   * Touch targets $\ge 44\times44\text{px}$ adhering to clean anti-slop ergonomics.
   * PIN guard keypad lock screen for shared workstation security.
 

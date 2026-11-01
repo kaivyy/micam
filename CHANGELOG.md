@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2026-11-01
+
+### Fixed
+- **Black screen after switching browser tabs**: The dashboard no longer drops both streams the instant a tab is hidden. Streams stay connected for a 30 second grace period (`HIDDEN_DISCONNECT_MS`), so a quick tab switch resumes with no reload. After a longer absence the camera session is released as before, which keeps Mi Home free.
+- **Last frame held while reconnecting**: When streams are released after the grace period, the last decoded frame of each lens is kept as the video poster (dimmed, with a "Menyambung ulang..." label) until the first new keyframe plays, completely eliminating the black screen flash. The held frame is never kept in standby mode.
+- **Desktop & Laptop Navbar Layout Balance**: Fixed header responsiveness across mid-range desktop and laptop viewports (641px - 1366px) by locking `.brand` with `flex-shrink: 0`, preventing the brand title and logo from being squished or pushed out by action buttons.
+
+### Added
+- **Modern App Icon & Branding**: Added an Apple Pro / macOS titanium squircle app icon featuring a dual-sensor camera motif with emerald green (`#10b981`) and electric cyan (`#0284c7`) optical lens coatings.
+- **Full PWA & Mobile Web Asset Suite**: Generated `apple-touch-icon.png` (180x180), `icon-192.png`, `icon-512.png`, `icon-512-maskable.png`, scalable `favicon.svg`, `favicon.ico`, and `manifest.json`. Adding to Home Screen in iOS Safari / Android now installs micam as a native standalone app.
+- **End-to-End Tab Switch Test Suite**: Added `tests/test_tab_switch.py` validating the 30-second grace window, poster frame hold, and reconnect cycle.
+
 ## [0.1.7] - 2026-11-01
 
 ### Fixed

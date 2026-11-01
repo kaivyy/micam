@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Xiaomi CW100 Dual • Surveillance & DVR NVR Pro</title>
+  <!-- App Icons & PWA Metadata -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="micam">
+  <meta name="application-name" content="micam">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -93,20 +104,22 @@
       align-items: center;
       gap: 0.75rem;
       min-width: 0;
-      flex-shrink: 1;
+      flex-shrink: 0;
     }
     .brand-mark {
       width: 38px;
       height: 38px;
       min-width: 38px;
       border-radius: var(--radius-sm);
-      background: var(--primary);
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
     }
+    .brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .brand-mark svg { width: 22px; height: 22px; fill: currentColor; }
     .brand-text {
       min-width: 0;
@@ -225,10 +238,11 @@
       display: none;
     }
 
-    /* Tablet breakpoint (641px - 940px) */
-    @media (max-width: 940px) and (min-width: 641px) {
+    /* Tablet and laptop breakpoint (641px - 1366px) */
+    @media (max-width: 1366px) and (min-width: 641px) {
       header {
         padding: 0.65rem 1rem;
+        gap: 0.65rem;
       }
       .brand-title-full { display: none; }
       .brand-title-short { display: block; }
@@ -1392,6 +1406,23 @@
       background: #000000;
       overflow: hidden;
     }
+    video-rtc.cam-reconnecting video {
+      filter: brightness(0.55);
+    }
+    video-rtc.cam-reconnecting::after {
+      content: 'Menyambung ulang...';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      pointer-events: none;
+      z-index: 3;
+    }
     .btn-icon.audio-on {
       color: var(--accent) !important;
       background: rgba(16, 185, 129, 0.15) !important;
@@ -2500,7 +2531,7 @@
   <header>
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
+        <img src="/apple-touch-icon.png" alt="micam" width="38" height="38">
       </div>
       <div class="brand-text">
         <h1 class="brand-title-full" id="brandTitleFull">Xiaomi CW100 Dual • CCTV Monitor</h1>
@@ -4460,11 +4491,47 @@
       }, { passive: true });
     });
 
-    function disconnectStreams() {
+    const HIDDEN_DISCONNECT_MS = 30000;
+    let hiddenDisconnectTID = null;
+    let streamsReleasedByHide = false;
+
+    function holdLastFrame(camEl) {
+      const video = camEl && camEl.video;
+      if (!video || video.readyState < 2 || !video.videoWidth) return;
+      try {
+        const scale = Math.min(1, 1280 / video.videoWidth);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(video.videoWidth * scale);
+        canvas.height = Math.round(video.videoHeight * scale);
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        video.poster = canvas.toDataURL('image/jpeg', 0.7);
+        camEl.classList.add('cam-reconnecting');
+      } catch (e) {
+        // frame hold is cosmetic only
+      }
+    }
+
+    function clearHeldFrame(camEl) {
+      if (!camEl) return;
+      camEl.classList.remove('cam-reconnecting');
+      if (camEl.video) camEl.video.removeAttribute('poster');
+    }
+
+    function disconnectStreams(keepFrame = false) {
       const camL = document.getElementById('camLeft');
       const camR = document.getElementById('camRight');
-      if (camL && typeof camL.ondisconnect === 'function') camL.ondisconnect();
-      if (camR && typeof camR.ondisconnect === 'function') camR.ondisconnect();
+      [camL, camR].forEach(cam => {
+        if (!cam) return;
+        if (keepFrame && !isStreamStandby) holdLastFrame(cam);
+        else clearHeldFrame(cam);
+        if (typeof cam.ondisconnect === 'function') cam.ondisconnect();
+      });
+      ['camLeft', 'camRight'].forEach(camId => {
+        if (fsrUpscalers[camId]) fsrUpscalers[camId].stop();
+      });
+    }
+
+    function pauseFsrUpscalers() {
       ['camLeft', 'camRight'].forEach(camId => {
         if (fsrUpscalers[camId]) fsrUpscalers[camId].stop();
       });
@@ -6045,6 +6112,7 @@
         const video = camEl.video || camEl.querySelector('video');
         if (video) {
           video.addEventListener('playing', () => {
+            clearHeldFrame(camEl);
             if (clarityModes[camId] === 'fsr') updateZoomTransform(camId, false);
           });
           video.addEventListener('loadeddata', () => {
@@ -6096,10 +6164,32 @@
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         stopDashboardPolling();
-        disconnectStreams();
+        pauseFsrUpscalers();
+        if (hiddenDisconnectTID) clearTimeout(hiddenDisconnectTID);
+        hiddenDisconnectTID = setTimeout(() => {
+          hiddenDisconnectTID = null;
+          if (!document.hidden) return;
+          disconnectStreams(true);
+          streamsReleasedByHide = true;
+        }, HIDDEN_DISCONNECT_MS);
       } else {
+        if (hiddenDisconnectTID) {
+          clearTimeout(hiddenDisconnectTID);
+          hiddenDisconnectTID = null;
+        }
         if (!isStreamStandby) {
-          reconnectStreams();
+          if (streamsReleasedByHide) {
+            streamsReleasedByHide = false;
+            reconnectStreams();
+          } else {
+            reconnectStreams();
+            ['camLeft', 'camRight'].forEach(camId => {
+              const cam = document.getElementById(camId);
+              if (cam && cam.video && cam.video.paused && cam.wsState === WebSocket.OPEN) {
+                cam.video.play().catch(() => {});
+              }
+            });
+          }
           resetIdleTimer();
         }
         fetchStatus();
