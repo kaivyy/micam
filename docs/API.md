@@ -347,8 +347,9 @@ Instantly terminates active go2rtc camera sessions on demand, freeing all P2P ch
 - **Token Redaction:** `GET /api/status`, `GET /api/wizard/devices`, and `POST /api/wizard/save` automatically strip the 32-character MIIO hardware encryption token (`token`) and Xiaomi `pass_token` before returning JSON payloads.
 - **CSRF / Same-Origin Protection:** All mutating endpoints (`POST`, `DELETE`, `OPTIONS`) validate the `Origin` header when present and reject cross-origin browser requests (`403 Forbidden`).
 - **Config Injection Defense (`POST /api/wizard/save`):** All camera fields are validated via `sanitize_camera_data()` (`ipaddress.ip_address` for IP, strict regex for `did`, `model`, `region`, `token`, `user_id`, and `pass_token`). When a camera is already paired, `/api/wizard/save` rejects unauthenticated attempts to overwrite configuration with an unauthorized `did` (`403 Forbidden`).
-- **YouTube Stream Key & DVR Directory Lock:** `POST /api/youtube/start` and `POST /api/youtube/config` require `stream_key` to match `^[A-Za-z0-9_-]{4,128}$`. `POST /api/record/settings` locks `storage_dir` to the server's configured `CCTV_STORAGE_DIR`.
-- **`go2rtc` Gateway Hardening (`:1984`):**
-  - `api.allow_paths` disables `/api/config`, `/api/exit`, `/api/log`, and the `:1984` web config editor.
-  - `exec.allow_paths: ["ffmpeg"]` blocks execution of any shell or binary other than `ffmpeg`.
-  - Dynamic stream mutation (`PUT`, `PATCH`, `POST`, `DELETE` on `/api/streams`) is disabled (`403 Forbidden`), and control endpoints (`/api/restart`, `/api/xiaomi`) are restricted strictly to `127.0.0.1` / `::1`.
+- **YouTube Stream Key, Telegram SSRF & DVR Directory Lock:** `POST /api/youtube/start` and `POST /api/youtube/config` require `stream_key` to match `^[A-Za-z0-9_-]{4,128}$`. `POST /api/telegram/test` validates `bot_token` (`^[0-9]{5,16}:[A-Za-z0-9_-]{20,64}$`) and `chat_id` (`^(-?[0-9]{1,24}|@[A-Za-z0-9_]{5,64})$`). `POST /api/record/settings` locks `storage_dir` to the server's configured `CCTV_STORAGE_DIR`.
+- **`go2rtc` Gateway Hardening (`:1984` & `127.0.0.1:8554`):**
+  - `app.modules` whitelist (`api`, `ws`, `rtsp`, `webrtc`, `mp4`, `mjpeg`, `xiaomi`) disables `exec`, `echo`, `expr`, `ffmpeg` stream redirector, `http`, `ngrok`, `pinggy`, and `debug` at process startup.
+  - `api.allow_paths` restricts routes strictly to `/api/ws`, `/api/webrtc`, `/api/frame.jpeg`, and `/api/restart` (disabling `/api/config`, `/api/streams`, `/api/xiaomi`, `/api/exit`, `/api/log`, and the `:1984` web config editor).
+  - `exec.allow_paths` and `echo.allow_paths` are locked to `["/nonexistent/disabled"]`.
+  - Dynamic stream mutation (`PUT`, `PATCH`, `POST`, `DELETE` on `/api/streams` and ad-hoc `GetOrPatch` query creation) is disabled, RTSP `ANNOUNCE` push is blocked, and control endpoints (`/api/restart`, `/api/xiaomi`) are restricted strictly to `127.0.0.1` / `::1`.

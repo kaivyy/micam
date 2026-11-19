@@ -37,9 +37,7 @@ STREAM_LEFT = os.environ.get("CCTV_STREAM_LEFT", "cctv_lensa_kiri")
 STREAM_RIGHT = os.environ.get("CCTV_STREAM_RIGHT", "cctv_lensa_kanan")
 
 def get_stream_rtsp(stream_name):
-    base = f"rtsp://{RTSP_HOST}/{stream_name}"
-    sep = "&" if "?" in stream_name else "?"
-    return f"{base}{sep}video=h264&audio=opus"
+    return f"rtsp://{RTSP_HOST}/{stream_name}"
 
 STREAMS = {
     "left": {

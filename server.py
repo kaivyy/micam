@@ -37,8 +37,16 @@ def load_env(env_path):
 load_env(os.path.join(BASE_DIR, ".env"))
 
 from recorder import recorder
-from xiaomi_wizard import wizard_session, sanitize_camera_data
+from xiaomi_wizard import wizard_session, sanitize_camera_data, ensure_hardened_go2rtc_yaml
 from youtube_streamer import youtube_streamer, normalize_layout_options, validate_stream_key
+
+_RE_TELEGRAM_TOKEN = re.compile(r"^[0-9]{5,16}:[A-Za-z0-9_-]{20,64}$")
+_RE_TELEGRAM_CHAT_ID = re.compile(r"^(-?[0-9]{1,24}|@[A-Za-z0-9_]{5,64})$")
+
+try:
+    ensure_hardened_go2rtc_yaml(BASE_DIR)
+except Exception as _eh_err:
+    print(f"[Security] Warning hardening go2rtc.yaml: {_eh_err}", file=sys.stderr)
 
 CAMERA_IP = os.environ.get("CCTV_CAMERA_IP", "192.168.1.100")
 CAMERA_PORT = int(os.environ.get("CCTV_CAMERA_PORT", 54321))
@@ -224,6 +232,9 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
+        if any(part.startswith(".") for part in parsed.path.split("/") if part):
+            self.send_error(403, "Forbidden")
+            return
         if parsed.path == "/api/status":
             self.handle_api_status()
         elif parsed.path == "/api/streams/standby":
@@ -412,10 +423,12 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"success": False, "message": f"Kamera {CCTV_NAME} bertipe Fixed Lens (tanpa motor mekanis PTZ)"})
 
         elif parsed.path == "/api/telegram/test":
-            token = data.get("bot_token", "").strip()
-            chat_id = data.get("chat_id", "").strip()
+            token = str(data.get("bot_token", "")).strip()
+            chat_id = str(data.get("chat_id", "")).strip()
             if not token or not chat_id:
-                self.send_json({"success": False, "error": "Token dan Chat ID Telegram wajib diisi"})
+                self.send_json({"success": False, "error": "Token dan Chat ID Telegram wajib diisi"}, status=400)
+            elif not _RE_TELEGRAM_TOKEN.match(token) or not _RE_TELEGRAM_CHAT_ID.match(chat_id):
+                self.send_json({"success": False, "error": "Format Token Bot atau Chat ID Telegram tidak valid"}, status=400)
             else:
                 try:
                     with urllib.request.urlopen(f"{GO2RTC_API}/api/frame.jpeg?src=cctv_garasi_kiri", timeout=6) as resp:
@@ -574,9 +587,15 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
 
         elif parsed.path == "/api/auth/reload_streams":
             try:
-                with urllib.request.urlopen(f"{GO2RTC_API}/api/streams", timeout=5) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-                    self.send_json({"success": True, "streams": data})
+                yaml_path = os.path.join(BASE_DIR, "go2rtc.yaml")
+                streams_info = {}
+                if os.path.exists(yaml_path):
+                    with open(yaml_path, "r", encoding="utf-8") as yf:
+                        cfg_text = yf.read()
+                    for sname in (STREAM_LEFT, STREAM_RIGHT):
+                        if f"{sname}:" in cfg_text:
+                            streams_info[sname] = {"configured": True}
+                self.send_json({"success": True, "streams": streams_info})
             except Exception as e:
                 self.send_json({"success": False, "error": str(e)})
 
@@ -887,6 +906,9 @@ class CCTVHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(502, f"Failed to fetch snapshot from go2rtc: {e}")
 
     def end_headers(self):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("Referrer-Policy", "same-origin")
         if self.path.endswith(".html") or self.path.endswith(".js") or self.path == "/" or ".js?" in self.path:
             self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
             self.send_header("Pragma", "no-cache")

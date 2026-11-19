@@ -109,10 +109,12 @@ flowchart TD
 
 ## Security Architecture & Hardening
 
-1. **`go2rtc` API & Command Execution Lockdown:**
-   - `go2rtc.yaml` restricts HTTP routes via `api.allow_paths` (`/api/ws`, `/api/webrtc`, `/api/frame.jpeg`, `/api/streams`, `/api/restart`, `/api/xiaomi`), disabling `/api/config` (preventing credential leaks or remote YAML tampering) and `/api/exit`.
-   - `exec.allow_paths` is restricted strictly to `["ffmpeg"]` in both YAML configuration and binary defaults, preventing arbitrary shell command execution (`exec:sh`, `exec:curl`, etc.).
-   - In the patched `go2rtc` binary (`patches/go2rtc-v1.9.15-shared-session.patch`), `/api/streams` is read-only (`GET` only; `PUT`/`PATCH`/`POST`/`DELETE` return `403 Forbidden`), and `/api/restart`, `/api/exit`, `/api/config`, and `/api/xiaomi` enforce loopback-only (`127.0.0.1` / `::1`) caller validation.
+1. **`go2rtc` Module Loader, API & Command Execution Lockdown:**
+   - `ensure_hardened_go2rtc_yaml()` runs automatically in `start.sh` and `server.py` before `go2rtc` starts, ensuring first-run and upgraded installations always have a hardened `go2rtc.yaml` and automatically stripping any injected `exec:`, `echo:`, or `expr:` lines.
+   - `go2rtc.yaml` restricts active modules via `app.modules` (`api`, `ws`, `rtsp`, `webrtc`, `mp4`, `mjpeg`, `xiaomi`) so `exec`, `echo`, `expr`, `ffmpeg` stream redirector, `http`, `ngrok`, `pinggy`, and `debug` are never initialized even on unpatched upstream `go2rtc` binaries.
+   - `api.allow_paths` restricts HTTP routes strictly to `/api/ws`, `/api/webrtc`, `/api/frame.jpeg`, and `/api/restart`, completely disabling `/api/config`, `/api/streams`, `/api/xiaomi`, and `/api/exit`.
+   - `exec.allow_paths` and `echo.allow_paths` are locked to `["/nonexistent/disabled"]` in both YAML configuration and binary defaults.
+   - In the patched `go2rtc` binary (`patches/go2rtc-v1.9.15-shared-session.patch`), `GetOrPatch()` is strictly read-only (`Get(source)` only), `/api/streams` rejects all mutating methods (`403 Forbidden`), RTSP `ANNOUNCE` push is blocked, RTSP listens on `127.0.0.1:8554` by default, and `/api/restart`, `/api/exit`, `/api/config`, and `/api/xiaomi` enforce loopback-only (`127.0.0.1` / `::1`) caller validation.
 2. **Backend Input Sanitization & Credential Protection (`server.py`, `xiaomi_wizard.py`):**
    - `sanitize_camera_data()` validates camera IP addresses via Python's `ipaddress.ip_address` and enforces strict regular expressions on `did`, `model`, `region`, `token`, `user_id`, and `pass_token` to eliminate YAML or `.env` injection.
    - Hardware 32-character hex MIIO tokens are redacted from all HTTP JSON responses (`/api/status`, `/api/wizard/devices`, `/api/wizard/save`).

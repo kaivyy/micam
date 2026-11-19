@@ -46,7 +46,10 @@ else
     GO2RTC_BIN="$DIR/go2rtc"
 fi
 
-# 4. Jalankan go2rtc jika belum berjalan
+# 4. Pastikan go2rtc.yaml sudah terproteksi (app.modules & allow_paths) sebelum go2rtc menyala
+python3 -c "import sys; sys.path.insert(0, '$DIR'); from xiaomi_wizard import ensure_hardened_go2rtc_yaml; ensure_hardened_go2rtc_yaml('$DIR')"
+
+# 5. Jalankan go2rtc jika belum berjalan
 echo "[*] Memeriksa status go2rtc gateway..."
 if ! pgrep -f "go2rtc.*go2rtc.yaml" > /dev/null; then
     echo "    Menjalankan go2rtc gateway..."

@@ -165,6 +165,35 @@ def generate_env_content(camera: dict) -> str:
     return "\n".join(lines)
 
 
+HARDENED_GO2RTC_HEADER = """app:
+  modules:
+    - api
+    - ws
+    - rtsp
+    - webrtc
+    - mp4
+    - mjpeg
+    - xiaomi
+
+api:
+  listen: ":1984"
+  origin: "*"
+  allow_paths:
+    - /api/ws
+    - /api/webrtc
+    - /api/frame.jpeg
+    - /api/restart
+
+exec:
+  allow_paths:
+    - /nonexistent/disabled
+
+echo:
+  allow_paths:
+    - /nonexistent/disabled
+"""
+
+
 def generate_go2rtc_yaml(camera: dict) -> str:
     """Generate go2rtc.yaml configuration from selected camera data."""
     clean = sanitize_camera_data(camera)
@@ -178,23 +207,10 @@ def generate_go2rtc_yaml(camera: dict) -> str:
     shared = "&shared=1" if lens_type == "dual" else ""
 
     lines = [
-        'api:',
-        '  listen: ":1984"',
-        '  origin: "*"',
-        '  allow_paths:',
-        '    - /api/ws',
-        '    - /api/webrtc',
-        '    - /api/frame.jpeg',
-        '    - /api/streams',
-        '    - /api/restart',
-        '    - /api/xiaomi',
-        '',
-        'exec:',
-        '  allow_paths:',
-        '    - ffmpeg',
+        HARDENED_GO2RTC_HEADER.strip(),
         '',
         'rtsp:',
-        '  listen: ":8554"',
+        '  listen: "127.0.0.1:8554"',
         '',
         'webrtc:',
         '  listen: ":8555"',
@@ -230,6 +246,69 @@ def generate_go2rtc_yaml(camera: dict) -> str:
         ])
 
     return "\n".join(lines)
+
+
+def ensure_hardened_go2rtc_yaml(base_dir: str = None) -> bool:
+    """
+    Ensure go2rtc.yaml exists and contains mandatory security hardening directives
+    (app.modules whitelist, api.allow_paths, exec/echo lockdown, and removal of any
+    injected exec:/echo:/expr: stream lines) before go2rtc starts.
+    """
+    if base_dir is None:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    yaml_path = os.path.join(base_dir, "go2rtc.yaml")
+
+    if not os.path.exists(yaml_path):
+        bootstrap = "\n".join([
+            HARDENED_GO2RTC_HEADER.strip(),
+            "",
+            "rtsp:",
+            '  listen: "127.0.0.1:8554"',
+            "",
+            "webrtc:",
+            '  listen: ":8555"',
+            "",
+            "streams: {}",
+            "",
+        ])
+        with open(yaml_path + ".tmp", "w", encoding="utf-8") as f:
+            f.write(bootstrap)
+        os.replace(yaml_path + ".tmp", yaml_path)
+        return True
+
+    with open(yaml_path, "r", encoding="utf-8") as f:
+        raw = f.read()
+
+    # Strip any malicious injected exec:, echo:, or expr: producer lines
+    cleaned_lines = []
+    modified = False
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if re.match(r"^-\s*(exec|echo|expr):", stripped, re.IGNORECASE):
+            modified = True
+            continue
+        cleaned_lines.append(line)
+
+    text = "\n".join(cleaned_lines) + "\n"
+    if "app:\n  modules:" not in text or "echo:\n  allow_paths:" not in text or "- /api/streams" in text or "- /api/xiaomi" in text:
+        # Preserve rtsp/webrtc/ffmpeg/xiaomi/streams sections while replacing top api/exec/app blocks
+        tail_idx = -1
+        for section in ("\nrtsp:", "\nwebrtc:", "\nffmpeg:", "\nxiaomi:", "\nstreams:"):
+            idx = text.find(section)
+            if idx != -1 and (tail_idx == -1 or idx < tail_idx):
+                tail_idx = idx
+        if tail_idx != -1:
+            text = HARDENED_GO2RTC_HEADER.strip() + "\n" + text[tail_idx:]
+            modified = True
+        elif "app:\n  modules:" not in text:
+            text = HARDENED_GO2RTC_HEADER.strip() + "\n\n" + text
+            modified = True
+
+    if modified:
+        with open(yaml_path + ".tmp", "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(yaml_path + ".tmp", yaml_path)
+    return modified
 
 
 class XiaomiWizardSession:

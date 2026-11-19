@@ -6005,6 +6005,7 @@
         if (scanBox) scanBox.style.display = 'none';
 
         if (data.success && data.cameras && data.cameras.length > 0) {
+          const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
           wizardDiscoveredCameras = data.cameras;
           if (camList) {
             camList.style.display = 'flex';
@@ -6014,13 +6015,13 @@
               const isDual = cam.lens_type === 'dual';
               card.innerHTML = `
                 <div class="camera-card-header">
-                  <strong>${cam.name || 'Xiaomi CCTV'}</strong>
+                  <strong>${esc(cam.name || 'Xiaomi CCTV')}</strong>
                   <span class="${isDual ? 'badge-lens-dual' : 'badge-lens-single'}">${isDual ? 'Dual-Lens 2.5K' : 'Single-Lens'}</span>
                 </div>
                 <div class="camera-card-meta">
-                  <span>Model: <code>${cam.model}</code></span> &bull; 
-                  <span>IP: <code>${cam.ip || 'Belum terdeteksi'}</code></span> &bull; 
-                  <span>DID: <code>${cam.did}</code></span>
+                  <span>Model: <code>${esc(cam.model)}</code></span> &bull; 
+                  <span>IP: <code>${esc(cam.ip || 'Belum terdeteksi')}</code></span> &bull; 
+                  <span>DID: <code>${esc(cam.did)}</code></span>
                 </div>
               `;
               card.onclick = () => selectWizardCamera(cam, card);
@@ -6043,7 +6044,11 @@
         if (scanBox) scanBox.style.display = 'none';
         if (camList) {
           camList.style.display = 'block';
-          camList.innerHTML = `<div style="color:#ef4444; padding:0.5rem;">Gagal memindai: ${err.message}</div>`;
+          const errDiv = document.createElement('div');
+          errDiv.style.cssText = 'color:#ef4444; padding:0.5rem;';
+          errDiv.textContent = `Gagal memindai: ${err.message}`;
+          camList.innerHTML = '';
+          camList.appendChild(errDiv);
         }
       }
     }

@@ -3,6 +3,16 @@
 # Xiaomi Outdoor Camera CW100 Dual (2.5K Ultra HD)
 # ==========================================
 
+app:
+  modules:
+    - api
+    - ws
+    - rtsp
+    - webrtc
+    - mp4
+    - mjpeg
+    - xiaomi
+
 api:
   listen: ":1984"
   origin: "*"
@@ -10,16 +20,18 @@ api:
     - /api/ws
     - /api/webrtc
     - /api/frame.jpeg
-    - /api/streams
     - /api/restart
-    - /api/xiaomi
 
 exec:
   allow_paths:
-    - ffmpeg
+    - /nonexistent/disabled
+
+echo:
+  allow_paths:
+    - /nonexistent/disabled
 
 rtsp:
-  listen: ":8554"
+  listen: "127.0.0.1:8554"
 
 webrtc:
   listen: ":8555"

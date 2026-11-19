@@ -119,9 +119,10 @@ To stop the background services:
   * PIN guard keypad lock screen for shared workstation security.
 
 * **Hardened Local Security Architecture:**
-  * **Zero Arbitrary Command Execution:** `go2rtc` gateway enforces `api.allow_paths` (disabling `/api/config` and `/api/exit`), `exec.allow_paths: ["ffmpeg"]`, read-only `/api/streams`, and loopback-only control APIs (`127.0.0.1`).
-  * **Strict Config & Input Sanitization:** Setup Wizard and REST endpoints validate IPv4/IPv6 addresses (`ipaddress.ip_address`), device IDs, and stream keys to prevent YAML, `.env`, or path-traversal injection.
-  * **Credential Redaction & CSRF Protection:** Hardware MIIO tokens are redacted from all API responses and mutating endpoints enforce same-origin verification.
+  * **Zero Arbitrary Command Execution:** `go2rtc` gateway enforces `app.modules` whitelist (disabling `exec`, `echo`, `expr`, `ffmpeg` stream redirector, `http`, and `debug` modules), `api.allow_paths` (disabling `/api/config`, `/api/streams`, and `/api/exit`), `exec.allow_paths: ["/nonexistent/disabled"]`, read-only `GetOrPatch`, and loopback-only control APIs (`127.0.0.1`).
+  * **Zero-Window Startup Sanitizer:** `start.sh` and `server.py` automatically bootstrap or upgrade `go2rtc.yaml` via `ensure_hardened_go2rtc_yaml()` before launching `go2rtc` and scrub any unauthorized `exec:`/`echo:`/`expr:` lines.
+  * **Strict Config & Input Sanitization:** Setup Wizard and REST endpoints validate IPv4/IPv6 addresses (`ipaddress.ip_address`), device IDs, YouTube stream keys, and Telegram bot credentials to prevent YAML, `.env`, SSRF, or path-traversal injection.
+  * **Credential Redaction & CSRF Protection:** Hardware MIIO tokens are redacted from all API responses, dotfiles are blocked (`403`), and mutating endpoints enforce same-origin verification.
   * *Deployment Note:* Designed for local LAN or private VPN (**Tailscale**). Do not expose ports `8088`, `1984`, or `8554` directly to the public internet.
 
 ---

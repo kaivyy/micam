@@ -70,8 +70,22 @@ index 9072e8d..571d6e9 100644
  		data, err := io.ReadAll(r.Body)
  		if err != nil {
  			http.Error(w, err.Error(), http.StatusBadRequest)
+diff --git a/internal/echo/echo.go b/internal/echo/echo.go
+index f33982f..c9c11ae 100644
+--- a/internal/echo/echo.go
++++ b/internal/echo/echo.go
+@@ -21,6 +21,9 @@ func Init() {
+ 	app.LoadConfig(&cfg)
+ 
+ 	allowPaths := cfg.Mod.AllowPaths
++	if allowPaths == nil {
++		allowPaths = []string{"/nonexistent/disabled"}
++	}
+ 
+ 	log := app.GetLogger("echo")
+ 
 diff --git a/internal/exec/exec.go b/internal/exec/exec.go
-index e428aef..60ac5d7 100644
+index e428aef..bd7023a 100644
 --- a/internal/exec/exec.go
 +++ b/internal/exec/exec.go
 @@ -35,7 +35,11 @@ func Init() {
@@ -82,11 +96,48 @@ index e428aef..60ac5d7 100644
 +	if cfg.Mod.AllowPaths != nil {
 +		allowPaths = cfg.Mod.AllowPaths
 +	} else {
-+		allowPaths = []string{"ffmpeg"}
++		allowPaths = []string{"/nonexistent/disabled"}
 +	}
  
  	rtsp.HandleFunc(func(conn *pkg.Conn) bool {
  		waitersMu.Lock()
+diff --git a/internal/rtsp/rtsp.go b/internal/rtsp/rtsp.go
+index 31c2c5d..01a6eec 100644
+--- a/internal/rtsp/rtsp.go
++++ b/internal/rtsp/rtsp.go
+@@ -228,30 +228,8 @@ func tcpHandler(conn *rtsp.Conn) {
+ 			}
+ 
+ 		case rtsp.MethodAnnounce:
+-			if len(conn.URL.Path) == 0 {
+-				log.Warn().Msg("[rtsp] server empty URL on ANNOUNCE")
+-				return
+-			}
+-
+-			name = conn.URL.Path[1:]
+-
+-			stream := streams.Get(name)
+-			if stream == nil {
+-				return
+-			}
+-
+-			query := conn.URL.Query()
+-			if s := query.Get("timeout"); s != "" {
+-				conn.Timeout = core.Atoi(s)
+-			}
+-
+-			log.Debug().Str("stream", name).Msg("[rtsp] new producer")
+-
+-			stream.AddProducer(conn)
+-
+-			closer = func() {
+-				stream.RemoveProducer(conn)
+-			}
++			log.Warn().Msg("[rtsp] external ANNOUNCE push blocked by security policy")
++			return
+ 		}
+ 	})
+ 
 diff --git a/internal/streams/api.go b/internal/streams/api.go
 index d6142eb..a3557d4 100644
 --- a/internal/streams/api.go
@@ -111,6 +162,31 @@ index d6142eb..a3557d4 100644
  
  	query := r.URL.Query()
  	src := query.Get("src")
+diff --git a/internal/streams/streams.go b/internal/streams/streams.go
+index f3b8df0..db36af4 100644
+--- a/internal/streams/streams.go
++++ b/internal/streams/streams.go
+@@ -122,18 +122,12 @@ func GetOrPatch(query url.Values) (*Stream, error) {
+ 		return nil, errors.New("streams: source empty")
+ 	}
+ 
+-	// check if src is stream name
++	// Security hardening: only allow accessing pre-configured streams, never dynamically patch or create streams via query params
+ 	if stream := Get(source); stream != nil {
+ 		return stream, nil
+ 	}
+ 
+-	// check if name param provided
+-	if name := query.Get("name"); name != "" {
+-		return Patch(name, source)
+-	}
+-
+-	// return new stream with src as name
+-	return Patch(source, source)
++	return nil, errors.New("streams: stream not found")
+ }
+ 
+ var log zerolog.Logger
 diff --git a/internal/xiaomi/xiaomi.go b/internal/xiaomi/xiaomi.go
 index 1e57842..cc95820 100644
 --- a/internal/xiaomi/xiaomi.go
