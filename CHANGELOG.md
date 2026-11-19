@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] - 2026-11-19
+
+### Security
+- **Closed YAML & `.env` Config Injection on Setup Wizard (`xiaomi_wizard.py`, `server.py`)**: Added `sanitize_camera_data()` enforcing strict `ipaddress.ip_address` validation on camera IP, regex validation on `did`, `model`, `region`, 32-char hex `token`, numeric `user_id`, and `pass_token`, and blocking any newline or YAML control characters.
+- **Locked Down `POST /api/wizard/save` (`server.py`)**: Restricted camera configuration saves when a device is already paired so unauthenticated callers cannot overwrite `.env` or `go2rtc.yaml` with arbitrary DIDs or streams.
+- **Hardened `go2rtc` API & Disabled Arbitrary `exec:` (`go2rtc.yaml`, `patches/go2rtc-v1.9.15-shared-session.patch`)**:
+  - Added `api.allow_paths` whitelist (`/api/ws`, `/api/webrtc`, `/api/frame.jpeg`, `/api/streams`, `/api/restart`, `/api/xiaomi`), completely disabling `/api/config`, `/api/exit`, `/api/log`, and the `:1984` config editor web root.
+  - Added `exec.allow_paths: ["ffmpeg"]` in YAML and binary default so `go2rtc` refuses to execute any shell or binary other than `ffmpeg`.
+  - Blocked mutating requests (`PUT`, `PATCH`, `POST`, `DELETE`) on `/api/streams` and `/api/preload` in the patched `go2rtc` binary (`403 Forbidden`), and restricted `/api/restart`, `/api/exit`, `/api/config`, and `/api/xiaomi` strictly to loopback (`127.0.0.1` / `::1`).
+- **Redacted Device Encryption Tokens from Public JSON Endpoints (`server.py`)**: Stripped the 32-character MIIO hardware AES token from `GET /api/status` (`info.token`), `GET /api/wizard/devices`, and `POST /api/wizard/save` responses.
+- **Cross-Origin (CSRF) Protection & Input Hardening (`server.py`, `youtube_streamer.py`, `recorder.py`)**:
+  - Enforced same-origin `Origin`/`Host` validation on `POST`, `DELETE`, and `OPTIONS` endpoints and removed wildcard `Access-Control-Allow-Origin: *` reflection for foreign origins.
+  - Added strict regex validation (`validate_stream_key`) for YouTube Live stream keys.
+  - Locked `recorder.py` `storage_dir` to `DEFAULT_STORAGE_DIR` so `POST /api/record/settings` cannot redirect recording writes or file cleanup to arbitrary directories.
+
+### Fixed
+- **Dynamic Camera Branding Across Multi-Model Setups (`public/index.html`, `public/settings.html`, `server.py`)**: Updated `<title>`, navbar brand headers (`#brandTitleFull`, `#brandTitleShort`, `#settingsBrandTitle`), resolution subtitle (`#subNetInfo`), and audio tooltips to dynamically reflect the paired camera model and name instead of hardcoding `Xiaomi CW100`.
+
+### Added
+- `tests/test_security_hardening.py`: Automated security test suite verifying YAML/env injection blocking, `go2rtc` `/api/config` & `PUT /api/streams` lockdown, non-loopback `/api/restart` rejection, MIIO token redaction, CSRF protection, YouTube stream key validation, and recorder directory lock.
+
 ## [0.1.8] - 2026-11-01
 
 ### Fixed

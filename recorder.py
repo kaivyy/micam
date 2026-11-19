@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import sys
 import json
 import time
@@ -8,6 +9,8 @@ import signal
 import subprocess
 import threading
 from datetime import datetime
+
+_RE_MP4_FILENAME = re.compile(r"^[A-Za-z0-9_.-]+\.mp4$")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -90,7 +93,10 @@ class RecorderManager:
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                     saved = json.load(f)
-                    self.config.update(saved)
+                    if isinstance(saved, dict):
+                        saved.pop("storage_dir", None)
+                        self.config.update(saved)
+            self.config["storage_dir"] = DEFAULT_STORAGE_DIR
         except Exception as e:
             print(f"[Recorder] Error loading config: {e}", file=sys.stderr)
 
@@ -103,10 +109,29 @@ class RecorderManager:
             print(f"[Recorder] Error saving config: {e}", file=sys.stderr)
 
     def update_config(self, new_data):
+        if not isinstance(new_data, dict):
+            return self.get_status()
         with self.lock:
-            for k in ["storage_dir", "auto_record_enabled", "auto_record_lens", "segment_minutes", "retention_days", "min_free_space_gb"]:
-                if k in new_data:
-                    self.config[k] = new_data[k]
+            if "auto_record_enabled" in new_data:
+                self.config["auto_record_enabled"] = bool(new_data["auto_record_enabled"])
+            if new_data.get("auto_record_lens") in ("left", "right", "both"):
+                self.config["auto_record_lens"] = new_data["auto_record_lens"]
+            if "segment_minutes" in new_data:
+                try:
+                    self.config["segment_minutes"] = max(1, min(1440, int(new_data["segment_minutes"])))
+                except (TypeError, ValueError):
+                    pass
+            if "retention_days" in new_data:
+                try:
+                    self.config["retention_days"] = max(0.1, min(3650.0, float(new_data["retention_days"])))
+                except (TypeError, ValueError):
+                    pass
+            if "min_free_space_gb" in new_data:
+                try:
+                    self.config["min_free_space_gb"] = max(0.1, min(10000.0, float(new_data["min_free_space_gb"])))
+                except (TypeError, ValueError):
+                    pass
+            self.config["storage_dir"] = DEFAULT_STORAGE_DIR
             self.ensure_storage_dir()
             self.save_config()
 
@@ -363,8 +388,10 @@ class RecorderManager:
 
     def delete_recording(self, filename):
         # Security: protect against path traversal
+        if not isinstance(filename, str):
+            return False, "Invalid filename"
         clean_name = os.path.basename(filename)
-        if clean_name != filename or not filename.endswith(".mp4"):
+        if clean_name != filename or not _RE_MP4_FILENAME.match(clean_name):
             return False, "Invalid filename"
 
         target = os.path.join(self.config["storage_dir"], clean_name)

@@ -1,3 +1,131 @@
+diff --git a/internal/api/api.go b/internal/api/api.go
+index dfb6511..b1672a9 100644
+--- a/internal/api/api.go
++++ b/internal/api/api.go
+@@ -205,6 +205,10 @@ func middlewareLog(next http.Handler) http.Handler {
+ 	})
+ }
+ 
++func IsLoopback(remoteAddr string) bool {
++	return isLoopback(remoteAddr)
++}
++
+ func isLoopback(remoteAddr string) bool {
+ 	return strings.HasPrefix(remoteAddr, "127.") || strings.HasPrefix(remoteAddr, "[::1]") || remoteAddr == "@"
+ }
+@@ -244,6 +248,10 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
+ }
+ 
+ func exitHandler(w http.ResponseWriter, r *http.Request) {
++	if !isLoopback(r.RemoteAddr) {
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
++	}
+ 	if r.Method != "POST" {
+ 		http.Error(w, "", http.StatusBadRequest)
+ 		return
+@@ -262,6 +270,10 @@ func exitHandler(w http.ResponseWriter, r *http.Request) {
+ }
+ 
+ func restartHandler(w http.ResponseWriter, r *http.Request) {
++	if !isLoopback(r.RemoteAddr) {
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
++	}
+ 	if r.Method != "POST" {
+ 		http.Error(w, "", http.StatusBadRequest)
+ 		return
+@@ -279,6 +291,10 @@ func restartHandler(w http.ResponseWriter, r *http.Request) {
+ }
+ 
+ func logHandler(w http.ResponseWriter, r *http.Request) {
++	if !isLoopback(r.RemoteAddr) {
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
++	}
+ 	switch r.Method {
+ 	case "GET":
+ 		// Send current state of the log file immediately
+diff --git a/internal/api/config.go b/internal/api/config.go
+index 9072e8d..571d6e9 100644
+--- a/internal/api/config.go
++++ b/internal/api/config.go
+@@ -10,6 +10,10 @@ import (
+ )
+ 
+ func configHandler(w http.ResponseWriter, r *http.Request) {
++	if !isLoopback(r.RemoteAddr) {
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
++	}
+ 	if app.ConfigPath == "" {
+ 		http.Error(w, "", http.StatusGone)
+ 		return
+@@ -26,6 +30,8 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
+ 		Response(w, data, "application/yaml")
+ 
+ 	case "POST", "PATCH":
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
+ 		data, err := io.ReadAll(r.Body)
+ 		if err != nil {
+ 			http.Error(w, err.Error(), http.StatusBadRequest)
+diff --git a/internal/exec/exec.go b/internal/exec/exec.go
+index e428aef..60ac5d7 100644
+--- a/internal/exec/exec.go
++++ b/internal/exec/exec.go
+@@ -35,7 +35,11 @@ func Init() {
+ 
+ 	app.LoadConfig(&cfg)
+ 
+-	allowPaths = cfg.Mod.AllowPaths
++	if cfg.Mod.AllowPaths != nil {
++		allowPaths = cfg.Mod.AllowPaths
++	} else {
++		allowPaths = []string{"ffmpeg"}
++	}
+ 
+ 	rtsp.HandleFunc(func(conn *pkg.Conn) bool {
+ 		waitersMu.Lock()
+diff --git a/internal/streams/api.go b/internal/streams/api.go
+index d6142eb..a3557d4 100644
+--- a/internal/streams/api.go
++++ b/internal/streams/api.go
+@@ -11,6 +11,10 @@ import (
+ )
+ 
+ func apiStreams(w http.ResponseWriter, r *http.Request) {
++	if r.Method != "GET" {
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
++	}
+ 	w = creds.SecretResponse(w)
+ 
+ 	query := r.URL.Query()
+@@ -135,6 +139,8 @@ func apiPreload(w http.ResponseWriter, r *http.Request) {
+ 		api.ResponseJSON(w, GetPreloads())
+ 		return
+ 	}
++	http.Error(w, "Forbidden", http.StatusForbidden)
++	return
+ 
+ 	query := r.URL.Query()
+ 	src := query.Get("src")
+diff --git a/internal/xiaomi/xiaomi.go b/internal/xiaomi/xiaomi.go
+index 1e57842..cc95820 100644
+--- a/internal/xiaomi/xiaomi.go
++++ b/internal/xiaomi/xiaomi.go
+@@ -219,6 +219,10 @@ func wakeUpCamera(url *url.URL) error {
+ }
+ 
+ func apiXiaomi(w http.ResponseWriter, r *http.Request) {
++	if !api.IsLoopback(r.RemoteAddr) {
++		http.Error(w, "Forbidden", http.StatusForbidden)
++		return
++	}
+ 	switch r.Method {
+ 	case "GET":
+ 		apiDeviceList(w, r)
 diff --git a/pkg/xiaomi/miss/client.go b/pkg/xiaomi/miss/client.go
 index 3113632..b0b9ed4 100644
 --- a/pkg/xiaomi/miss/client.go

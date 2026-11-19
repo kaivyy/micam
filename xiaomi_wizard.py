@@ -6,6 +6,7 @@ and automatic .env and go2rtc.yaml configuration generation.
 """
 
 import os
+import re
 import sys
 import json
 import time
@@ -15,6 +16,7 @@ import hashlib
 import hmac
 import shutil
 import logging
+import ipaddress
 import requests
 from Crypto.Cipher import ARC4
 
@@ -24,6 +26,12 @@ if not logger.handlers:
     handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s [%(name)s]: %(message)s"))
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
+
+_RE_SAFE_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+_RE_REGION = re.compile(r"^[a-z0-9]{1,10}$")
+_RE_HEX32 = re.compile(r"^[0-9a-fA-F]{32}$")
+_RE_DIGITS = re.compile(r"^[0-9]{0,32}$")
+_RE_PASS_TOKEN = re.compile(r"^[A-Za-z0-9:+/=_.-]*$")
 
 
 def detect_lens_type(model: str) -> str:
@@ -37,18 +45,86 @@ def detect_lens_type(model: str) -> str:
     return "single"
 
 
+def sanitize_camera_data(camera: dict) -> dict:
+    """Validate and sanitize camera configuration fields to prevent YAML/.env/command injection."""
+    if not isinstance(camera, dict):
+        raise ValueError("Camera configuration must be a dictionary")
+
+    raw_ip = str(camera.get("ip") or "192.168.1.11").strip()
+    try:
+        ip = str(ipaddress.ip_address(raw_ip))
+    except ValueError as exc:
+        raise ValueError(f"Invalid camera IP address: {raw_ip!r}") from exc
+
+    try:
+        port = int(camera.get("port", 54321))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid camera port") from exc
+    if not (1 <= port <= 65535):
+        raise ValueError(f"Camera port out of range: {port}")
+
+    raw_token = str(camera.get("token") or ("0" * 32)).strip()
+    if not _RE_HEX32.match(raw_token):
+        raise ValueError("Invalid 32-character hex device token")
+
+    raw_did = str(camera.get("did", "")).strip()
+    if raw_did and not _RE_SAFE_ID.match(raw_did):
+        raise ValueError(f"Invalid device ID (did): {raw_did!r}")
+
+    raw_model = str(camera.get("model") or "chuangmi.camera.075ae1").strip()
+    if not _RE_SAFE_ID.match(raw_model):
+        raise ValueError(f"Invalid camera model: {raw_model!r}")
+
+    raw_lens = str(camera.get("lens_type") or detect_lens_type(raw_model)).strip().lower()
+    if raw_lens not in ("single", "dual"):
+        raw_lens = detect_lens_type(raw_model)
+
+    raw_region = str(camera.get("region") or "sg").strip().lower()
+    if not _RE_REGION.match(raw_region):
+        raise ValueError(f"Invalid region: {raw_region!r}")
+
+    raw_uid = str(camera.get("user_id") or "").strip()
+    if not _RE_DIGITS.match(raw_uid):
+        raise ValueError(f"Invalid Xiaomi user_id: {raw_uid!r}")
+
+    raw_pass_token = str(camera.get("pass_token") or "").strip()
+    if any(ch in raw_pass_token for ch in ("\r", "\n", "\x00")) or not _RE_PASS_TOKEN.match(raw_pass_token):
+        raise ValueError("Invalid Xiaomi pass_token format")
+
+    raw_name = str(camera.get("name") or "Xiaomi CCTV")
+    clean_name = re.sub(r"[\r\n\x00\"'`#]", "", raw_name).strip()[:128] or "Xiaomi CCTV"
+
+    raw_email = str(camera.get("email") or "")
+    clean_email = re.sub(r"[\r\n\x00\"'`#]", "", raw_email).strip()[:128]
+
+    return {
+        "ip": ip,
+        "port": port,
+        "token": raw_token.lower(),
+        "did": raw_did,
+        "name": clean_name,
+        "model": raw_model,
+        "lens_type": raw_lens,
+        "region": raw_region,
+        "user_id": raw_uid,
+        "email": clean_email,
+        "pass_token": raw_pass_token,
+    }
+
+
 def generate_env_content(camera: dict) -> str:
     """Generate .env file content from selected camera data."""
-    ip = camera.get("ip") or "192.168.1.11"
-    port = camera.get("port", 54321)
-    token = camera.get("token") or "0" * 32
-    did = str(camera.get("did", ""))
-    name = camera.get("name") or "Xiaomi CCTV"
-    model = camera.get("model") or "chuangmi.camera.075ae1"
-    lens_type = camera.get("lens_type") or detect_lens_type(model)
-    region = camera.get("region") or "sg"
-    user_id = str(camera.get("user_id") or "")
-    email = camera.get("email") or ""
+    clean = sanitize_camera_data(camera)
+    ip = clean["ip"]
+    port = clean["port"]
+    token = clean["token"]
+    did = clean["did"]
+    name = clean["name"]
+    model = clean["model"]
+    lens_type = clean["lens_type"]
+    region = clean["region"]
+    user_id = clean["user_id"]
+    email = clean["email"]
 
     lines = [
         "# ==========================================",
@@ -91,19 +167,31 @@ def generate_env_content(camera: dict) -> str:
 
 def generate_go2rtc_yaml(camera: dict) -> str:
     """Generate go2rtc.yaml configuration from selected camera data."""
-    ip = camera.get("ip") or "192.168.1.11"
-    did = str(camera.get("did", ""))
-    model = camera.get("model") or "chuangmi.camera.075ae1"
-    lens_type = camera.get("lens_type") or detect_lens_type(model)
-    region = camera.get("region") or "sg"
-    user_id = str(camera.get("user_id") or "")
-    pass_token = camera.get("pass_token") or ""
+    clean = sanitize_camera_data(camera)
+    ip = clean["ip"]
+    did = clean["did"]
+    model = clean["model"]
+    lens_type = clean["lens_type"]
+    region = clean["region"]
+    user_id = clean["user_id"]
+    pass_token = clean["pass_token"]
     shared = "&shared=1" if lens_type == "dual" else ""
 
     lines = [
         'api:',
         '  listen: ":1984"',
         '  origin: "*"',
+        '  allow_paths:',
+        '    - /api/ws',
+        '    - /api/webrtc',
+        '    - /api/frame.jpeg',
+        '    - /api/streams',
+        '    - /api/restart',
+        '    - /api/xiaomi',
+        '',
+        'exec:',
+        '  allow_paths:',
+        '    - ffmpeg',
         '',
         'rtsp:',
         '  listen: ":8554"',
@@ -404,15 +492,16 @@ class XiaomiWizardSession:
         env_path = os.path.join(base_dir, ".env")
         yaml_path = os.path.join(base_dir, "go2rtc.yaml")
 
+        camera_data = dict(camera_data)
         camera_data["user_id"] = self.user_id or camera_data.get("user_id")
         camera_data["pass_token"] = self.pass_token or camera_data.get("pass_token")
         camera_data["region"] = camera_data.get("region") or self.active_region
 
-        new_env = generate_env_content(camera_data)
-        new_yaml = generate_go2rtc_yaml(camera_data)
-
         # Atomic backup and write
         try:
+            new_env = generate_env_content(camera_data)
+            new_yaml = generate_go2rtc_yaml(camera_data)
+
             if os.path.exists(env_path):
                 shutil.copyfile(env_path, env_path + ".bak")
             with open(env_path + ".tmp", "w", encoding="utf-8") as f:

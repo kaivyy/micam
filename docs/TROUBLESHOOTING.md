@@ -111,3 +111,18 @@ This guide covers common setup issues, network edge cases, and performance tunin
   1. **P2P Shared-Session Multiplexing (`&shared=1`)**: The patched `go2rtc` gateway multiplexes both lens channels over a single P2P connection to the physical camera, leaving 1 P2P slot permanently available for the official Mi Home app.
   2. **Non-blocking Buffer Isolation**: Camera socket read loops are decoupled from slow web clients, preventing `pop buffer is full` buffer overflows and reconnection storms.
   3. **Instant Standby ("Bebaskan Kamera")**: If needed, tap the **Bebaskan Kamera** button in the dashboard toolbar or mobile drawer to immediately suspend all web streams and release camera P2P sessions with a single click.
+
+---
+
+## 7. Security Hardening & High CPU Troubleshooting
+
+### Symptom: Unexpectedly high CPU usage or concern over exposed API ports
+- **How `micam` uses CPU normally:**
+  - **Idle / WebRTC Live View / Local DVR (`-c copy`):** ~0–3% CPU (no video transcoding).
+  - **YouTube Live Broadcast (`libx264` encoding):** ~50–80% of 1 CPU core while YouTube Live is actively broadcasting.
+- **Built-in Security Protections:**
+  1. **`go2rtc` Command & Config Lockdown:** `go2rtc.yaml` and the patched `go2rtc` binary enforce `api.allow_paths` (disabling `/api/config` and `/api/exit`), `exec.allow_paths: ["ffmpeg"]` (blocking arbitrary shell commands), read-only `/api/streams` (`PUT`/`PATCH`/`DELETE` return `403 Forbidden`), and loopback-only access for `/api/restart` and `/api/xiaomi`.
+  2. **Setup Wizard & API Injection Defense:** `sanitize_camera_data()` validates IP addresses via `ipaddress.ip_address` and rejects any newline or YAML injection payloads on `POST /api/wizard/save`.
+  3. **Token Redaction & CSRF Protection:** MIIO 32-character hardware tokens are stripped from `/api/status` and `/api/wizard/devices`, and cross-origin `POST`/`DELETE` requests are blocked (`403 Forbidden`).
+- **Deployment Best Practice:**
+  Never port-forward ports `8088`, `1984`, or `8554` directly to the public internet. Always keep `micam` inside your local LAN or behind an authenticated private VPN such as **Tailscale** (`tailnet only`).

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Setelan Hardware Kamera • Xiaomi CW100</title>
+  <title>Setelan Hardware Kamera • micam</title>
   <!-- App Icons & PWA Metadata -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -650,7 +650,7 @@
       </div>
       <div>
         <h1 class="brand-title">
-          <span class="brand-title-full">Xiaomi CW100 • Setelan Hardware</span>
+          <span class="brand-title-full" id="settingsBrandTitle">Setelan Hardware Kamera</span>
           <span class="brand-title-mobile">Setelan Kamera</span>
         </h1>
         <p class="brand-sub">CHIP INTEGRATION MIIO • ADVANCED HARDWARE CONTROLS</p>
@@ -916,6 +916,25 @@
       }
     }
 
+    function updateCameraInfo(cam) {
+      if (!cam) return;
+      const rawName = (cam.name || '').trim();
+      const camName = rawName || 'Xiaomi CCTV';
+      document.title = `${camName} • Setelan Hardware Kamera`;
+      const brandTitle = document.getElementById('settingsBrandTitle');
+      if (brandTitle) brandTitle.textContent = `${camName} • Setelan Hardware`;
+    }
+
+    async function loadCameraInfo() {
+      try {
+        const resp = await fetch('/api/wizard/check');
+        const data = await resp.json();
+        if (data.camera) {
+          updateCameraInfo(data.camera);
+        }
+      } catch (e) {}
+    }
+
     // Load Initial State
     async function loadAdvancedStatus() {
       try {
@@ -925,6 +944,9 @@
           return;
         }
         const res = await resp.json();
+        if (res.camera) {
+          updateCameraInfo(res.camera);
+        }
         if (!res.authenticated || !res.success) {
           showAuthGate();
           return;
@@ -1006,6 +1028,7 @@
 
     // Start on DOM ready
     document.addEventListener('DOMContentLoaded', () => {
+      loadCameraInfo();
       loadAdvancedStatus();
     });
   </script>

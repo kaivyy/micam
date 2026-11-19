@@ -112,10 +112,17 @@ To stop the background services:
 * **Pure OLED Black Design (`#000000`) & Progressive Web App (PWA):**
   * High-contrast interface optimized for AMOLED/OLED displays.
   * Modern titanium squircle app icon & branding with full PWA asset suite (`manifest.json`, `apple-touch-icon.png`, `favicon.svg`).
+  * Dynamic multi-camera branding that automatically adapts browser tab titles, navigation headers, and sensor badges to the active paired camera model.
   * Seamless iOS Safari / Android "Add to Home Screen" standalone app experience.
   * Resilient background tab handling with 30-second grace window and last-frame poster hold to eliminate jarring black screen reloads.
   * Touch targets $\ge 44\times44\text{px}$ adhering to clean anti-slop ergonomics.
   * PIN guard keypad lock screen for shared workstation security.
+
+* **Hardened Local Security Architecture:**
+  * **Zero Arbitrary Command Execution:** `go2rtc` gateway enforces `api.allow_paths` (disabling `/api/config` and `/api/exit`), `exec.allow_paths: ["ffmpeg"]`, read-only `/api/streams`, and loopback-only control APIs (`127.0.0.1`).
+  * **Strict Config & Input Sanitization:** Setup Wizard and REST endpoints validate IPv4/IPv6 addresses (`ipaddress.ip_address`), device IDs, and stream keys to prevent YAML, `.env`, or path-traversal injection.
+  * **Credential Redaction & CSRF Protection:** Hardware MIIO tokens are redacted from all API responses and mutating endpoints enforce same-origin verification.
+  * *Deployment Note:* Designed for local LAN or private VPN (**Tailscale**). Do not expose ports `8088`, `1984`, or `8554` directly to the public internet.
 
 ---
 

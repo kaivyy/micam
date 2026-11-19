@@ -1,9 +1,18 @@
 import json
 import os
+import re
 import subprocess
 import threading
 import time
 from datetime import datetime
+
+_RE_STREAM_KEY = re.compile(r"^[A-Za-z0-9_-]{4,128}$")
+
+
+def validate_stream_key(key: str) -> bool:
+    if not isinstance(key, str):
+        return False
+    return bool(_RE_STREAM_KEY.match(key.strip()))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(BASE_DIR, "youtube_config.json")
@@ -204,12 +213,15 @@ class YouTubeStreamer:
     def start(self, stream_key=None, lens=None, quality=None, silent_audio=None, auto_start=None, layout_options=None):
         with self.lock:
             if stream_key is not None:
-                self.config["stream_key"] = stream_key.strip()
+                clean_key = str(stream_key).strip()
+                if clean_key and not validate_stream_key(clean_key):
+                    return False, "Format Stream Key YouTube tidak valid."
+                self.config["stream_key"] = clean_key
             if lens is not None and lens in LENS_CHOICES:
                 self.config["lens"] = lens
             if layout_options:
                 self.config.update(normalize_layout_options({**self.config, **layout_options}))
-            if quality is not None:
+            if quality is not None and quality in ("native", "1080p", "720p"):
                 self.config["quality"] = quality
             if silent_audio is not None:
                 self.config["silent_audio"] = bool(silent_audio)
@@ -221,6 +233,8 @@ class YouTubeStreamer:
             key = self.config.get("stream_key", "").strip()
             if not key:
                 return False, "Stream Key YouTube belum diisi."
+            if not validate_stream_key(key):
+                return False, "Format Stream Key YouTube tidak valid."
 
             if self.running and self.process and self.process.poll() is None:
                 return True, "Streaming YouTube sudah aktif."

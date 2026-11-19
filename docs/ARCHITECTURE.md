@@ -99,8 +99,23 @@ flowchart TD
 | Port | Protocol | Service | Description |
 | :--- | :--- | :--- | :--- |
 | **8088** | TCP (HTTP) | `server.py` | Dashboard UI, REST API, DVR HTTP 206 video playback |
-| **1984** | TCP (HTTP/WS) | `go2rtc` | WebRTC signaling, MSE stream, HTTP snapshot API |
+| **1984** | TCP (HTTP/WS) | `go2rtc` | WebRTC signaling, MSE stream, HTTP snapshot API (hardened `allow_paths`) |
 | **1985** | TCP (HTTPS/WSS) | `go2rtc` | Secure WebRTC signaling (if SSL configured) |
 | **8554** | TCP (RTSP) | `go2rtc` | RTSP server for DVR engine and external NVRs |
 | **8555** | TCP/UDP | `go2rtc` | WebRTC ICE candidate gathering and peer exchange |
 | **54321** | UDP | Camera MIIO | Xiaomi encrypted local control RPC & P2P handshake |
+
+---
+
+## Security Architecture & Hardening
+
+1. **`go2rtc` API & Command Execution Lockdown:**
+   - `go2rtc.yaml` restricts HTTP routes via `api.allow_paths` (`/api/ws`, `/api/webrtc`, `/api/frame.jpeg`, `/api/streams`, `/api/restart`, `/api/xiaomi`), disabling `/api/config` (preventing credential leaks or remote YAML tampering) and `/api/exit`.
+   - `exec.allow_paths` is restricted strictly to `["ffmpeg"]` in both YAML configuration and binary defaults, preventing arbitrary shell command execution (`exec:sh`, `exec:curl`, etc.).
+   - In the patched `go2rtc` binary (`patches/go2rtc-v1.9.15-shared-session.patch`), `/api/streams` is read-only (`GET` only; `PUT`/`PATCH`/`POST`/`DELETE` return `403 Forbidden`), and `/api/restart`, `/api/exit`, `/api/config`, and `/api/xiaomi` enforce loopback-only (`127.0.0.1` / `::1`) caller validation.
+2. **Backend Input Sanitization & Credential Protection (`server.py`, `xiaomi_wizard.py`):**
+   - `sanitize_camera_data()` validates camera IP addresses via Python's `ipaddress.ip_address` and enforces strict regular expressions on `did`, `model`, `region`, `token`, `user_id`, and `pass_token` to eliminate YAML or `.env` injection.
+   - Hardware 32-character hex MIIO tokens are redacted from all HTTP JSON responses (`/api/status`, `/api/wizard/devices`, `/api/wizard/save`).
+   - Mutating `POST` and `DELETE` requests enforce same-origin `Origin`/`Host` verification against cross-site request forgery (CSRF), and DVR `storage_dir` is locked to the server's configured environment path.
+3. **Network Exposure Best Practices:**
+   - Do not expose ports `8088`, `1984`, or `8554` directly to the public internet via router port-forwarding or unprotected public VPS interfaces. For remote access outside the home LAN, use an encrypted mesh VPN such as **Tailscale** (`tailnet only`).

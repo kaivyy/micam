@@ -6,6 +6,17 @@
 api:
   listen: ":1984"
   origin: "*"
+  allow_paths:
+    - /api/ws
+    - /api/webrtc
+    - /api/frame.jpeg
+    - /api/streams
+    - /api/restart
+    - /api/xiaomi
+
+exec:
+  allow_paths:
+    - ffmpeg
 
 rtsp:
   listen: ":8554"
